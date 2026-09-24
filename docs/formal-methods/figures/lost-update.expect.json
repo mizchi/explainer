@@ -1,0 +1,53 @@
+{
+  "format": "vlmkit-anim/expect@1",
+  "states": [
+    "s0",
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7",
+    "s8",
+    "s9",
+    "s10",
+    "s11",
+    "s12"
+  ],
+  "transitions": [
+    "s0->s1:Read(a)",
+    "s0->s2:Read(b)",
+    "s1->s3:Write(a)",
+    "s1->s4:Read(b)",
+    "s2->s4:Read(a)",
+    "s2->s5:Write(b)",
+    "s3->s6:Read(b)",
+    "s4->s7:Write(a)",
+    "s4->s8:Write(b)",
+    "s5->s9:Read(a)",
+    "s6->s10:Write(b)",
+    "s7->s11:Write(b)",
+    "s8->s11:Write(a)",
+    "s9->s12:Write(a)"
+  ],
+  "initial": "s0",
+  "final": [
+    "s10",
+    "s11",
+    "s12"
+  ],
+  "visited": [
+    "s0",
+    "s1",
+    "s3",
+    "s6",
+    "s10",
+    "s0",
+    "s1",
+    "s4",
+    "s7",
+    "s11"
+  ],
+  "end": "s11"
+}

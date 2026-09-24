@@ -1,0 +1,116 @@
+{
+  "$comment": "本文に載せる出力はすべてここで再実行して照合する。expect の各行は stdout にその順で現れなければならない。",
+  "checks": [
+    {
+      "name": "z3-is-odd",
+      "cmd": "node examples/z3/01-is-odd.mjs",
+      "expect": [
+        "x % 2 === 1: sat",
+        "  counterexample: x = -2147483647",
+        "  JS says: -2147483647 % 2 === 1 -> false, (-2147483647 & 1) === 1 -> true",
+        "x % 2 !== 0: unsat"
+      ]
+    },
+    {
+      "name": "z3-midpoint",
+      "cmd": "node examples/z3/02-midpoint.mjs",
+      "expect": [
+        "(lo + hi) / 2: sat",
+        "  mid < lo: true",
+        "lo + (hi - lo) / 2: unsat"
+      ]
+    },
+    {
+      "name": "z3-bmc-induction",
+      "cmd": "node examples/z3/03-bmc-and-induction.mjs",
+      "expect": [
+        "BMC  Counter, k=4: sat",
+        "BMC  CounterAtomic, k=4: unsat",
+        "IND  CounterAtomic, Inv=NoLostUpdate: base unsat, step sat",
+        "  CTI: count=-1, pc=[a:done, b:incr]  --step-->  count=0, pc=[a:done, b:done]",
+        "IND  CounterAtomic, Inv=CountIsDone: base unsat, step unsat"
+      ]
+    },
+    {
+      "name": "z3-unknown",
+      "cmd": "node examples/z3/04-unknown.mjs",
+      "expect": [
+        "x^3 + y^3 = z^3 (x,y,z > 0): unknown",
+        "3x + 3y = 3z + 1: unsat"
+      ]
+    },
+    {
+      "name": "tlc-counter",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/states -config Counter.cfg Counter",
+      "cwd": "examples/tla",
+      "save": "$TMP/counter.out",
+      "expect": [
+        "Error: Invariant NoLostUpdate is violated.",
+        "State 2: <Read(\"a\") line 15, col 3 to line 18, col 20 of module Counter>",
+        "State 3: <Read(\"b\") line 15, col 3 to line 18, col 20 of module Counter>",
+        "State 4: <Write(\"a\") line 21, col 3 to line 24, col 18 of module Counter>",
+        "State 5: <Write(\"b\") line 21, col 3 to line 24, col 18 of module Counter>",
+        "/\\ count = 1"
+      ]
+    },
+    {
+      "name": "tlc-counter-graph",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/states2 -config Full.cfg -dump dot,actionlabels $TMP/counter-full Counter",
+      "cwd": "examples/tla",
+      "expect": [
+        "No error has been found.",
+        "13 distinct states found"
+      ]
+    },
+    {
+      "name": "fig-lost-update-from-tlc",
+      "cmd": "node ../../skills/explainer/scripts/tlc-to-scene.mjs --dot $TMP/counter-full.dot --trace $TMP/counter.out --vars pc,count --bare --abbrev read=R,write=W,done=D --also 'Read(a),Write(a),Read(b),Write(b)' --layout tb --title 'Counter の全到達可能状態 (a の pc, b の pc | count)' --out $TMP/lost-update && diff $TMP/lost-update.scene.json figures/lost-update.scene.json && diff $TMP/lost-update.expect.json figures/lost-update.expect.json && echo 'figure matches TLC'",
+      "expect": [
+        "13 states, 14 transitions, 3 final",
+        "figure matches TLC"
+      ]
+    },
+    {
+      "name": "tlc-atomic",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/states3 -config CounterAtomic.cfg -dump dot $TMP/atomic CounterAtomic",
+      "cwd": "examples/tla",
+      "expect": [
+        "No error has been found.",
+        "4 distinct states found"
+      ]
+    },
+    {
+      "name": "fig-induction-reach-matches-tlc",
+      "cmd": "node figures/check-induction.mjs $TMP/atomic.dot",
+      "expect": [
+        "reach group matches TLC"
+      ]
+    },
+    {
+      "name": "tlc-witness",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/states4 -config Witness.cfg CounterAtomic",
+      "cwd": "examples/tla",
+      "expect": [
+        "Error: Invariant NotDone is violated.",
+        "/\\ count = 2"
+      ]
+    },
+    {
+      "name": "tlc-liveness-unfair",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/states5 -config Liveness.cfg CounterAtomic",
+      "cwd": "examples/tla",
+      "expect": [
+        "Error: Temporal property Termination was violated.",
+        "State 3: Stuttering"
+      ]
+    },
+    {
+      "name": "tlc-liveness-fair",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/states6 -config LivenessFair.cfg CounterAtomic",
+      "cwd": "examples/tla",
+      "expect": [
+        "No error has been found."
+      ]
+    }
+  ]
+}

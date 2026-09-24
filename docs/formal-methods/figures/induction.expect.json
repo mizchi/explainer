@@ -1,0 +1,7 @@
+{
+  "format": "vlmkit-anim/expect@1",
+  "modules": ["r0", "r1", "r2", "r3", "cti", "bad"],
+  "deps": ["r0->r1", "r0->r2", "r1->r3", "r2->r3", "cti->bad"],
+  "groups": { "all": ["bad"], "inv": ["cti"], "reach": ["r0", "r1", "r2", "r3"] },
+  "highlighted": ["r0", "r1", "r2", "r3"]
+}

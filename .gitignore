@@ -1,0 +1,8 @@
+node_modules/
+.tools/
+test-results/
+.vlmkit/
+docs/**/dist/
+*_TTrace_*.tla
+*_TTrace_*.bin
+states/

@@ -1,0 +1,21 @@
+{
+  "name": "explainer",
+  "private": true,
+  "type": "module",
+  "description": "Persona-calibrated crash-course explainers, with figures and claims checked by tools (vlmkit, vlmkit-anim).",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "setup:tla": "sh scripts/setup-tla.sh",
+    "verify": "node skills/explainer/scripts/verify-doc.mjs docs/formal-methods",
+    "build": "node skills/explainer/scripts/build-html.mjs docs/formal-methods/README.md"
+  },
+  "devDependencies": {
+    "@mizchi/vlmkit": "^0.22.0",
+    "@mizchi/vlmkit-anim": "^0.22.0",
+    "marked": "^18.0.14",
+    "playwright": "^1.56.1",
+    "z3-solver": "^5.2.0"
+  }
+}

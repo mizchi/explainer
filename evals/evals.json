@@ -1,0 +1,42 @@
+{
+  "$comment": "eli5 と同じ形式。各ケースをスキルありとなしで走らせ、assertions で採点する。",
+  "skill": "explainer",
+  "evals": [
+    {
+      "id": 1,
+      "name": "formal-methods-mizchi",
+      "prompt": "personas/mizchi.md の読み手向けに、Z3 と TLA+ の結果の読み方の速習資料を書いて",
+      "audience": "personas/mizchi.md",
+      "assertions": [
+        "ツールの紹介やインストール手順を本文で説明していない（ペルソナの『省くもの』を守る）",
+        "sat / unsat / unknown の意味の違いを、実行した例の出力で示している",
+        "有界検査・全探索・帰納法の守備範囲の違いを、同じ題材で比べている",
+        "本文に引用した出力がすべて checks.json で再生成でき、verify-doc.mjs が VERIFIED になる",
+        "図には事実シート（*.expect.json）があり、vlmkit-anim check --expect が通る",
+        "末尾に判定を問う理解度チェックが 3 問以上ある"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "pr-explain-reviewer",
+      "prompt": "この PR が何を変えるのか、レビュアーの @someone がわかるように説明して（ペルソナはまだ無い）",
+      "audience": "unknown reviewer",
+      "assertions": [
+        "説明を書く前に、読み手について最大 5 問の質問をするか、公開情報からペルソナを作ると宣言している",
+        "変更をファイル順ではなく説明の順（literate diff）に並べている",
+        "変更前後で振る舞いが変わる最小の例を、実行できる形で示している",
+        "検証できなかった主張を『未検証』と明記している"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "no-figure-for-one-liner",
+      "prompt": "Array.prototype.at(-1) って何？",
+      "audience": "any",
+      "assertions": [
+        "1〜3 文で答えている",
+        "図を描いていない（要素 4 つ以上の関係・時間順序・包含関係のどれもないため）"
+      ]
+    }
+  ]
+}
