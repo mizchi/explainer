@@ -1,0 +1,150 @@
+{
+  "format": "vlmkit-anim/scene@1",
+  "kind": "state-machine",
+  "title": "Counter の全到達可能状態 (a の pc, b の pc | count)",
+  "layout": "tb",
+  "states": [
+    {
+      "id": "s0",
+      "label": "R R | 0"
+    },
+    {
+      "id": "s1",
+      "label": "W R | 0"
+    },
+    {
+      "id": "s2",
+      "label": "R W | 0"
+    },
+    {
+      "id": "s3",
+      "label": "D R | 1"
+    },
+    {
+      "id": "s4",
+      "label": "W W | 0"
+    },
+    {
+      "id": "s5",
+      "label": "R D | 1"
+    },
+    {
+      "id": "s6",
+      "label": "D W | 1"
+    },
+    {
+      "id": "s7",
+      "label": "D W | 1"
+    },
+    {
+      "id": "s8",
+      "label": "W D | 1"
+    },
+    {
+      "id": "s9",
+      "label": "W D | 1"
+    },
+    {
+      "id": "s10",
+      "label": "D D | 2",
+      "final": true
+    },
+    {
+      "id": "s11",
+      "label": "D D | 1",
+      "final": true
+    },
+    {
+      "id": "s12",
+      "label": "D D | 2",
+      "final": true
+    }
+  ],
+  "initial": "s0",
+  "transitions": [
+    {
+      "from": "s0",
+      "to": "s1",
+      "on": "Read(a)"
+    },
+    {
+      "from": "s0",
+      "to": "s2",
+      "on": "Read(b)"
+    },
+    {
+      "from": "s1",
+      "to": "s3",
+      "on": "Write(a)"
+    },
+    {
+      "from": "s1",
+      "to": "s4",
+      "on": "Read(b)"
+    },
+    {
+      "from": "s2",
+      "to": "s4",
+      "on": "Read(a)"
+    },
+    {
+      "from": "s2",
+      "to": "s5",
+      "on": "Write(b)"
+    },
+    {
+      "from": "s3",
+      "to": "s6",
+      "on": "Read(b)"
+    },
+    {
+      "from": "s4",
+      "to": "s7",
+      "on": "Write(a)"
+    },
+    {
+      "from": "s4",
+      "to": "s8",
+      "on": "Write(b)"
+    },
+    {
+      "from": "s5",
+      "to": "s9",
+      "on": "Read(a)"
+    },
+    {
+      "from": "s6",
+      "to": "s10",
+      "on": "Write(b)"
+    },
+    {
+      "from": "s7",
+      "to": "s11",
+      "on": "Write(b)"
+    },
+    {
+      "from": "s8",
+      "to": "s11",
+      "on": "Write(a)"
+    },
+    {
+      "from": "s9",
+      "to": "s12",
+      "on": "Write(a)"
+    }
+  ],
+  "trace": [
+    "Read(a)",
+    "Write(a)",
+    "Read(b)",
+    "Write(b)",
+    {
+      "goto": "s0",
+      "caption": "TLC の反例: 初期状態に戻り、別の順序で実行する"
+    },
+    "Read(a)",
+    "Read(b)",
+    "Write(a)",
+    "Write(b)"
+  ]
+}

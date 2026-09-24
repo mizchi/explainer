@@ -1,0 +1,133 @@
+{
+  "format": "vlmkit-anim/scene@1",
+  "kind": "diagram",
+  "title": "CounterAtomic: 到達可能 ⊂ NoLostUpdate ⊂ 全状態",
+  "layout": "lr",
+  "nodes": [
+    {
+      "id": "r0",
+      "label": "0 | incr incr"
+    },
+    {
+      "id": "r1",
+      "label": "1 | done incr"
+    },
+    {
+      "id": "r2",
+      "label": "1 | incr done"
+    },
+    {
+      "id": "r3",
+      "label": "2 | done done"
+    },
+    {
+      "id": "cti",
+      "label": "-1 | done incr",
+      "tone": "bad",
+      "hidden": true
+    },
+    {
+      "id": "bad",
+      "label": "0 | done done",
+      "tone": "bad",
+      "hidden": true
+    }
+  ],
+  "edges": [
+    {
+      "from": "r0",
+      "to": "r1",
+      "label": "Incr(a)"
+    },
+    {
+      "from": "r0",
+      "to": "r2",
+      "label": "Incr(b)"
+    },
+    {
+      "from": "r1",
+      "to": "r3",
+      "label": "Incr(b)"
+    },
+    {
+      "from": "r2",
+      "to": "r3",
+      "label": "Incr(a)"
+    },
+    {
+      "from": "cti",
+      "to": "bad",
+      "label": "Incr(b)",
+      "tone": "bad"
+    }
+  ],
+  "groups": [
+    {
+      "id": "all",
+      "label": "型を満たす全状態",
+      "nodes": [
+        "bad"
+      ]
+    },
+    {
+      "id": "inv",
+      "label": "NoLostUpdate を満たす",
+      "parent": "all",
+      "nodes": [
+        "cti"
+      ]
+    },
+    {
+      "id": "reach",
+      "label": "到達可能 (TLC が列挙) = CountIsDone",
+      "parent": "inv",
+      "nodes": [
+        "r0",
+        "r1",
+        "r2",
+        "r3"
+      ]
+    }
+  ],
+  "sequence": [
+    {
+      "highlight": [
+        "r0",
+        "r1",
+        "r2",
+        "r3"
+      ],
+      "caption": "TLC と BMC が見るのは初期状態から辿れる 4 状態だけ。ここでは NoLostUpdate は破れない"
+    },
+    {
+      "unhighlight": [
+        "r0",
+        "r1",
+        "r2",
+        "r3"
+      ],
+      "ms": 0
+    },
+    {
+      "show": "cti",
+      "caption": "帰納法は「NoLostUpdate を満たす任意の状態」から始める。count=-1 は到達不能だが、Done でないので条件を満たす"
+    },
+    {
+      "show": "bad",
+      "ms": 0
+    },
+    {
+      "flow": "cti->bad",
+      "caption": "そこから Incr(b) の 1 歩で Done かつ count=0 になり、条件が破れる。これが CTI (帰納法の反例)"
+    },
+    {
+      "highlight": [
+        "r0",
+        "r1",
+        "r2",
+        "r3"
+      ],
+      "caption": "count = 終わった数 (CountIsDone) に強めると、満たす状態は到達可能な 4 つと一致し、1 歩で外へ出る道が消える"
+    }
+  ]
+}
