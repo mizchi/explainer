@@ -37,6 +37,21 @@
         "1〜3 文で答えている",
         "図を描いていない（要素 4 つ以上の関係・時間順序・包含関係のどれもないため）"
       ]
+    },
+    {
+      "id": 4,
+      "name": "book-inductive-invariants",
+      "skill": "explainer-book",
+      "prompt": "personas/mizchi.md 向けに、帰納的不変条件を自分で見つけられるようになる学習資料を章立てで作って",
+      "audience": "personas/mizchi.md",
+      "assertions": [
+        "1 章が quickstart で、理論の説明より前に道具を動かして結果に着く",
+        "各章の学習目標が「〜できる」の形で、それぞれ理解度チェックで問われている",
+        "概念を、それを導入する章より前で使っていない（verify-book.mjs の concepts が通る）",
+        "書かせる演習には、出発点で落ちる検査と、答えで通る検査の両方がある",
+        "手で推論した到達可能性や実行順序を、道具の出力で裏付けている",
+        "verify-book.mjs が book verdict: VERIFIED になる"
+      ]
     }
   ]
 }

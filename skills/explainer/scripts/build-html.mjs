@@ -1,44 +1,58 @@
 #!/usr/bin/env node
-// README.md を 1 枚の自己完結 HTML (dist/index.html) にする。
+// Markdown を自己完結 HTML にする。1 ページでも、章立ての本でも。
 // - figures/*.svg への画像リンクは SVG をそのまま埋め込む (外部参照なし)
 // - 同名の *.scene.json があれば、vlmkit-anim html で再生ページ (dist/<name>.html) を作ってリンクする
+// - 複数ページのときは、ページ間の .md リンクを .html に張り替え、目次・前後の章へのナビを付ける
 //
-//   node build-html.mjs <doc>/README.md
+//   node build-html.mjs <doc>/README.md                       → dist/index.html
+//   node build-html.mjs <book>/README.md <book>/01-x.md …     → dist/index.html, dist/01-x.html, …
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { marked } from 'marked';
 
-const mdPath = resolve(process.argv[2] ?? 'README.md');
-const docDir = dirname(mdPath);
+const pages = (process.argv.length > 2 ? process.argv.slice(2) : ['README.md']).map((p) => resolve(p));
+const docDir = dirname(pages[0]);
 const dist = join(docDir, 'dist');
 mkdirSync(dist, { recursive: true });
 const anim = join(process.cwd(), 'node_modules/@mizchi/vlmkit-anim/dist/cli.mjs');
 
-let md = readFileSync(mdPath, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
-const title = md.match(/^# (.+)$/m)?.[1] ?? 'Explainer';
+const htmlName = (md) => (basename(md) === 'README.md' ? 'index.html' : basename(md).replace(/\.md$/, '.html'));
+const titleOf = (src) => src.match(/^# (.+)$/m)?.[1] ?? 'Explainer';
+const sources = pages.map((p) => readFileSync(p, 'utf8'));
+const book = pages.length > 1;
+const mdNames = new Set(pages.map((p) => basename(p)));
 
-// 画像 → インライン SVG (+ 再生ページへのリンク)
-md = md.replace(/!\[([^\]]*)\]\((figures\/[^)]+?)\.svg\)/g, (_, alt, base) => {
-  const svg = readFileSync(join(docDir, `${base}.svg`), 'utf8').replace(/<\?xml[^>]*>/, '');
-  const scene = join(docDir, `${base}.scene.json`);
-  let link = '';
-  if (existsSync(scene) && existsSync(anim)) {
-    const name = base.split('/').pop();
-    spawnSync('node', [anim, 'html', scene, '--out', join(dist, `${name}.html`), '--title', alt], { encoding: 'utf8' });
-    link = `<a class="play" href="${name}.html">▶ 1 ステップずつ再生する</a>`;
-  }
-  return `\n<figure role="img" aria-label="${alt}">${svg}<figcaption>${alt} ${link}</figcaption></figure>\n`;
-});
+function render(src) {
+  let md = src.replace(/<!--[\s\S]*?-->/g, '');
+  // 画像 → インライン SVG (+ 再生ページへのリンク)
+  md = md.replace(/!\[([^\]]*)\]\((figures\/[^)]+?)\.svg\)/g, (_, alt, base) => {
+    const svg = readFileSync(join(docDir, `${base}.svg`), 'utf8').replace(/<\?xml[^>]*>/, '');
+    const scene = join(docDir, `${base}.scene.json`);
+    let link = '';
+    if (existsSync(scene) && existsSync(anim)) {
+      const name = base.split('/').pop();
+      spawnSync('node', [anim, 'html', scene, '--out', join(dist, `${name}.html`), '--title', alt], { encoding: 'utf8' });
+      link = `<a class="play" href="${name}.html">▶ 1 ステップずつ再生する</a>`;
+    }
+    return `\n<figure role="img" aria-label="${alt}">${svg}<figcaption>${alt} ${link}</figcaption></figure>\n`;
+  });
+  // 本の中のページへのリンクを .html に
+  md = md.replace(/\]\(([\w.-]+\.md)(#[^)]*)?\)/g, (all, file, hash = '') =>
+    mdNames.has(file) ? `](${htmlName(file)}${hash})` : all);
+  return marked.parse(md);
+}
 
-const body = marked.parse(md);
-const html = `<!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${title}</title>
-<style>
+function nav(i) {
+  if (!book) return '';
+  const link = (j, label) => `<a href="${htmlName(pages[j])}">${label}${titleOf(sources[j])}</a>`;
+  const prev = i > 0 ? link(i - 1, '← ') : '<span></span>';
+  const next = i < pages.length - 1 ? link(i + 1, '→ ') : '<span></span>';
+  const toc = i > 0 ? `<a href="index.html">目次</a>` : '';
+  return `<nav class="book" aria-label="章の移動">${prev}${toc}${next}</nav>`;
+}
+
+const CSS = `
 :root { --bg: #ffffff; --fg: #1f2328; --muted: #57606a; --line: #d0d7de; --code: #f6f8fa; --accent: #0550ae; --fig: #ffffff; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --bg: #0d1117; --fg: #e6edf3; --muted: #9da7b3; --line: #30363d; --code: #161b22; --accent: #79c0ff; --fig: #ffffff; }
@@ -63,12 +77,26 @@ figcaption { color: var(--muted); font-size: .9rem; text-align: center; margin-t
 .play { margin-left: .5em; white-space: nowrap; }
 details { border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; margin: .6em 0; }
 summary { cursor: pointer; font-weight: 600; }
-</style>
+nav.book { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: .93rem; }
+`;
+
+pages.forEach((p, i) => {
+  const title = titleOf(sources[i]);
+  const html = `<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${title}</title>
+<style>${CSS}</style>
 </head>
 <body><main>
-${body}
+${nav(i)}
+${render(sources[i])}
+${nav(i)}
 </main></body>
 </html>
 `;
-writeFileSync(join(dist, 'index.html'), html);
-console.log(`wrote ${join(dist, 'index.html')}`);
+  writeFileSync(join(dist, htmlName(p)), html);
+  console.log(`wrote ${join(dist, htmlName(p))}`);
+});

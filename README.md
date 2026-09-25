@@ -30,6 +30,16 @@ AI から人間へ概念を説明するための、スキルと道具です。
 約 10 種の検証器をエージェント経由で既に回しています。
 そこで資料は、ツールの入門ではなく、**検査器の結果が何を保証したかを自分で判定する基準**に絞りました。
 
+## 例：章立ての学習資料（本）
+
+1 本の資料に収まらないときは、`explainer-book` スキルで章立てにします。
+
+- 本：[`docs/inductive-invariant-book/`](docs/inductive-invariant-book/README.md)「帰納的不変条件を自分で見つける」（全 3 章）
+  - `01-quickstart.md`：Apalache の 3 つの check で、不変条件が何歩でも成り立つことを示す
+  - `02-reading-cti.md`：帰納法の反例（CTI）が、条件の弱さかバグかを TLC で切り分ける
+  - `03-strengthening.md`：CTI から足すべき条件を読み取る演習
+- 本全体の検査（`verify-book.mjs`）：学習目標と理解度チェックの対応、概念を導入前に使っていないか、章の読了時間、演習の出発点が落ちて答えが通るか、章の依存図
+
 ## 使い方
 
 ```sh
@@ -37,25 +47,30 @@ npm install            # Node 24+（vlmkit の要件）
 npm run setup:tla      # TLC と Apalache を .tools/ に取得（Java 17+）
 npm run verify         # docs/formal-methods を検証 → verdict: VERIFIED
 npm run build          # docs/formal-methods/dist/index.html を生成
+npm run verify:book    # docs/inductive-invariant-book を検証 → book verdict: VERIFIED
+npm run build:book     # docs/inductive-invariant-book/dist/*.html を生成
 ```
 
 スキルを他のリポジトリで使う場合：
 
 ```sh
 cp -r skills/explainer ~/.claude/skills/explainer
+cp -r skills/explainer-book ~/.claude/skills/explainer-book   # 本版（explainer を前提にする）
 ```
 
-このリポジトリの中では、`.claude/skills/explainer` から自動で読み込まれます。
+このリポジトリの中では、`.claude/skills/` から自動で読み込まれます。
 
 ## 構成
 
 | パス | 内容 |
 |---|---|
-| `skills/explainer/SKILL.md` | スキル本体 |
+| `skills/explainer/SKILL.md` | スキル本体（1 本の速習資料） |
+| `skills/explainer-book/SKILL.md` | 本版（章立ての学習資料）。`scripts/verify-book.mjs` が本全体を検査 |
 | `skills/explainer/references/` | ペルソナ・文体・図のガイド |
 | `skills/explainer/scripts/verify-doc.mjs` | 検証（checks / vlmkit-anim / 引用照合 / vlmkit ゲート） |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → 自己完結 HTML |
 | `skills/explainer/scripts/tlc-to-scene.mjs` | TLC の状態グラフ・反例 → vlmkit-anim の図と事実シート |
 | `personas/` | 読み手のペルソナ |
 | `docs/<topic>/` | 資料：`README.md`, `checks.json`, `examples/`, `figures/` |
+| `docs/<topic>-book/` | 本：`README.md`（目次）, `book.json`, `NN-*.md`, `checks.json`, `examples/`, `figures/` |
 | `evals/evals.json` | スキルの評価ケース（eli5 と同じ形式） |
