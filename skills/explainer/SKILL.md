@@ -16,6 +16,18 @@ ELI5 との違いは 2 つ。
 
 読了が 20 分を超える、演習が要る、概念に順序がある。このどれかなら、章立ての `explainer-book` を使う。
 
+## 準備（初回だけ）
+
+スクリプトは、このスキルのディレクトリ（以下 `<skill>`）の `scripts/` にあります。
+依存は、資料を置くリポジトリに入れます。Node 24 以上が必要です。
+
+```sh
+npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright
+```
+
+形式手法の例を扱うときは、TLC（Java 11+）や Apalache（Java 17+）、`z3-solver` も入れます。
+`verify-doc.mjs` は `$TLA2TOOLS`（tla2tools.jar）と `$APALACHE`（apalache-mc）を、リポジトリの `.tools/` から探します。
+
 ## 手順
 
 ```
@@ -25,8 +37,9 @@ ELI5 との違いは 2 つ。
 4. 実物を作る   主張ごとに、実行できる例（コード・モデル・コマンド）を先に作って走らせる
 5. 書く        references/writing.md の型で。出力は貼る、打ち直さない
 6. 図          references/figures.md。事実シート（*.expect.json）を先に、図は後
-7. 検証        node skills/explainer/scripts/verify-doc.mjs <doc-dir> が VERIFIED になるまで
-8. 渡す        HTML（dist/index.html）と要約。検証できなかったことは「未検証」と明記
+7. 検証        node <skill>/scripts/verify-doc.mjs <doc-dir> が VERIFIED になるまで
+8. 読ませる    first-reader スキルで、ペルソナ本人を読み手にして読ませる。途中で離脱した箇所と、翌日残ったものを見る
+9. 渡す        HTML（dist/index.html）と要約。検証できなかったことは「未検証」と明記
 ```
 
 ### 1. ペルソナ
@@ -87,8 +100,8 @@ ELI5 との違いは 2 つ。
 `<doc-dir>/checks.json` に、本文が引用する出力を再生成するコマンドと、期待する行を書く。
 
 ```
-node skills/explainer/scripts/verify-doc.mjs <doc-dir>          # 検査
-node skills/explainer/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直す
+node <skill>/scripts/verify-doc.mjs <doc-dir>          # 検査
+node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直す
 ```
 
 `verify-doc.mjs` が見るもの：
@@ -102,7 +115,27 @@ node skills/explainer/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を
 直して再実行し、`verdict: VERIFIED` になるまで繰り返す。
 上限は 5 ラウンド。それでも通らない主張は本文から外すか、「未検証」と明記する。
 
-### 8. 渡す
+### 8. 読ませる（first-reader）
+
+`verify-doc.mjs` が保証するのは、主張が**正しい**ことだけです。
+読み手が**最後まで読み、翌日も覚えている**かは、同梱の `first-reader` スキルで確かめる。
+
+- **読み手の配役**：
+  - sympathetic 役：`personas/<id>.md` の本人。「既に知っていること」を priors に、「読み方」を patience budget にする。
+  - skeptical 役：資料が届く場面（PR のレビュー、Slack のリンク）から配役する。
+- **intended gist**：資料の「一枚で」の表と、ペルソナの問い（手順 2）。
+- **判定**：
+  - recall の答えが intended gist と食い違ったら、その節は伝わっていない。
+  - skim gate を通らない、または前半で両者が離脱したら、構成の問題として扱う。行単位の手直しより先に直す。
+- **直すのは書き手（このスキル）**：
+  - first-reader は書き直さない。読み手の証言を受けて、どこをどう直すかは explainer が決める。
+  - 直したら `verify-doc.mjs` を再実行し、first-reader は `again` で同じ読み手に読ませ直す。
+- **注意**：
+  - 書き手は下書きを全部読んでいる。読み手は必ず fresh な subagent にする（first-reader の手順どおり）。
+  - `signals.py` の信頼シグナルの数え方は英語向けで、日本語の資料ではほぼ 0 になる。日本語では trust ledger を自分の通読で判断する。
+  - `.first-reader/` は資料の隣に作られる。git 管理しない。
+
+### 9. 渡す
 
 - チャットでは、要約（3〜5 行）と `dist/index.html` を渡す。検証の結果（VERIFIED か、何が未検証か）も添える。
 - PR では、差分の説明を同じ型で書き、図の SVG を添付する。理解度チェックは PR 本文の末尾に置く。

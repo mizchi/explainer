@@ -8,8 +8,20 @@
 //   node build-html.mjs <book>/README.md <book>/01-x.md …     → dist/index.html, dist/01-x.html, …
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { basename, dirname, join, resolve } from 'node:path';
-import { marked } from 'marked';
+import { pathToFileURL } from 'node:url';
+
+// 依存は「資料を置いたリポジトリ」の node_modules から解決する。
+// プラグインとして入れたとき、このスクリプトの隣には node_modules が無いため。
+const projectRequire = createRequire(join(process.cwd(), 'package.json'));
+let marked;
+try {
+  ({ marked } = await import(pathToFileURL(projectRequire.resolve('marked')).href));
+} catch {
+  console.error('marked is not installed in this project: npm i -D marked @mizchi/vlmkit @mizchi/vlmkit-anim playwright');
+  process.exit(2);
+}
 
 const pages = (process.argv.length > 2 ? process.argv.slice(2) : ['README.md']).map((p) => resolve(p));
 const docDir = dirname(pages[0]);
