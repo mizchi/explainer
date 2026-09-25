@@ -1,0 +1,15 @@
+{
+  "name": "explainer",
+  "description": "Skills for explaining things to humans who can't keep up with coding agents: persona-calibrated crash courses and books whose claims and figures are verified by tools.",
+  "owner": { "name": "mizchi", "url": "https://github.com/mizchi" },
+  "plugins": [
+    {
+      "name": "explainer",
+      "source": "./",
+      "displayName": "explainer",
+      "description": "Three skills: explainer (a persona-calibrated crash course with tool-verified claims and figures), explainer-book (chaptered learning material with objectives, concept order, reading budgets and executed exercises), first-reader (simulated beta readers: skim gate, no-lookahead timed reads, recall test; bundled from awesome-llm-apps, Apache-2.0).",
+      "category": "documentation",
+      "keywords": ["explanation", "documentation", "learning", "persona", "vlmkit", "beta-reader"]
+    }
+  ]
+}

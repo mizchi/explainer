@@ -1,0 +1,20 @@
+{
+  "name": "explainer",
+  "version": "0.1.0",
+  "description": "Explain concepts, PRs and designs to one specific reader: build a persona, write only what they don't know, check every quoted output and figure with tools (vlmkit, vlmkit-anim), and test the draft on simulated readers (first-reader). Single crash courses or chaptered books.",
+  "author": {
+    "name": "mizchi",
+    "url": "https://github.com/mizchi"
+  },
+  "homepage": "https://github.com/mizchi/explainer",
+  "repository": "https://github.com/mizchi/explainer",
+  "keywords": [
+    "explanation",
+    "documentation",
+    "learning",
+    "persona",
+    "formal-methods",
+    "vlmkit",
+    "beta-reader"
+  ]
+}

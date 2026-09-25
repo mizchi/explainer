@@ -11,6 +11,10 @@ description: 1 本の速習資料では収まらない、章立ての学習資�
 ペルソナ・図・検証の仕組みは `explainer` をそのまま使う。先に `../explainer/SKILL.md` を読むこと。
 このスキルが足すのは、本全体の設計と検査。
 
+スクリプトは、このスキルのディレクトリ（以下 `<skill>`）の `scripts/` にあります。
+`verify-book.mjs` は、隣の `explainer` スキルの `scripts/verify-doc.mjs` を呼びます。2 つのスキルは同じ場所に入れてください。
+依存の入れ方は `explainer` の「準備」と同じです。
+
 ## いつ本にするか
 
 次のどれかに当てはまったら本にする。1 つも当てはまらなければ、`explainer` の 1 本で書く。
@@ -41,8 +45,9 @@ description: 1 本の速習資料では収まらない、章立ての学習資�
 3. 概念の順序   各判定に要る概念を書き出し、どの章で導入するかを決める（book.json introduces / requires）
 4. 実物を先に   各章の例と演習を作り、走らせる。演習は「出発点で落ちる」「答えで通る」を両方確かめる
 5. 章を書く     explainer の writing.md の型。章の冒頭に所要時間とゴール、末尾に理解度チェック
-6. 検証         node skills/explainer-book/scripts/verify-book.mjs <book-dir> [--write]
-7. 渡す         dist/index.html と、各章の 1 行要約。未検証の点を明記
+6. 検証         node <skill>/scripts/verify-book.mjs <book-dir> [--write]
+7. 読ませる     first-reader で、少なくとも 01-quickstart と演習の章を、ペルソナ本人に読ませる（explainer の手順 8）
+8. 渡す         dist/index.html と、各章の 1 行要約。未検証の点を明記
 ```
 
 ### 2. 学習目標
@@ -84,8 +89,8 @@ description: 1 本の速習資料では収まらない、章立ての学習資�
 ### 6. 検証
 
 ```
-node skills/explainer-book/scripts/verify-book.mjs <book-dir>           # 検査
-node skills/explainer-book/scripts/verify-book.mjs <book-dir> --write   # 依存図と SVG を作り直す
+node <skill>/scripts/verify-book.mjs <book-dir>           # 検査
+node <skill>/scripts/verify-book.mjs <book-dir> --write   # 依存図と SVG を作り直す
 ```
 
 本全体の検査：

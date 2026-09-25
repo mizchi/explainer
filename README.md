@@ -51,14 +51,48 @@ npm run verify:book    # docs/inductive-invariant-book を検証 → book verdic
 npm run build:book     # docs/inductive-invariant-book/dist/*.html を生成
 ```
 
-スキルを他のリポジトリで使う場合：
+## インストール（Claude Code プラグイン）
 
-```sh
-cp -r skills/explainer ~/.claude/skills/explainer
-cp -r skills/explainer-book ~/.claude/skills/explainer-book   # 本版（explainer を前提にする）
+このリポジトリは、そのまま Claude Code のプラグインマーケットプレイスです。
+1 つのプラグイン `explainer` に、3 つのスキルが入っています。
+
+```
+/plugin marketplace add mizchi/explainer
+/plugin install explainer@explainer
 ```
 
-このリポジトリの中では、`.claude/skills/` から自動で読み込まれます。
+シェルからは `claude plugin marketplace add mizchi/explainer` と `claude plugin install explainer@explainer` です。
+
+| スキル | 使う場面 |
+|---|---|
+| `explainer` | 1 人の読み手に向けた速習資料。主張と図を道具で検証する |
+| `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
+| `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
+
+スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。
+`first-reader` は Python 3 の標準ライブラリだけで動きます。
+
+`first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
+日本語の下書きでも 1 段落ずつ読ませられるよう、`feed.py` の語数の数え方を変えています。
+
+## スキルの効果を測る（evals）
+
+`evals/<case>/prompt.md` と `graders/*.md` が、`claude plugin eval` のケースです。
+各ケースを、プラグインあり・なしの 2 つの条件で実行し、スコアの差（Δ）を出します。
+
+```sh
+claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
+```
+
+| ケース | 見ること |
+|---|---|
+| `crash-course` | 読み手の既知を省くか。コードを実行して出力を載せるか。理解度チェックがあるか |
+| `book` | 1 章が quickstart か。各章に学習目標と答えつきの問いがあるか。演習の答えを実行して確かめるか |
+| `pr-reader-first` | 読み手が分からないとき、書く前に確かめるか、前提を明示するか |
+| `one-liner-control` | 対照。1 文で済む質問で、スキルを呼ばず、資料を作らないか |
+| `first-reader-no-rewrite` | 下書きのレビューで、読み手の体験を報告し、書き直さないか |
+
+`first-reader` のスクリプトの単体テストは `python3 tests/first-reader/test_first_reader.py` と `test_cjk.py` です。
 
 ## 構成
 
@@ -73,4 +107,7 @@ cp -r skills/explainer-book ~/.claude/skills/explainer-book   # 本版（explain
 | `personas/` | 読み手のペルソナ |
 | `docs/<topic>/` | 資料：`README.md`, `checks.json`, `examples/`, `figures/` |
 | `docs/<topic>-book/` | 本：`README.md`（目次）, `book.json`, `NN-*.md`, `checks.json`, `examples/`, `figures/` |
-| `evals/evals.json` | スキルの評価ケース（eli5 と同じ形式） |
+| `skills/first-reader/` | 模擬読者（同梱、Apache-2.0） |
+| `.claude-plugin/` | プラグインとマーケットプレイスの定義 |
+| `evals/` | `claude plugin eval` のケース |
+| `tests/first-reader/` | first-reader のスクリプトの単体テスト |

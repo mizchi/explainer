@@ -7,3 +7,6 @@ docs/**/dist/
 *_TTrace_*.bin
 states/
 _apalache-out/
+.first-reader/
+__pycache__/
+evals/results/
