@@ -92,6 +92,10 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `one-liner-control` | 対照。1 文で済む質問で、スキルを呼ばず、資料を作らないか |
 | `first-reader-no-rewrite` | 下書きのレビューで、読み手の体験を報告し、書き直さないか |
 
+最新の結果と、その読み方の注意は [`evals/RESULTS.md`](evals/RESULTS.md) にあります。
+2026-09-25 の回は、シェルに依存しない grader で `crash-course` と `pr-reader-first` が +0.50、対照ケースは差なし（過剰発火なし）でした。
+その回の環境では eval のサンドボックス内でシェルが動かず、コード実行を見る grader は無効でした。
+
 `first-reader` のスクリプトの単体テストは `python3 tests/first-reader/test_first_reader.py` と `test_cjk.py` です。
 
 ## 構成
