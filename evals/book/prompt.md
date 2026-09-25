@@ -1,7 +1,7 @@
 ---
-description: 章立ての学習資料を頼まれたとき、quickstart から始まり、章ごとに目標と理解度チェックがあり、演習の答えを実行して確かめるか
+description: 章立ての学習資料を頼まれたとき、スキルが足すもの（概念の順序、既知の省略、判断を問う目標と問い、答えを確かめられる演習、実行できなかったことの報告）を満たすか
 tags: [explainer-book, heavy]
-runs: 2
+runs: 3
 max_turns: 80
 timeout_seconds: 2400
 allowed_tools: [Read, Write, Edit, Bash, Glob, Grep, Skill]
