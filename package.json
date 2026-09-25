@@ -12,10 +12,11 @@
     "build": "node skills/explainer/scripts/build-html.mjs docs/formal-methods/README.md"
   },
   "devDependencies": {
+    "@informalsystems/quint": "^0.32.0",
     "@mizchi/vlmkit": "^0.22.0",
     "@mizchi/vlmkit-anim": "^0.22.0",
     "marked": "^18.0.14",
-    "playwright": "^1.56.1",
+    "playwright": "1.56.1",
     "z3-solver": "^5.2.0"
   }
 }

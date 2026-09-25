@@ -34,7 +34,7 @@ AI から人間へ概念を説明するための、スキルと道具です。
 
 ```sh
 npm install            # Node 24+（vlmkit の要件）
-npm run setup:tla      # TLC を .tools/ に取得（Java 11+）
+npm run setup:tla      # TLC と Apalache を .tools/ に取得（Java 17+）
 npm run verify         # docs/formal-methods を検証 → verdict: VERIFIED
 npm run build          # docs/formal-methods/dist/index.html を生成
 ```

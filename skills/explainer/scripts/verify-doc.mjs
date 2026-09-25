@@ -29,7 +29,8 @@ const repoRoot = findUp(docDir, 'package.json') ?? process.cwd();
 const bin = (name) => join(repoRoot, 'node_modules', '.bin', name);
 const anim = `node ${join(repoRoot, 'node_modules/@mizchi/vlmkit-anim/dist/cli.mjs')}`;
 const TMP = mkdtempSync(join(tmpdir(), 'explainer-verify-'));
-const env = { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0', TMP, TLA2TOOLS: join(repoRoot, '.tools/tla2tools.jar') };
+const env = { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0', TMP, TLA2TOOLS: join(repoRoot, '.tools/tla2tools.jar'),
+  APALACHE: join(repoRoot, '.tools/apalache/bin/apalache-mc') };
 
 let failures = 0;
 const ok = (msg) => console.log(`  ✓ ${msg}`);
