@@ -3,7 +3,7 @@ EXTENDS Naturals
 
 Procs == {"a", "b"}
 
-VARIABLES count, tmp, pc
+VARIABLES (* @type: Int; *) count, (* @type: Str -> Int; *) tmp, (* @type: Str -> Str; *) pc
 vars == <<count, tmp, pc>>
 
 Init ==

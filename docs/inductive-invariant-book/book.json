@@ -1,0 +1,61 @@
+{
+  "title": "帰納的不変条件を自分で見つける",
+  "persona": "../../personas/mizchi.md",
+  "assumed": ["TLA+", "TLC", "Apalache", "不変条件", "有界モデル検査"],
+  "aliases": {
+    "CTI": ["帰納法の反例"],
+    "帰納的強化": ["強化"]
+  },
+  "chapters": [
+    {
+      "file": "01-quickstart.md",
+      "short": "クイックスタート",
+      "kind": "quickstart",
+      "minutes": 10,
+      "requires": ["Apalache", "不変条件"],
+      "introduces": ["帰納的不変条件"],
+      "objectives": [
+        { "id": "run-three", "text": "Apalache の 3 つの check で、不変条件が任意の歩数で成り立つことを示せる" },
+        { "id": "read-length", "text": "「up to computation length N」が、有界検査の結果か帰納法の一部かを、コマンドから読み分けられる" }
+      ]
+    },
+    {
+      "file": "02-reading-cti.md",
+      "short": "反例を読む",
+      "kind": "concept",
+      "minutes": 12,
+      "requires": ["帰納的不変条件", "TLC"],
+      "introduces": ["CTI", "到達可能性"],
+      "objectives": [
+        { "id": "classify-cti", "text": "CTI が出たとき、不変条件が弱すぎるだけか、性質が本当に破れるかを TLC で判定できる" }
+      ]
+    },
+    {
+      "file": "03-strengthening.md",
+      "short": "不変条件を強める",
+      "kind": "practice",
+      "minutes": 15,
+      "requires": ["CTI", "帰納的不変条件", "到達可能性"],
+      "introduces": ["帰納的強化"],
+      "objectives": [
+        { "id": "strengthen", "text": "CTI の最初の状態から、足すべき条件を読み取り、3 つの check を通せる" },
+        { "id": "explain-lemma", "text": "足した条件を、ドメインの言葉で 1 文で説明できる" }
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "id": "ex-reach",
+      "chapter": "02-reading-cti.md",
+      "kind": "check",
+      "answer": ["tlc-racy-reach", "tlc-racy-mutex"]
+    },
+    {
+      "id": "ex-handoff",
+      "chapter": "03-strengthening.md",
+      "kind": "write",
+      "starter": ["apa-handoff-start"],
+      "answer": ["apa-handoff-base", "apa-handoff-step", "apa-handoff-implies"]
+    }
+  ]
+}

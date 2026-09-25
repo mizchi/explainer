@@ -6,3 +6,4 @@ docs/**/dist/
 *_TTrace_*.tla
 *_TTrace_*.bin
 states/
+_apalache-out/

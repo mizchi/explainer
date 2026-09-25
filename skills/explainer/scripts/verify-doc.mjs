@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // 解説ドキュメントの「主張」を道具で検査する。
 //
-//   node verify-doc.mjs <doc-dir> [--write] [--skip-html]
+//   node verify-doc.mjs <doc-dir> [--pages README.md,01-x.md,…] [--write] [--skip-html]
 //
 // 1. checks   <doc-dir>/checks.json のコマンドを再実行し、expect の各行が stdout に順に現れるか
 // 2. figures  <doc-dir>/figures/*.scene.json を vlmkit-anim check (+ --expect) / layout で検査し、
 //             still で描き直した SVG がコミット済みのものと一致するか (--write で上書き)
-// 3. prose    README.md の <!-- output: name --> 直後のコードブロックが、その check の実出力にあるか
+// 3. prose    各ページ (既定は README.md) の <!-- output: name --> 直後のコードブロックが、その check の実出力にあるか
 //             <!-- source: path --> 直後のコードブロックが、そのファイルの一部と一致するか
-//             画像リンクの参照先が存在するか
-// 4. page     HTML に組み、vlmkit check integrity / check a11y contrast を通す (--skip-html で省略)
+//             画像リンクとページ間リンク (*.md) の参照先が存在するか
+// 4. page     HTML に組み、各ページに vlmkit check integrity / check a11y contrast を通す (--skip-html で省略)
 //
 // どれか 1 つでも落ちれば exit 1。落ちた項目ごとに「何が・どこで・どう直すか」を 1 行で出す。
 import { spawnSync } from 'node:child_process';
@@ -21,7 +21,11 @@ import { parseArgs } from 'node:util';
 
 const { values: opt, positionals } = parseArgs({
   allowPositionals: true,
-  options: { write: { type: 'boolean', default: false }, 'skip-html': { type: 'boolean', default: false } },
+  options: {
+    write: { type: 'boolean', default: false },
+    'skip-html': { type: 'boolean', default: false },
+    pages: { type: 'string', default: 'README.md' },
+  },
 });
 const docDir = resolve(positionals[0] ?? '.');
 const here = dirname(fileURLToPath(import.meta.url));
@@ -29,7 +33,8 @@ const repoRoot = findUp(docDir, 'package.json') ?? process.cwd();
 const bin = (name) => join(repoRoot, 'node_modules', '.bin', name);
 const anim = `node ${join(repoRoot, 'node_modules/@mizchi/vlmkit-anim/dist/cli.mjs')}`;
 const TMP = mkdtempSync(join(tmpdir(), 'explainer-verify-'));
-const env = { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0', TMP, TLA2TOOLS: join(repoRoot, '.tools/tla2tools.jar') };
+const env = { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0', TMP, TLA2TOOLS: join(repoRoot, '.tools/tla2tools.jar'),
+  APALACHE: join(repoRoot, '.tools/apalache/bin/apalache-mc') };
 
 let failures = 0;
 const ok = (msg) => console.log(`  ✓ ${msg}`);
@@ -97,42 +102,46 @@ for (const f of scenes) {
 
 // ---- 3. prose ----------------------------------------------------------------
 console.log('prose (本文の引用が実物と一致するか)');
-const mdPath = join(docDir, 'README.md');
-const md = readFileSync(mdPath, 'utf8');
-const lineOf = (idx) => md.slice(0, idx).split('\n').length;
-for (const m of md.matchAll(/<!--\s*(output|source):\s*([^\s]+)\s*-->\s*\n```[^\n]*\n([\s\S]*?)\n```/g)) {
-  const [, kind, ref, body] = m;
-  const at = `README.md:${lineOf(m.index)}`;
-  if (kind === 'output') {
-    const out = outputs.get(ref);
-    if (out === undefined) { ng(`${at}: output block names unknown check "${ref}"`, 'add it to checks.json'); continue; }
-    const lines = body.split('\n').filter((x) => x.trim() && !x.trim().startsWith('...'));
-    const miss = missingInOrder(out, lines);
-    miss === null ? ok(`${at}: output of ${ref}`) : ng(`${at}: quoted output not produced by ${ref}: ${JSON.stringify(miss)}`, 'paste the real output, do not retype it');
-  } else {
-    const file = join(docDir, ref);
-    if (!existsSync(file)) { ng(`${at}: source ${ref} does not exist`); continue; }
-    const src = readFileSync(file, 'utf8').replace(/\s+$/gm, '');
-    src.includes(body.replace(/\s+$/gm, ''))
-      ? ok(`${at}: excerpt of ${ref}`)
-      : ng(`${at}: excerpt differs from ${ref}`, 'the file changed or the excerpt was edited by hand; copy it again');
+const pages = opt.pages.split(',').map((x) => x.trim()).filter(Boolean);
+for (const page of pages) {
+  const md = readFileSync(join(docDir, page), 'utf8');
+  const lineOf = (idx) => md.slice(0, idx).split('\n').length;
+  for (const m of md.matchAll(/<!--\s*(output|source):\s*([^\s]+)\s*-->\s*\n```[^\n]*\n([\s\S]*?)\n```/g)) {
+    const [, kind, ref, body] = m;
+    const at = `${page}:${lineOf(m.index)}`;
+    if (kind === 'output') {
+      const out = outputs.get(ref);
+      if (out === undefined) { ng(`${at}: output block names unknown check "${ref}"`, 'add it to checks.json'); continue; }
+      const lines = body.split('\n').filter((x) => x.trim() && !x.trim().startsWith('...'));
+      const miss = missingInOrder(out, lines);
+      miss === null ? ok(`${at}: output of ${ref}`) : ng(`${at}: quoted output not produced by ${ref}: ${JSON.stringify(miss)}`, 'paste the real output, do not retype it');
+    } else {
+      const file = join(docDir, ref);
+      if (!existsSync(file)) { ng(`${at}: source ${ref} does not exist`); continue; }
+      const src = readFileSync(file, 'utf8').replace(/\s+$/gm, '');
+      src.includes(body.replace(/\s+$/gm, ''))
+        ? ok(`${at}: excerpt of ${ref}`)
+        : ng(`${at}: excerpt differs from ${ref}`, 'the file changed or the excerpt was edited by hand; copy it again');
+    }
   }
+  for (const m of md.matchAll(/!\[[^\]]*\]\(([^)\s]+)\)/g))
+    existsSync(join(docDir, m[1])) ? ok(`${page}: image ${m[1]}`) : ng(`${page}: image ${m[1]} is missing`);
+  for (const m of md.matchAll(/\]\(([\w.-]+\.md)(?:#[^)]*)?\)/g))
+    if (!existsSync(join(docDir, m[1]))) ng(`${page}: link to ${m[1]}, which does not exist`);
 }
-for (const m of md.matchAll(/!\[[^\]]*\]\(([^)\s]+)\)/g))
-  existsSync(join(docDir, m[1])) ? ok(`image ${m[1]}`) : ng(`image ${m[1]} is missing`);
 
 // ---- 4. page -----------------------------------------------------------------
 if (!opt['skip-html']) {
   console.log('page (vlmkit)');
-  const html = join(docDir, 'dist', 'index.html');
-  const b = sh(`node ${join(here, 'build-html.mjs')} ${mdPath}`);
+  const b = sh(`node ${join(here, 'build-html.mjs')} ${pages.map((x) => join(docDir, x)).join(' ')}`);
   if (b.code !== 0) ng('build-html failed', b.out.trim().split('\n').at(-1));
-  else {
+  else for (const page of pages) {
+    const html = join(docDir, 'dist', page === 'README.md' ? 'index.html' : page.replace(/\.md$/, '.html'));
     // 閉じた <details> の答えは、非表示でも箱の寸法が残り container-protrusion と測られる。
     // そこで「全部開いた版」を厳格に検査し、閉じた版はその 1 種だけ理由付きで除外する。
-    const openHtml = join(docDir, 'dist', 'open.html');
+    const openHtml = html.replace(/\.html$/, '.open.html');
     writeFileSync(openHtml, readFileSync(html, 'utf8').replace(/<details>/g, '<details open>'));
-    const allowClosed = `--allow "container-protrusion@details;closed <details> keeps its hidden answer's box — checked expanded in open.html"`;
+    const allowClosed = `--allow "container-protrusion@details;closed <details> keeps its hidden answer's box — checked expanded in the .open.html copy"`;
     for (const [gate, page, extra] of [
       ['check integrity', openHtml, ''],
       ['check integrity', html, allowClosed],

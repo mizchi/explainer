@@ -1,0 +1,166 @@
+{
+  "$comment": "本に引用する出力と、演習の答えを再生成する。",
+  "checks": [
+    {
+      "name": "apa-mutex-base",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=Init --inv=IndInv --length=0 Mutex.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 0",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apa-mutex-step",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=IndInv --inv=IndInv --length=1 Mutex.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 1",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apa-mutex-implies",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=IndInv --inv=Mutex --length=0 Mutex.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 0",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apa-mutex-bmc",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --inv=Mutex Mutex.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 10",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apa-mutex-naive",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --run-dir=$TMP/r-mutex --init=IndNaive --inv=IndNaive --length=1 Mutex.tla; sed -n '/^State0/,/^State1 ==/p' $TMP/r-mutex/violation1.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "State 1: state invariant 2 violated.",
+        "EXITCODE: ERROR (12)",
+        "State0 == lock = \"free\" /\\ pc = SetAsFun({ <<\"a\", \"cs\">>, <<\"b\", \"idle\">> })",
+        "State1 == lock = \"b\" /\\ pc = SetAsFun({ <<\"a\", \"cs\">>, <<\"b\", \"cs\">> })"
+      ]
+    },
+    {
+      "name": "tlc-mutex-reach",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/st-tlc-mutex-reach -config Reach.cfg MutexReach",
+      "cwd": "examples/tla",
+      "expect": [
+        "No error has been found.",
+        "3 distinct states found"
+      ]
+    },
+    {
+      "name": "tlc-mutex",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/st-tlc-mutex -config Mutex.cfg Mutex",
+      "cwd": "examples/tla",
+      "expect": [
+        "No error has been found."
+      ]
+    },
+    {
+      "name": "apa-racy-naive",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --run-dir=$TMP/r-racy --init=IndNaive --inv=IndNaive --length=1 MutexRacy.tla; sed -n '/^State0/,/^State1 ==/p' $TMP/r-racy/violation1.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "State 1: state invariant 2 violated.",
+        "EXITCODE: ERROR (12)",
+        "State0 == lock = \"free\" /\\ pc = SetAsFun({ <<\"a\", \"checked\">>, <<\"b\", \"cs\">> })",
+        "State1 == lock = \"a\" /\\ pc = SetAsFun({ <<\"a\", \"cs\">>, <<\"b\", \"cs\">> })"
+      ]
+    },
+    {
+      "name": "tlc-racy-reach",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/st-tlc-racy-reach -config Reach.cfg MutexRacyReach",
+      "cwd": "examples/tla",
+      "expect": [
+        "Error: Invariant NotCTI is violated.",
+        "State 5: <Take(\"b\")",
+        "/\\ pc = [a |-> \"cs\", b |-> \"cs\"]",
+        "State 6: <Release(\"a\")",
+        "State 7: <Check(\"a\")",
+        "/\\ pc = [a |-> \"checked\", b |-> \"cs\"]"
+      ]
+    },
+    {
+      "name": "tlc-racy-mutex",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/st-tlc-racy-mutex -config MutexRacy.cfg MutexRacy",
+      "cwd": "examples/tla",
+      "expect": [
+        "Error: Invariant Mutex is violated.",
+        "State 2: <Check(\"a\")",
+        "State 3: <Check(\"b\")",
+        "State 4: <Take(\"a\")",
+        "State 5: <Take(\"b\")",
+        "/\\ pc = [a |-> \"cs\", b |-> \"cs\"]"
+      ]
+    },
+    {
+      "name": "tlc-handoff",
+      "cmd": "java -cp $TLA2TOOLS tlc2.TLC -nowarning -cleanup -metadir $TMP/st-tlc-handoff -config Handoff.cfg Handoff",
+      "cwd": "examples/tla",
+      "expect": [
+        "No error has been found.",
+        "6 distinct states found"
+      ]
+    },
+    {
+      "name": "apa-handoff-start",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --run-dir=$TMP/r-handoff --init=IndStart --inv=IndStart --length=1 Handoff.tla; sed -n '/^State0/,/^State1 ==/p' $TMP/r-handoff/violation1.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "State 1: state invariant 4 violated.",
+        "EXITCODE: ERROR (12)",
+        "grant = \"b\"",
+        "/\\ holder = \"a\"",
+        "/\\ pc = SetAsFun({ <<\"a\", \"cs\">>, <<\"b\", \"idle\">> })"
+      ]
+    },
+    {
+      "name": "apa-handoff-base",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=Init --inv=IndInv --length=0 HandoffSolution.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 0",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apa-handoff-step",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=IndInv --inv=IndInv --length=1 HandoffSolution.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 1",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apa-handoff-implies",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=IndInv --inv=Mutex --length=0 HandoffSolution.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 0",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apa-handoff-patch",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --run-dir=$TMP/r-patch --init=IndPatch --inv=IndPatch --length=1 HandoffPatch.tla; sed -n '/^State0/,/^State1 ==/p' $TMP/r-patch/violation1.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "State 1: state invariant 4 violated.",
+        "EXITCODE: ERROR (12)",
+        "grant = \"a\"",
+        "/\\ holder = \"b\"",
+        "/\\ pc = SetAsFun({ <<\"a\", \"idle\">>, <<\"b\", \"cs\">> })"
+      ]
+    }
+  ]
+}

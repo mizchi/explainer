@@ -111,6 +111,71 @@
       "expect": [
         "No error has been found."
       ]
+    },
+    {
+      "name": "quint-bounded",
+      "cmd": "npx quint verify --invariant=small Bounded.qnt",
+      "cwd": "examples/quint",
+      "expect": [
+        "[ok] No violation found",
+        "You may increase --max-steps."
+      ]
+    },
+    {
+      "name": "quint-bounded-deep",
+      "cmd": "npx quint verify --invariant=small --max-steps=100 Bounded.qnt",
+      "cwd": "examples/quint",
+      "expect": [
+        "[State 100] { count: 100 }",
+        "[violation] Found an issue"
+      ]
+    },
+    {
+      "name": "apalache-bmc-default",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --inv=NoLostUpdate CounterAtomic.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 10",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apalache-ind-naive",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --run-dir=$TMP/apa-naive --init=IndNaive --inv=IndNaive --length=1 CounterAtomic.tla; sed -n '/^State0/,/^State1/p' $TMP/apa-naive/violation1.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "State 1: state invariant 2 violated.",
+        "EXITCODE: ERROR (12)",
+        "State0 == count = 0 /\\ pc = SetAsFun({ <<\"a\", \"incr\">>, <<\"b\", \"done\">> })",
+        "State1 == count = 1 /\\ pc = SetAsFun({ <<\"a\", \"done\">>, <<\"b\", \"done\">> })"
+      ]
+    },
+    {
+      "name": "apalache-ind-step",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=IndInv --inv=IndInv --length=1 CounterAtomic.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 1",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apalache-ind-base",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=Init --inv=IndInv --length=0 CounterAtomic.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 0",
+        "EXITCODE: OK"
+      ]
+    },
+    {
+      "name": "apalache-ind-implies",
+      "cmd": "$APALACHE check --out-dir=$TMP/apa --init=IndInv --inv=NoLostUpdate --length=0 CounterAtomic.tla",
+      "cwd": "examples/tla",
+      "expect": [
+        "Checker reports no error up to computation length 0",
+        "EXITCODE: OK"
+      ]
     }
   ]
 }

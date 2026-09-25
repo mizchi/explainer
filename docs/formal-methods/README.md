@@ -179,9 +179,9 @@ Model checking completed. No error has been found.
 
 | 方式 | 見る状態 | 代表例 | 「OK」の意味 |
 |---|---|---|---|
-| 有界モデル検査 (BMC) | 初期状態から **k 歩以内** に到達できる状態 | Apalache の既定（Quint `verify` もこれ） | k 歩以内には反例がない |
+| 有界モデル検査 (BMC) | 初期状態から **k 歩以内** に到達できる状態 | Apalache の既定（10 歩）、Quint `verify`（既定の backend は Apalache） | k 歩以内には反例がない |
 | 明示的な全探索 | 有限の定数で **到達可能な全状態** | TLC | この大きさのインスタンスでは反例がない |
-| 帰納法 | **不変条件を満たす全状態**（到達可能かを問わない） | Apalache の inductive check、TLAPS、Lean | どんな大きさ・何歩でも成り立つ |
+| 帰納法 | **不変条件を満たす全状態**（到達可能かを問わない） | Apalache の `--init=Inv --inv=Inv --length=1`、TLAPS、Lean | どんな大きさ・何歩でも成り立つ |
 
 BMC とは、k 歩の実行を丸ごと 1 つの SMT 式に展開し、Z3 に `sat` かを聞く方式です。
 つまり TLA+ と Z3 は、内部でつながっています。
@@ -202,7 +202,35 @@ IND  CounterAtomic, Inv=CountIsDone: base unsat, step unsat
 - **帰納法**：「`Init ⇒ Inv`」（基底）と「`Inv ∧ Next ⇒ Inv'`」（一歩）を示せれば、歩数に関係なく成り立ちます。
 - **`NoLostUpdate` の一歩が `sat`**：正しい不変条件なのに、帰納法では示せません。
 
-最後の点が肝です。図にすると、こうなります。
+BMC の緑がどれだけ狭いかは、Quint で見ると分かります。
+
+<!-- source: examples/quint/Bounded.qnt -->
+```
+module Bounded {
+  var count: int
+  action init = count' = 0
+  action step = count' = count + 1
+  val small = count < 100
+}
+```
+
+<!-- output: quint-bounded -->
+```
+[ok] No violation found
+You may increase --max-steps.
+```
+
+`small` は 100 歩目に破れます。
+それでも緑なのは、`quint verify` の既定の `--max-steps` が 10 だからです。
+`--max-steps=100` にすると反例が出ます。
+
+<!-- output: quint-bounded-deep -->
+```
+[State 100] { count: 100 }
+[violation] Found an issue
+```
+
+帰納法の一歩で `sat` が出た点が肝です。図にすると、こうなります。
 
 ![到達可能 ⊂ NoLostUpdate ⊂ 全状態](figures/induction.svg)
 
@@ -219,6 +247,71 @@ CTI が出ても、それだけではバグではありません。**不変条�
 有界検査・全探索から帰納法に進むとき、人間の仕事は **この強化を見つけること**です。
 AI が出した帰納的証明をレビューするときも、見るべきはここです。
 足された補題がドメインの言葉で意味を持つかを確かめます。
+
+### Apalache で同じ検査をする
+
+Z3 の手書き版と同じことを、TLA+ の仕様のまま Apalache で確かめます。
+不変条件の候補は、仕様に演算子として書きます。
+
+<!-- source: examples/tla/CounterAtomic.tla -->
+```tla
+TypeOK ==
+  /\ count \in Int
+  /\ pc \in [Procs -> {"incr", "done"}]
+
+\* そのままの不変条件を帰納法にかける (CTI が出るはず)
+IndNaive == TypeOK /\ NoLostUpdate
+
+\* 強めた不変条件: count = 終わったプロセスの数
+DoneCount == IF pc["a"] = "done" THEN IF pc["b"] = "done" THEN 2 ELSE 1
+             ELSE IF pc["b"] = "done" THEN 1 ELSE 0
+CountIsDone == count = DoneCount
+IndInv == TypeOK /\ CountIsDone
+```
+
+`TypeOK` は型の制約だけで、`count` には任意の整数を許します。
+`--init=X` は「X を満たす任意の状態から始める」、`--length=1` は「一歩だけ進める」という意味です。
+
+まず、強めていない `IndNaive` を帰納法にかけます。
+
+```sh
+apalache-mc check --init=IndNaive --inv=IndNaive --length=1 CounterAtomic.tla
+```
+
+<!-- output: apalache-ind-naive -->
+```
+State 1: state invariant 2 violated.
+EXITCODE: ERROR (12)
+State0 == count = 0 /\ pc = SetAsFun({ <<"a", "incr">>, <<"b", "done">> })
+State1 == count = 1 /\ pc = SetAsFun({ <<"a", "done">>, <<"b", "done">> })
+```
+
+`count = 0` なのに `b` が終わっている状態は、到達できません。
+Z3 の手書き版は、`count = -1` の別の CTI を返しました。
+CTI は 1 つとは限りません。どれも到達できない状態から出発しています。
+
+強めた `IndInv` では、3 つの `check` がすべて通ります。
+
+| コマンド | 確かめること |
+|---|---|
+| `--init=IndInv --inv=IndInv --length=1` | 一歩：`IndInv ∧ Next ⇒ IndInv'` |
+| `--init=Init --inv=IndInv --length=0` | 基底：`Init ⇒ IndInv` |
+| `--init=IndInv --inv=NoLostUpdate --length=0` | 目的の性質を含む：`IndInv ⇒ NoLostUpdate` |
+
+<!-- output: apalache-ind-step -->
+```
+Checker reports no error up to computation length 1
+EXITCODE: OK
+```
+
+出力の「up to computation length 1」は、BMC と同じ言い回しです。
+しかし `--init=IndInv` から始めたので、意味は「1 歩以内」ではありません。
+**任意の歩数で成り立つ**ことの証明の一部です。
+出力の文面だけでは、どちらの検査だったか区別できません。
+報告には、コマンドも一緒に残してください。
+
+3 つのうち 1 つでも欠けると、証明になりません。
+たとえば一歩の `check` だけが通っても、`IndInv` が初期状態で偽なら何も言えません。
 
 ---
 
@@ -329,13 +422,14 @@ CTI は多くの場合、到達不能な状態から出発しています。
 
 ```sh
 npm install              # Node 24+
-npm run setup:tla        # TLC (tla2tools.jar) を .tools/ に取得。Java 11+
+npm run setup:tla        # TLC と Apalache を .tools/ に取得。Java 17+
 npm run verify           # 例の再実行 → 本文の出力と照合 → 図の検査 → HTML を vlmkit で検査
 ```
 
 | ファイル | 内容 |
 |---|---|
 | `examples/z3/*.mjs` | Z3 の例（npm `z3-solver`、TypeScript と同じ API） |
-| `examples/tla/*.tla`, `*.cfg` | TLA+ の例と TLC の設定 |
+| `examples/tla/*.tla`, `*.cfg` | TLA+ の例と TLC の設定（Apalache 用の型注釈つき） |
+| `examples/quint/*.qnt` | Quint の例（`npm` の `@informalsystems/quint`） |
 | `figures/*.scene.json` | 図の元（vlmkit-anim）。`*.expect.json` は図が守るべき事実 |
 | `checks.json` | 本文に引用した出力を再生成するコマンドと、期待する行 |
