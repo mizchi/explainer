@@ -88,13 +88,14 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 |---|---|
 | `crash-course` | 読み手の既知を省くか。コードを実行して出力を載せるか。理解度チェックがあるか |
 | `crash-course-known-heavy` | 専門家向けでも「〜とは」から始めがちな題材（BuildKit のキャッシュ）で、既知を省き、核心を正しく説明するか |
+| `crash-course-persona-implicit` | 同じ題材で、既知を依頼文に書かず、ペルソナのファイルにだけ書いたとき |
 | `book` | 1 章が quickstart か。各章に学習目標と答えつきの問いがあるか。演習の答えを実行して確かめるか |
 | `pr-reader-first` | 読み手が分からないとき、書く前に確かめるか、前提を明示するか |
 | `one-liner-control` | 対照。1 文で済む質問で、スキルを呼ばず、資料を作らないか |
 | `first-reader-no-rewrite` | 下書きのレビューで、読み手の体験を報告し、書き直さないか |
 
 最新の結果と、その読み方の注意は [`evals/RESULTS.md`](evals/RESULTS.md) にあります。
-2026-09-25〜26 の回は、シェルに依存しない grader で `crash-course` が +0.43（各 3 回、5 回目）、`crash-course-known-heavy` が +0.25、`pr-reader-first` が +0.50、`book` が +0.28、対照ケースは差なし（過剰発火なし）でした。実行できなかったコードを報告したのは、スキルありで 6 回中 6 回、なしで 6 回中 1 回です。
+2026-09-25〜26 の回は、シェルに依存しない grader で `crash-course` が +0.43（各 3 回、5 回目）、`crash-course-known-heavy` が +0.25、`crash-course-persona-implicit` が +0.12、`pr-reader-first` が +0.50、`book` が +0.28、対照ケースは差なし（過剰発火なし）でした。実行できなかったコードを報告したのは、スキルありで 6 回中 6 回、なしで 6 回中 1 回です。読み手の情報（依頼文でもペルソナのファイルでも）があるときの既知の省略は、スキルなしでもできていました。
 その回の環境では eval のサンドボックス内でシェルが動かず、コード実行を見る grader は無効でした。
 
 `first-reader` のスクリプトの単体テストは `python3 tests/first-reader/test_first_reader.py` と `test_cjk.py` です。
