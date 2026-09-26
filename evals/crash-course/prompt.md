@@ -1,7 +1,7 @@
 ---
 description: 読み手のペルソナが与えられたとき、既知を省き、実行した出力と理解度チェックつきの速習資料を書くか
 tags: [explainer, heavy]
-runs: 2
+runs: 3
 max_turns: 60
 timeout_seconds: 1500
 allowed_tools: [Read, Write, Edit, Bash, Glob, Grep, Skill]
