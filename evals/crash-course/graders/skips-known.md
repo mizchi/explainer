@@ -1,25 +1,18 @@
 ---
-type: llm
+type: regex
 weight: 2
-focus: { source: file, path: docs/money/README.md }
+target: { source: file, path: docs/money/README.md }
+match: not_contains
+flags: m
+pattern: "^#{1,6}[^\\n]*(型注釈|型エイリアス|ジェネリクス|型システム|TypeScript\\s*の型|number\\s*型とは|数値型とは|number\\s*型の基本|整数と小数の区別|演算子の(使い方|基本)|Math\\.(round|floor)\\s*の使い方|toFixed\\s*の使い方|インストール|実行方法|実行のしかた|Node\\.?js\\s*(とは|の使い方)|console\\.log|基本構文)"
 ---
-読み手は TypeScript 歴 10 年で、依頼文は「型システムや number 型の基本は説明不要」と明示している。
-次の一覧だけを「既知」として扱い、一覧にないものは既知とみなさない。
+読み手の既知（依頼文の「型システムや number 型の基本は説明不要」）に、見出しを割いていないか。
 
-既知（説明してはいけない）：
-- K1. TypeScript の型注釈・型エイリアス・ジェネリクスなど、型システムの書き方
-- K2. JavaScript の数値が `number` という 1 つの型で、整数と小数を型として区別しないこと
-- K3. 四則演算子、`Math.round` / `Math.floor` / `toFixed` などの関数の呼び方そのもの
-- K4. `node` でファイルを実行する方法、`console.log` の使い方、基本構文
+LLM の判定は 3 回目に 2 対 1 で割れ、4 回目は全件 FAIL だったが、保存済みの 14 の資料のどれにも既知を説明する見出しは無かった。
+そのため、判定を機械的にした。見出しに次の語が出たら FAIL：
+- K1 型システム：型注釈、型エイリアス、ジェネリクス、型システム、TypeScript の型
+- K2 number 型の基本：number 型とは、数値型とは、number 型の基本、整数と小数の区別
+- K3 関数の呼び方：演算子の使い方、Math.round / Math.floor / toFixed の使い方
+- K4 実行と基本構文：インストール、実行方法、Node.js とは / の使い方、console.log、基本構文
 
-既知ではない（説明してよい。判定に使わない）：
-- 浮動小数点の表現誤差（`0.1 + 0.2` など）と IEEE 754
-- `toFixed` や `Math.round` の丸め方向・丸めの結果が直感と違うこと
-- 丸めるタイミング（明細ごとか合計後か）
-- 安全に扱える整数の範囲（`Number.MAX_SAFE_INTEGER`）、`BigInt`、decimal 系ライブラリ
-
-「説明している」とは、K1〜K4 のどれかに、見出しを 1 つ割くか、2 文以上を使って仕組みを説明していることを言う。
-1 文の言及や、コード例の中で使っているだけなら説明に数えない。
-
-PASS の条件：K1〜K4 のどれも説明していない。
-FAIL の条件：K1〜K4 のどれか 1 つでも説明している。FAIL のときは、どの K に当たるかを判断の根拠にする。
+見出しだけを見るので、本文の段落で既知を長く説明していても検出できない。
