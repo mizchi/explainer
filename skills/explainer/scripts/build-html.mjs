@@ -2,6 +2,7 @@
 // Markdown を自己完結 HTML にする。1 ページでも、章立ての本でも。
 // - figures/*.svg への画像リンクは SVG をそのまま埋め込む (外部参照なし)
 // - 同名の *.scene.json があれば、vlmkit-anim html で再生ページ (dist/<name>.html) を作ってリンクする
+// - figures/*.fig.png への画像リンクは、同名の *.fig.html（手で書いた HTML の図）があればそれを埋め込む
 // - 複数ページのときは、ページ間の .md リンクを .html に張り替え、目次・前後の章へのナビを付ける
 //
 //   node build-html.mjs <doc>/README.md                       → dist/index.html
@@ -37,7 +38,17 @@ const mdNames = new Set(pages.map((p) => basename(p)));
 
 function render(src) {
   let md = src.replace(/<!--[\s\S]*?-->/g, '');
-  // 画像 → インライン SVG (+ 再生ページへのリンク)
+  // 図のマークアップは Markdown に通さない。空行や字下げがあると、marked が HTML ブロックを閉じて
+  // 残りを <pre> にしてしまうため（D2 の SVG で起きた）。置き換え用の印を置き、変換のあとで戻す
+  const figures = [];
+  const hold = (html) => `\n\nXFIGUREX${figures.push(html) - 1}XFIGUREX\n\n`;
+  // HTML の図：Markdown は figures/<name>.fig.png を参照し、HTML では figures/<name>.fig.html をそのまま埋め込む
+  md = md.replace(/!\[([^\]]*)\]\((figures\/[^)]+?)\.fig\.png\)/g, (all, alt, base) => {
+    const html = join(docDir, `${base}.fig.html`);
+    if (!existsSync(html)) return all;
+    return hold(`<figure aria-label="${alt}">${readFileSync(html, 'utf8')}<figcaption>${alt}</figcaption></figure>`);
+  });
+  // SVG の図 → インライン SVG (+ 再生ページへのリンク)
   md = md.replace(/!\[([^\]]*)\]\((figures\/[^)]+?)\.svg\)/g, (_, alt, base) => {
     const svg = readFileSync(join(docDir, `${base}.svg`), 'utf8').replace(/<\?xml[^>]*>/, '');
     const scene = join(docDir, `${base}.scene.json`);
@@ -47,12 +58,12 @@ function render(src) {
       spawnSync('node', [anim, 'html', scene, '--out', join(dist, `${name}.html`), '--title', alt], { encoding: 'utf8' });
       link = `<a class="play" href="${name}.html">▶ 1 ステップずつ再生する</a>`;
     }
-    return `\n<figure role="img" aria-label="${alt}">${svg}<figcaption>${alt} ${link}</figcaption></figure>\n`;
+    return hold(`<figure role="img" aria-label="${alt}">${svg}<figcaption>${alt} ${link}</figcaption></figure>`);
   });
   // 本の中のページへのリンクを .html に
   md = md.replace(/\]\(([\w.-]+\.md)(#[^)]*)?\)/g, (all, file, hash = '') =>
     mdNames.has(file) ? `](${htmlName(file)}${hash})` : all);
-  return marked.parse(md);
+  return marked.parse(md).replace(/<p>XFIGUREX(\d+)XFIGUREX<\/p>|XFIGUREX(\d+)XFIGUREX/g, (_, a, b) => figures[Number(a ?? b)]);
 }
 
 function nav(i) {

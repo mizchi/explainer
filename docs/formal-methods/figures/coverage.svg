@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 470" font-family="system-ui, 'Hiragino Sans', 'Noto Sans JP', sans-serif">
+  <title>検査が見る状態の範囲</title>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#cf222e"/></marker></defs>
+  <rect x="0" y="0" width="520" height="470" fill="#ffffff"/>
+  <!-- 型を満たす全状態 -->
+  <rect x="10" y="10" width="500" height="450" rx="14" fill="#f6f8fa" stroke="#8c959f"/>
+  <text x="26" y="38" font-size="17" fill="#1f2328">型を満たす全状態</text>
+  <!-- Inv を満たす状態 -->
+  <rect x="30" y="50" width="460" height="340" rx="12" fill="#ddf4ff" stroke="#0969da"/>
+  <text x="46" y="78" font-size="17" fill="#0550ae">Inv を満たす状態</text>
+  <text x="46" y="99" font-size="15" fill="#0550ae">帰納法：ここの任意の状態から 1 歩</text>
+  <!-- 到達可能な状態 -->
+  <rect x="50" y="112" width="270" height="262" rx="10" fill="#dafbe1" stroke="#1a7f37"/>
+  <text x="66" y="139" font-size="17" fill="#116329">到達可能な状態</text>
+  <text x="66" y="160" font-size="15" fill="#116329">TLC：有限の定数で全部</text>
+  <!-- k 歩以内 -->
+  <rect x="68" y="174" width="234" height="182" rx="8" fill="#fff8c5" stroke="#9a6700"/>
+  <text x="84" y="201" font-size="17" fill="#7d4e00">k 歩以内</text>
+  <text x="84" y="222" font-size="15" fill="#7d4e00">BMC</text>
+  <text x="84" y="241" font-size="15" fill="#7d4e00">Apalache 既定 10 歩</text>
+  <text x="84" y="260" font-size="15" fill="#7d4e00">Quint verify</text>
+  <circle cx="100" cy="320" r="6" fill="#1f2328"/>
+  <text x="114" y="325" font-size="15" fill="#1f2328">Init</text>
+  <!-- CTI：Inv の中、到達可能の外。説明は点の上に置き、矢印は下へ出す -->
+  <text x="405" y="170" font-size="17" fill="#a40e26" text-anchor="middle">CTI</text>
+  <text x="405" y="192" font-size="15" fill="#a40e26" text-anchor="middle">到達不能だが</text>
+  <text x="405" y="211" font-size="15" fill="#a40e26" text-anchor="middle">Inv を満たす</text>
+  <circle cx="405" cy="236" r="7" fill="#cf222e"/>
+  <!-- そこから 1 歩で Inv の外へ出る -->
+  <line x1="407" y1="244" x2="452" y2="418" stroke="#cf222e" stroke-width="2" marker-end="url(#a)"/>
+  <circle cx="455" cy="428" r="7" fill="#cf222e"/>
+  <text x="438" y="433" font-size="15" fill="#a40e26" text-anchor="end">1 歩で Inv の外へ</text>
+</svg>

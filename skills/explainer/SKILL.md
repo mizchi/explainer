@@ -89,7 +89,9 @@ npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright
 - 時間の順序があるとき
 - 包含関係があるとき
 
-図は vlmkit-anim のシーン（JSON）で描く。検査は 3 つ。
+図は vlmkit-anim のシーン（JSON）で描く。当てはまる kind が無い概念図は、SVG / HTML / D2 で直接書き、`scripts/figure-check.mjs` で描画・検査して、出てきたシートを目で見て直す（`references/figures.md` の「手で描く図」）。
+
+vlmkit-anim の図の検査は 3 つ。
 
 - `check --expect`：事実シートと照合する。事実シートは道具の出力（TLC の状態グラフ、import グラフ）から作る。
 - `layout`：重なりやはみ出しがないか。
@@ -165,4 +167,5 @@ node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直
 | `references/figures.md` | 問い → 図の種類の対応、事実シートの作り方、vlmkit-anim の手順 |
 | `scripts/verify-doc.mjs` | 検証（checks / 図 / 引用 / HTML） |
 | `scripts/build-html.mjs` | README.md → 自己完結 HTML（SVG をインラインで埋め込む） |
+| `scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 の図を描画し、重なり・はみ出し・枠線や線と文字の交差・小さすぎる文字・事実シートを検査し、目で見るシートを作る |
 | `scripts/tlc-to-scene.mjs` | TLC の状態グラフと反例 → vlmkit-anim の state-machine シーンと事実シート |

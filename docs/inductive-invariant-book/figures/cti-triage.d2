@@ -1,0 +1,24 @@
+# 入口（一歩の検査）が上に来るよう、層を direction どおりに積む ELK を使う
+vars: {
+  d2-config: {
+    layout-engine: elk
+  }
+}
+
+direction: down
+*.style.font-size: 22
+(* -> *)[*].style.font-size: 20
+
+step: "一歩の検査\n（--length=1）"
+reach: "State0 に\n着けるか？（TLC）" {shape: diamond}
+weak: "条件が弱すぎる\n条件を足す（3 章）"
+prop: "性質を TLC で検査"
+bug: "バグ報告\n（反例トレース）"
+done: "基底と含意へ\n（1 章）"
+
+step -> done: "通る"
+step -> reach: "CTI が出る"
+reach -> weak: "着けない"
+reach -> prop: "着ける"
+prop -> bug: "破れる"
+weak -> step: "足してもう一度"

@@ -6,6 +6,7 @@
 // 1. checks   <doc-dir>/checks.json のコマンドを再実行し、expect の各行が stdout に順に現れるか
 // 2. figures  <doc-dir>/figures/*.scene.json を vlmkit-anim check (+ --expect) / layout で検査し、
 //             still で描き直した SVG がコミット済みのものと一致するか (--write で上書き)
+// 2b. hand    手で書いた図（*.svg / *.fig.html / *.d2）を figure-check.mjs に通す
 // 3. prose    各ページ (既定は README.md) の <!-- output: name --> 直後のコードブロックが、その check の実出力にあるか
 //             <!-- source: path --> 直後のコードブロックが、そのファイルの一部と一致するか
 //             画像リンクとページ間リンク (*.md) の参照先が存在するか
@@ -100,6 +101,19 @@ for (const f of scenes) {
   else ok(`${f}: SVG up to date`);
 }
 
+// ---- 2b. 手で書いた図（SVG / HTML / D2） ---------------------------------------------
+// vlmkit-anim のシーンから描いたもの以外の図を figure-check.mjs に通す。目で見るシートもここで作られる
+const all = existsSync(figDir) ? readdirSync(figDir) : [];
+const handMade = all.filter((f) =>
+  f.endsWith('.d2') || f.endsWith('.fig.html') ||
+  (f.endsWith('.svg') && !all.includes(f.replace(/\.svg$/, '.scene.json')) && !all.includes(f.replace(/\.svg$/, '.d2'))));
+if (handMade.length) console.log('figures (hand-made: figure-check)');
+for (const f of handMade) {
+  const r = sh(`node ${join(here, 'figure-check.mjs')} ${join(figDir, f)}${opt.write ? ' --write' : ''}`);
+  const fails = r.out.split('\n').filter((l) => l.trim().startsWith('✗'));
+  r.code === 0 ? ok(`${f}: CLEAN (sheet: figures/.figure-check/${f.replace(/\.fig\.html$|\.svg$|\.d2$/, '')}/)`) : ng(`${f}: ${fails.length} problem(s): ${fails.map((l) => l.trim().slice(2)).slice(0, 2).join(' / ')}`, `node ${join(here, 'figure-check.mjs')} ${join(figDir, f)} — then look at the sheet`);
+}
+
 // ---- 3. prose ----------------------------------------------------------------
 console.log('prose (本文の引用が実物と一致するか)');
 const pages = opt.pages.split(',').map((x) => x.trim()).filter(Boolean);
@@ -139,6 +153,14 @@ if (!opt['skip-html']) {
     const html = join(docDir, 'dist', page === 'README.md' ? 'index.html' : page.replace(/\.md$/, '.html'));
     // 閉じた <details> の答えは、非表示でも箱の寸法が残り container-protrusion と測られる。
     // そこで「全部開いた版」を厳格に検査し、閉じた版はその 1 種だけ理由付きで除外する。
+    // 図がページの中で壊れていないか：Markdown の変換で <pre> にされたり、タグがエスケープされたりしていないか
+    const built = readFileSync(html, 'utf8');
+    const broken = [...built.matchAll(/<figure\b[\s\S]*?<\/figure>/g)]
+      .map((m) => m[0])
+      .filter((f) => /<pre\b/.test(f) || /&lt;\/?(svg|g|text|path|rect|div|style)\b/.test(f));
+    broken.length
+      ? ng(`${page}: ${broken.length} figure(s) broken in the built page (turned into <pre> or escaped markup)`, 'the figure markup went through Markdown; see build-html.mjs placeholders')
+      : ok(`${page}: ${built.match(/<figure\b/g)?.length ?? 0} figure(s) intact in the built page`);
     const openHtml = html.replace(/\.html$/, '.open.html');
     writeFileSync(openHtml, readFileSync(html, 'utf8').replace(/<details>/g, '<details open>'));
     const allowClosed = `--allow "container-protrusion@details;closed <details> keeps its hidden answer's box — checked expanded in the .open.html copy"`;

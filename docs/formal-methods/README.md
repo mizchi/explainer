@@ -30,11 +30,7 @@ Z3 は TypeScript の小さな関数、TLA+ は「2 プロセスが共有カウ�
 
 検証したい性質 P があるとき、Z3 には **¬P を満たす値があるか** を聞きます。
 
-| Z3 の答え | 意味 |
-|---|---|
-| `sat` | 反例がある。具体的な値が取り出せる |
-| `unsat` | 反例がない。**その論理の中では** P が全入力で成り立つ（= 証明） |
-| `unknown` | 何も言っていない。時間切れか、決定手続きが諦めた |
+![Z3 の答えの読み方：sat は反例あり、unsat はその世界の中では反例なし、unknown は未証明](figures/z3-answers.fig.png)
 
 ### 例：`x % 2 === 1` は奇数判定か
 
@@ -182,6 +178,11 @@ Model checking completed. No error has been found.
 | 有界モデル検査 (BMC) | 初期状態から **k 歩以内** に到達できる状態 | Apalache の既定（10 歩）、Quint `verify`（既定の backend は Apalache） | k 歩以内には反例がない |
 | 明示的な全探索 | 有限の定数で **到達可能な全状態** | TLC | この大きさのインスタンスでは反例がない |
 | 帰納法 | **不変条件を満たす全状態**（到達可能かを問わない） | Apalache の `--init=Inv --inv=Inv --length=1`、TLAPS、Lean | どんな大きさ・何歩でも成り立つ |
+
+![検査が見る状態の範囲：k 歩以内 ⊂ 到達可能 ⊂ Inv を満たす状態 ⊂ 全状態](figures/coverage.svg)
+
+外側の検査ほど、多くの状態について言えます。
+帰納法だけが、到達できない状態（CTI）まで見ます。
 
 BMC とは、k 歩の実行を丸ごと 1 つの SMT 式に展開し、Z3 に `sat` かを聞く方式です。
 つまり TLA+ と Z3 は、内部でつながっています。
@@ -432,4 +433,5 @@ npm run verify           # 例の再実行 → 本文の出力と照合 → 図�
 | `examples/tla/*.tla`, `*.cfg` | TLA+ の例と TLC の設定（Apalache 用の型注釈つき） |
 | `examples/quint/*.qnt` | Quint の例（`npm` の `@informalsystems/quint`） |
 | `figures/*.scene.json` | 図の元（vlmkit-anim）。`*.expect.json` は図が守るべき事実 |
+| `figures/coverage.svg`, `figures/z3-answers.fig.html` | 手で書いた図。`*.facts.json` は図に必ず出る語。`figure-check.mjs` で検査する |
 | `checks.json` | 本文に引用した出力を再生成するコマンドと、期待する行 |
