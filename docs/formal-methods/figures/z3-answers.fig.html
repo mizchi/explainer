@@ -1,0 +1,31 @@
+<style>
+.z3 { display: grid; gap: 12px; font-size: 15px; }
+.z3 .ask { border: 2px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--code); }
+.z3 .ask code { font-size: 14px; }
+.z3 .arrow { text-align: center; color: var(--muted); font-size: 14px; }
+.z3 .answers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.z3 .card { border: 2px solid; border-radius: 8px; padding: 10px 12px; }
+.z3 .card b { display: block; font-family: ui-monospace, monospace; font-size: 17px; margin-bottom: 4px; }
+.z3 .sat { border-color: #cf222e; }
+.z3 .unsat { border-color: #1a7f37; }
+.z3 .unknown { border-color: #9a6700; }
+/* ダーク：3:1 は満たすが暗く見えるので、明るい色にする（約 7.5:1） */
+:root[data-theme="dark"] .z3 .sat { border-color: #ff7b72; }
+:root[data-theme="dark"] .z3 .unsat { border-color: #3fb950; }
+:root[data-theme="dark"] .z3 .unknown { border-color: #d29922; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .z3 .sat { border-color: #ff7b72; }
+  :root:not([data-theme="light"]) .z3 .unsat { border-color: #3fb950; }
+  :root:not([data-theme="light"]) .z3 .unknown { border-color: #d29922; }
+}
+@media (max-width: 520px) { .z3 .answers { grid-template-columns: 1fr; } }
+</style>
+<div class="z3">
+  <div class="ask">確かめたい性質 P の<strong>否定</strong>を渡す：<code>s.add(Not(P))</code> → <code>s.check()</code></div>
+  <div class="arrow">↓ Z3 の答えは 3 つのどれか ↓</div>
+  <div class="answers">
+    <div class="card sat"><b>sat</b>反例がある。値を取り出し、実物で再生してから報告する</div>
+    <div class="card unsat"><b>unsat</b>反例がない。ただしモデルの型と前提の世界の中だけで</div>
+    <div class="card unknown"><b>unknown</b>何も言っていない。未証明として扱う</div>
+  </div>
+</div>

@@ -1,0 +1,22 @@
+{
+  "labels": [
+    "一歩の検査",
+    "State0 に",
+    "着けるか？（TLC）",
+    "条件が弱すぎる",
+    "性質を TLC で検査",
+    "バグ報告",
+    "基底と含意へ",
+    "着けない",
+    "着ける",
+    "CTI が出る"
+  ],
+  "edges": [
+    "step->done",
+    "step->reach",
+    "reach->weak",
+    "reach->prop",
+    "prop->bug",
+    "weak->step"
+  ]
+}

@@ -45,10 +45,13 @@ AI から人間へ概念を説明するための、スキルと道具です。
 ```sh
 npm install            # Node 24+（vlmkit の要件）
 npm run setup:tla      # TLC と Apalache を .tools/ に取得（Java 17+）
+npm run setup:d2       # D2（TALA / ELK）を .tools/ に取得。手で書く D2 の図に使う
 npm run verify         # docs/formal-methods を検証 → verdict: VERIFIED
 npm run build          # docs/formal-methods/dist/index.html を生成
 npm run verify:book    # docs/inductive-invariant-book を検証 → book verdict: VERIFIED
 npm run build:book     # docs/inductive-invariant-book/dist/*.html を生成
+npm run figure -- docs/formal-methods/figures/coverage.svg   # 図 1 枚を描画・検査。出てきたシートを目で見る
+npm run test:figures   # figure-check の回帰テスト
 ```
 
 ## インストール（Claude Code プラグイン）
@@ -110,6 +113,8 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `skills/explainer/scripts/verify-doc.mjs` | 検証（checks / vlmkit-anim / 引用照合 / vlmkit ゲート） |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → 自己完結 HTML |
 | `skills/explainer/scripts/tlc-to-scene.mjs` | TLC の状態グラフ・反例 → vlmkit-anim の図と事実シート |
+| `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
+| `tests/figure-check/` | figure-check の回帰テスト（悪い図がそれぞれの検査で落ちるか） |
 | `personas/` | 読み手のペルソナ |
 | `docs/<topic>/` | 資料：`README.md`, `checks.json`, `examples/`, `figures/` |
 | `docs/<topic>-book/` | 本：`README.md`（目次）, `book.json`, `NN-*.md`, `checks.json`, `examples/`, `figures/` |

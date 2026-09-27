@@ -11,7 +11,10 @@
     "verify": "node skills/explainer/scripts/verify-doc.mjs docs/formal-methods",
     "build": "node skills/explainer/scripts/build-html.mjs docs/formal-methods/README.md",
     "verify:book": "node skills/explainer-book/scripts/verify-book.mjs docs/inductive-invariant-book",
-    "build:book": "node skills/explainer/scripts/build-html.mjs docs/inductive-invariant-book/README.md docs/inductive-invariant-book/01-quickstart.md docs/inductive-invariant-book/02-reading-cti.md docs/inductive-invariant-book/03-strengthening.md"
+    "build:book": "node skills/explainer/scripts/build-html.mjs docs/inductive-invariant-book/README.md docs/inductive-invariant-book/01-quickstart.md docs/inductive-invariant-book/02-reading-cti.md docs/inductive-invariant-book/03-strengthening.md",
+    "setup:d2": "sh scripts/setup-d2.sh",
+    "test:figures": "node tests/figure-check/run.mjs",
+    "figure": "node skills/explainer/scripts/figure-check.mjs"
   },
   "devDependencies": {
     "@informalsystems/quint": "^0.32.0",
