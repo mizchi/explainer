@@ -100,7 +100,7 @@ Mermaid の図（`figures/*.mmd`）を使うときは `mermaid` も入れます�
 - 時間の順序があるとき
 - 包含関係があるとき
 
-図は vlmkit-anim のシーン（JSON）で描く。当てはまる kind が無い概念図は、Mermaid で済むなら Mermaid、足りない構造なら D2、D2 に乗らない自由な図なら SVG / HTML で直接書く。どれも `scripts/figure-check.mjs` で描画・検査して、出てきたシートを目で見て直す（`references/figures.md` の「手で描く図」）。
+図は vlmkit-anim のシーン（JSON）で描く。当てはまる kind が無い概念図は、Mermaid で済むなら Mermaid、足りない構造なら D2、D2 に乗らない自由な図なら SVG / HTML で直接書く。どれも `scripts/figure-check.mjs` で描画・検査して、出てきたシートと辺のシート（矢印を 1 本ずつ強調したもの）を目で見て直す。D2 と Mermaid は配置を道具が決めるので、不自然なら `scripts/figure-variants.mjs` で候補を並べて選び直す（`references/figures.md` の「手で描く図」）。
 
 vlmkit-anim の図の検査は 3 つ。
 
@@ -179,4 +179,6 @@ node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直
 | `scripts/verify-doc.mjs` | 検証（checks / 図 / 引用 / HTML） |
 | `scripts/build-html.mjs` | README.md → 自己完結 HTML（SVG をインラインで埋め込む） |
 | `scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画し、重なり・はみ出し・枠線や線と文字の交差・小さすぎる文字・事実シートを検査し、目で見るシートを作る |
+| `scripts/figure-arrows.mjs` | 矢印の読みやすさ（2 本が重なって走る・箱を突き抜ける・交差・遠回り・逆向き）と、辺を 1 本ずつ強調したシート。figure-check が使う |
+| `scripts/figure-variants.mjs` | D2 / Mermaid の配置の候補（TALA の seed・ELK・dagre、向き）を描き、点数つきで並べる |
 | `scripts/tlc-to-scene.mjs` | TLC の状態グラフと反例 → vlmkit-anim の state-machine シーンと事実シート |

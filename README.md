@@ -1,132 +1,219 @@
 # explainer
 
-AI から人間へ概念を説明するための、スキルと道具です。
+English | [日本語](README.ja.md)
 
-コーディングエージェントが書く速さに、人間の理解が追いつかなくなっています（[Geoffrey Litt, *Understanding is the new bottleneck*](https://www.geoffreylitt.com/2026/07/02/understanding-is-the-new-bottleneck)）。
-このリポジトリは、読み手 1 人のために、**その人が知らないことだけ**を、**道具で検証した主張と図**で書くためのものです。
+Skills and tools for explaining concepts from an AI to a human.
 
-## 何をするか
+Coding agents now write faster than people can understand what they wrote ([Geoffrey Litt, *Understanding is the new bottleneck*](https://www.geoffreylitt.com/2026/07/02/understanding-is-the-new-bottleneck)).
+This repository is for writing, for one reader, **only what that reader does not already know**, with **claims and figures checked by tools**.
+
+## What it does
 
 ```
-ペルソナ ─→ 問い ─→ 実物（実行できる例・モデル） ─→ 本文 + 図 ─→ 検証 ─→ HTML
-  │                          │                          │           │
-  質問 + 公開情報        出力は貼る。打ち直さない     vlmkit-anim   verify-doc.mjs
-                                                   事実シート照合  (checks / 図 / 引用 / vlmkit)
+persona ─→ question ─→ real artifacts (runnable examples, models) ─→ text + figures ─→ verify ─→ HTML
+  │                          │                                          │               │
+  questions + public info    paste outputs, never retype               vlmkit-anim     verify-doc.mjs
+                                                                        fact sheets     (checks / figures / quotes / vlmkit)
 ```
 
-- **ペルソナ**（`personas/`）：読み手が既に知っていることと、怪しいところ。資料から何を削るかを決める。
-- **スキル**（`skills/explainer/`）：手順、文体、図の選び方、検証の仕方。
-- **検証**：本文に引用した出力は `checks.json` で再実行して照合します。図は [`@mizchi/vlmkit-anim`](https://github.com/mizchi/vlmkit) で事実シートと照合し、ページは `vlmkit check integrity` / `check a11y contrast` に通します。
+- **Persona** (`personas/`): what the reader already knows, and where their understanding is shaky. It decides what to leave out.
+- **Skills** (`skills/explainer/`): the procedure, writing style, how to choose a figure, how to verify.
+- **Verification**: every quoted output is re-run from `checks.json` and compared with the text. Figures are checked against fact sheets with [`@mizchi/vlmkit-anim`](https://github.com/mizchi/vlmkit), and pages go through `vlmkit check integrity` / `check a11y contrast`.
 
-[ELI5](https://github.com/dreambigou/eli5) は、読み手を型（年齢・職種）で扱います。
-このスキルは、実在の 1 人をペルソナとして扱い、書いた主張を道具で検査します。
+[ELI5](https://github.com/dreambigou/eli5) treats the reader as a type (age, job).
+This skill treats one real person as the reader, and checks what it writes with tools.
 
-## 例：mizchi 向けの形式手法の速習資料
+## Instructions, and the figures they produced
 
-- ペルソナ：[`personas/mizchi.md`](personas/mizchi.md)（公開情報から作成。事実と推測を分けて記載）
-- 資料：[`docs/formal-methods/README.md`](docs/formal-methods/README.md)「緑を読む：Z3 と TLA+ の『OK』は何を保証したのか」
+These are instructions actually given in the conversation that built this repository (excerpts, translated from Japanese; the originals are in [README.ja.md](README.ja.md)), and the figures that came out.
+Every figure was either checked against a tool's output or passed `figure-check.mjs`, and was looked at and fixed by eye.
+The images are rebuilt with `npm run readme:images`. The figures themselves are in Japanese, the language of the documents.
 
-ペルソナを作ってみると、読み手は形式手法の初心者ではありませんでした。
-約 10 種の検証器をエージェント経由で既に回しています。
-そこで資料は、ツールの入門ではなく、**検査器の結果が何を保証したかを自分で判定する基準**に絞りました。
+### 1. A crash course on formal methods
 
-## 例：章立ての学習資料（本）
+> As a test, build a persona of mizchi from public information, and write an explanation of formal methods that I can understand. I tried to write material on Z3 and TLA+, but lost confidence as I wrote it.
+>
+> Actually run the induction check with Apalache as well, and verify it.
 
-1 本の資料に収まらないときは、`explainer-book` スキルで章立てにします。
+![Figures from the formal methods crash course](docs/readme/formal-methods.png)
 
-- 本：[`docs/inductive-invariant-book/`](docs/inductive-invariant-book/README.md)「帰納的不変条件を自分で見つける」（全 3 章）
-  - `01-quickstart.md`：Apalache の 3 つの check で、不変条件が何歩でも成り立つことを示す
-  - `02-reading-cti.md`：帰納法の反例（CTI）が、条件の弱さかバグかを TLC で切り分ける
-  - `03-strengthening.md`：CTI から足すべき条件を読み取る演習
-- 本全体の検査（`verify-book.mjs`）：学習目標と理解度チェックの対応、概念を導入前に使っていないか、章の読了時間、演習の出発点が落ちて答えが通るか、章の依存図
+- A: all reachable states of Counter, generated from TLC's state graph by `tlc-to-scene.mjs`. The orange `D D | 1` is the final state where one update was lost.
+- B: for CounterAtomic, reachable states ⊂ NoLostUpdate ⊂ all states. The contents of the "reachable" box are checked against the states TLC enumerated. Red is the counterexample to induction (CTI) that Z3 found: an unreachable state that satisfies NoLostUpdate and leaves it in one step.
+- C: which states each check looked at (hand-written SVG).
+- Document: [`docs/formal-methods/README.md`](docs/formal-methods/README.md)
 
-## 例：図の道具の選び方（チートシート）
+### 2. A chaptered course
 
-- 資料：[`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md)「どの図を、どの道具で描くか」
-- Mermaid で済むなら Mermaid、足りない構造なら D2（TALA / ELK / dagre）、D2 に乗らない自由な図なら SVG / HTML。道具の出力を写す図は vlmkit-anim。同じサンプルを Mermaid と D2 の 3 つのエンジンで描いて比べた結果（`samples/compare.mjs`）つき
-- 測って分かったこと：箱の中の向きは、Mermaid だと中の箱が外とつながると無視され、ELK と dagre は常に黙って無視する。守ったのは TALA だけ。TALA は seed で配置がすべて変わり、箱が増えると急に遅くなる
+> I want to add a skill for making a substantial course that doesn't end as a short text. Like foo-book/01-quickstart.md.
 
-## 使い方
+![Figures from the chaptered book](docs/readme/book.png)
+
+- A: chapter dependency map, generated from `book.json`; the same data drives the check that no concept is used before it is introduced.
+- B: triaging a counterexample to induction (CTI), in D2 + ELK.
+- Book: [`docs/inductive-invariant-book/`](docs/inductive-invariant-book/README.md)
+
+### 3. Which figure tool to use
+
+> Using TALA and D2, make a cheat sheet from samples that sorts out which drawing tool to use when.
+
+![The same D2 drawn by three engines](docs/readme/engines.png)
+
+- The same `arch.d2` drawn by A: TALA, B: ELK, C: dagre.
+- Without a `direction`, A put the entry points (browser, app) at the bottom. In B and C, lines cross the container titles (エッジ, サービス, データ).
+- Cheat sheet: [`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md)
+
+> Write down when to use Mermaid. Use Mermaid when it is enough; for other structured patterns consider D2; for free-form drawings D2 can't express, consider SVG or HTML.
+
+![Mermaid compared with D2 + TALA](docs/readme/mermaid-vs-tala.png)
+
+- A: a figure Mermaid is enough for (a procedure with a back edge). No ✗ from the checks.
+- B: in Mermaid, once a node inside a subgraph links to a node outside it, the subgraph's `direction TB` is ignored and everything goes into one row.
+- C: the same links in D2 + TALA keep the inside vertical.
+
+### 4. Render, look, and fix the layout
+
+> With D2 and Mermaid, when you actually render from the semantics, the result is sometimes clearly unnatural, or the arrows are hard to read. I want a flow that checks these visually and fixes them.
+
+![Edge sheet](docs/readme/arrows-edges.png)
+
+The edge sheet (made by `figure-check.mjs`): each arrow drawn in red in turn, with the others faded.
+The two framed in red failed the machine check "browser→CDN and browser→API Gateway run together for 222px": the split reads as an arrow between CDN and API Gateway.
+
+![Layout candidates](docs/readme/arrows-variants.png)
+
+Layout candidates (made by `figure-variants.mjs`): TALA seeds 1–6, ELK and dagre, sorted by penalty.
+Only seeds 6 and 5 have no ✗. You choose among those by eye and record why in a comment in the source.
+
+## Example: a formal methods crash course for mizchi
+
+- Persona: [`personas/mizchi.md`](personas/mizchi.md) (built from public information; facts and guesses kept apart)
+- Document: [`docs/formal-methods/README.md`](docs/formal-methods/README.md) "Reading the green: what did Z3's and TLA+'s 'OK' actually guarantee?"
+
+Building the persona showed the reader was not a beginner at formal methods.
+They already run about ten verifiers through agents.
+So the document is not a tool tutorial; it is limited to **criteria for judging, yourself, what a checker's result guaranteed**.
+
+## Example: a chaptered course (book)
+
+When one document is not enough, the `explainer-book` skill splits it into chapters.
+
+- Book: [`docs/inductive-invariant-book/`](docs/inductive-invariant-book/README.md) "Finding inductive invariants yourself" (3 chapters)
+  - `01-quickstart.md`: show with Apalache's three checks that an invariant holds for any number of steps
+  - `02-reading-cti.md`: use TLC to tell whether a counterexample to induction (CTI) means a weak invariant or a bug
+  - `03-strengthening.md`: exercises in reading off the condition to add from a CTI
+- Whole-book checks (`verify-book.mjs`): learning objectives matched to quizzes, no concept used before it is introduced, reading time per chapter, exercises whose starting point fails and whose answer passes, the chapter dependency map
+
+## Example: choosing a figure tool (cheat sheet)
+
+- Document: [`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md) "Which figure, with which tool"
+- Mermaid when it is enough; D2 (TALA / ELK / dagre) for structures Mermaid can't handle; SVG / HTML for free-form figures that don't fit D2. vlmkit-anim for figures that copy a tool's output. Includes a comparison that draws the same samples with Mermaid and D2's three engines (`samples/compare.mjs`).
+- Measured findings: the direction inside a container is ignored by Mermaid once inner nodes link outside, and always silently ignored by ELK and dagre; only TALA kept it. TALA's layout changes completely with the seed, and it slows down sharply as boxes are added.
+
+## Usage
 
 ```sh
-npm install            # Node 24+（vlmkit の要件）
-npm run setup:tla      # TLC と Apalache を .tools/ に取得（Java 17+）
-npm run setup:d2       # D2（TALA / ELK）を .tools/ に取得。手で書く D2 の図に使う
-npm run verify         # docs/formal-methods を検証 → verdict: VERIFIED
-npm run build          # docs/formal-methods/dist/index.html を生成
-npm run verify:book    # docs/inductive-invariant-book を検証 → book verdict: VERIFIED
-npm run build:book     # docs/inductive-invariant-book/dist/*.html を生成
-npm run verify:cheatsheet   # docs/figure-cheatsheet を検証（エンジンの比較を再実行する。2 分ほど）
-npm run figure -- docs/formal-methods/figures/coverage.svg   # 図 1 枚を描画・検査。出てきたシートを目で見る
-npm run test:figures   # figure-check の回帰テスト
+npm install            # Node 24+ (required by vlmkit)
+npm run setup:tla      # fetch TLC and Apalache into .tools/ (Java 17+)
+npm run setup:d2       # fetch D2 (TALA / ELK) into .tools/, for hand-written D2 figures
+npm run verify         # verify docs/formal-methods → verdict: VERIFIED
+npm run build          # build docs/formal-methods/dist/index.html
+npm run verify:book    # verify docs/inductive-invariant-book → book verdict: VERIFIED
+npm run build:book     # build docs/inductive-invariant-book/dist/*.html
+npm run verify:cheatsheet   # verify docs/figure-cheatsheet (re-runs the engine comparison, ~2 min)
+npm run figure -- docs/formal-methods/figures/coverage.svg   # render and check one figure; look at the sheet it prints
+npm run figure:variants -- docs/figure-cheatsheet/figures/arch.d2   # lay out D2 / Mermaid candidates with scores; compare and choose
+npm run test:figures   # regression tests for figure-check
+npm run readme:images  # rebuild the README images (docs/readme/*.png)
 ```
 
-## インストール（Claude Code プラグイン）
+## Install (Claude Code plugin)
 
-このリポジトリは、そのまま Claude Code のプラグインマーケットプレイスです。
-1 つのプラグイン `explainer` に、3 つのスキルが入っています。
+This repository is itself a Claude Code plugin marketplace.
+One plugin, `explainer`, contains three skills.
 
 ```
 /plugin marketplace add mizchi/explainer
 /plugin install explainer@explainer
 ```
 
-シェルからは `claude plugin marketplace add mizchi/explainer` と `claude plugin install explainer@explainer` です。
+From a shell: `claude plugin marketplace add mizchi/explainer` and `claude plugin install explainer@explainer`.
 
-| スキル | 使う場面 |
+| Skill | When to use it |
 |---|---|
-| `explainer` | 1 人の読み手に向けた速習資料。主張と図を道具で検証する |
-| `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
-| `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
+| `explainer` | A crash course for one reader. Claims and figures are checked with tools |
+| `explainer-book` | A chaptered course. Checks learning objectives, concept order, reading time and exercises |
+| `first-reader` | Has simulated readers read a draft one paragraph at a time before publishing. Reports where they drop off and what stays with them the next day. Does not rewrite |
 
-スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid` も入れます。
-`first-reader` は Python 3 の標準ライブラリだけで動きます。
+Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures.
+`first-reader` needs only the Python 3 standard library.
 
-`first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
-日本語の下書きでも 1 段落ずつ読ませられるよう、`feed.py` の語数の数え方を変えています。
+`first-reader` is bundled from [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
+`feed.py` counts words differently so that Japanese drafts can also be read one paragraph at a time.
 
-## スキルの効果を測る（evals）
+## Measuring the skills (evals)
 
-`evals/<case>/prompt.md` と `graders/*.md` が、`claude plugin eval` のケースです。
-各ケースを、プラグインあり・なしの 2 つの条件で実行し、スコアの差（Δ）を出します。
+`evals/<case>/prompt.md` and `graders/*.md` are cases for `claude plugin eval`.
+Each case runs with and without the plugin, and the score difference (Δ) is reported.
 
 ```sh
 claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 ```
 
-| ケース | 見ること |
+| Case | What it looks at |
 |---|---|
-| `crash-course` | 読み手の既知を省くか。コードを実行して出力を載せるか。理解度チェックがあるか |
-| `crash-course-known-heavy` | 専門家向けでも「〜とは」から始めがちな題材（BuildKit のキャッシュ）で、既知を省き、核心を正しく説明するか |
-| `crash-course-persona-implicit` | 同じ題材で、既知を依頼文に書かず、ペルソナのファイルにだけ書いたとき |
-| `crash-course-persona-build` | 読み手の名前と所属しか分からないとき、書く前に確かめるか、仮定を明示するか。経歴を作り上げないか |
-| `book` | 1 章が quickstart か。各章に学習目標と答えつきの問いがあるか。演習の答えを実行して確かめるか |
-| `pr-reader-first` | 読み手が分からないとき、書く前に確かめるか、前提を明示するか |
-| `one-liner-control` | 対照。1 文で済む質問で、スキルを呼ばず、資料を作らないか |
-| `first-reader-no-rewrite` | 下書きのレビューで、読み手の体験を報告し、書き直さないか |
+| `crash-course` | Does it skip what the reader knows? Does it run code and show the output? Is there a quiz? |
+| `crash-course-known-heavy` | On a topic that invites "X is…" openings even for experts (BuildKit caching), does it skip the known parts and explain the core correctly? |
+| `crash-course-persona-implicit` | The same topic, with the reader's knowledge only in the persona file, not in the request |
+| `crash-course-persona-build` | Given only the reader's name and team, does it check before writing, or state its assumptions? Does it avoid inventing a background? |
+| `book` | Is chapter 1 a quickstart? Does each chapter have objectives and quizzes with answers? Does it run the exercise answers to check them? |
+| `pr-reader-first` | When the reader is unknown, does it check before writing, or state its assumptions? |
+| `one-liner-control` | Control. For a one-sentence question, does it avoid calling the skill and producing a document? |
+| `first-reader-no-rewrite` | When reviewing a draft, does it report the reader's experience without rewriting? |
 
-最新の結果と、その読み方の注意は [`evals/RESULTS.md`](evals/RESULTS.md) にあります。
-2026-09-25〜27 の回は、シェルに依存しない grader で `crash-course` が +0.43（各 3 回、5 回目）、`crash-course-known-heavy` が +0.25、`crash-course-persona-implicit` が +0.12、`crash-course-persona-build` が +0.20（仮のペルソナを残す規則を足した 9 回目は +0.40）、`pr-reader-first` が +0.50、`book` が +0.28、対照ケースは差なし（過剰発火なし）でした。実行できなかったコードを報告したのは、スキルありで 6 回中 6 回、なしで 6 回中 1 回です。読み手の情報（依頼文でもペルソナのファイルでも）があるときの既知の省略は、スキルなしでもできていました。
-その回の環境では eval のサンドボックス内でシェルが動かず、コード実行を見る grader は無効でした。
+The latest results, and caveats on reading them, are in [`evals/RESULTS.md`](evals/RESULTS.md) (in Japanese).
+In the 2026-09-25 to 27 runs, using only graders that don't depend on a shell, the Δ values were:
 
-`first-reader` のスクリプトの単体テストは `python3 tests/first-reader/test_first_reader.py` と `test_cjk.py` です。
-
-## 構成
-
-| パス | 内容 |
+| Case | Δ |
 |---|---|
-| `skills/explainer/SKILL.md` | スキル本体（1 本の速習資料） |
-| `skills/explainer-book/SKILL.md` | 本版（章立ての学習資料）。`scripts/verify-book.mjs` が本全体を検査 |
-| `skills/explainer/references/` | ペルソナ・文体・図のガイド |
-| `skills/explainer/scripts/verify-doc.mjs` | 検証（checks / vlmkit-anim / 引用照合 / vlmkit ゲート） |
-| `skills/explainer/scripts/build-html.mjs` | Markdown → 自己完結 HTML |
-| `skills/explainer/scripts/tlc-to-scene.mjs` | TLC の状態グラフ・反例 → vlmkit-anim の図と事実シート |
-| `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
-| `tests/figure-check/` | figure-check の回帰テスト（悪い図がそれぞれの検査で落ちるか） |
-| `personas/` | 読み手のペルソナ |
-| `docs/<topic>/` | 資料：`README.md`, `checks.json`, `examples/`, `figures/` |
-| `docs/<topic>-book/` | 本：`README.md`（目次）, `book.json`, `NN-*.md`, `checks.json`, `examples/`, `figures/` |
-| `skills/first-reader/` | 模擬読者（同梱、Apache-2.0） |
-| `.claude-plugin/` | プラグインとマーケットプレイスの定義 |
-| `evals/` | `claude plugin eval` のケース |
-| `tests/first-reader/` | first-reader のスクリプトの単体テスト |
+| `crash-course` | +0.43 (3 runs each, 5th round) |
+| `crash-course-known-heavy` | +0.25 |
+| `crash-course-persona-implicit` | +0.12 |
+| `crash-course-persona-build` | +0.20; +0.40 in the 9th round, after adding the rule to record a provisional persona |
+| `pr-reader-first` | +0.50 |
+| `book` | +0.28 |
+| control case | no difference (no over-triggering) |
+
+Reporting code it could not run happened in 6 of 6 runs with the skill and 1 of 6 without.
+When the reader's information was given (in the request or in a persona file), skipping known material happened even without the skill.
+In that environment the shell did not work inside the eval sandbox, so graders that look at code execution were disabled.
+
+Unit tests for the `first-reader` scripts: `python3 tests/first-reader/test_first_reader.py` and `test_cjk.py`.
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `skills/explainer/SKILL.md` | The skill (one crash course) |
+| `skills/explainer-book/SKILL.md` | The book version (chaptered course). `scripts/verify-book.mjs` checks the whole book |
+| `skills/explainer/references/` | Guides for personas, writing and figures |
+| `skills/explainer/scripts/verify-doc.mjs` | Verification (checks / vlmkit-anim / quotes / vlmkit gates) |
+| `skills/explainer/scripts/build-html.mjs` | Markdown → self-contained HTML |
+| `skills/explainer/scripts/tlc-to-scene.mjs` | TLC state graphs and counterexamples → vlmkit-anim figures and fact sheets |
+| `skills/explainer/scripts/figure-check.mjs` | Renders and checks hand-written SVG / HTML / D2 / Mermaid figures, and makes a sheet to look at (light, dark, phone) |
+| `skills/explainer/scripts/figure-arrows.mjs` | Arrow readability checks, and a sheet with each edge highlighted in turn (used by figure-check) |
+| `skills/explainer/scripts/figure-variants.mjs` | Draws D2 / Mermaid layout candidates (TALA seeds, ELK, dagre, directions) and lays them out with scores |
+| `tests/figure-check/` | Regression tests for figure-check (each bad figure fails its check) |
+| `personas/` | Reader personas |
+| `docs/<topic>/` | Documents: `README.md`, `checks.json`, `examples/`, `figures/` |
+| `docs/<topic>-book/` | Books: `README.md` (contents), `book.json`, `NN-*.md`, `checks.json`, `examples/`, `figures/` |
+| `docs/readme/` | Images for this README |
+| `skills/first-reader/` | Simulated readers (bundled, Apache-2.0) |
+| `.claude-plugin/` | Plugin and marketplace definitions |
+| `evals/` | Cases for `claude plugin eval` |
+| `tests/first-reader/` | Unit tests for the first-reader scripts |
+| `scripts/readme-images.mjs` | Rebuilds the README images |
+
+## License
+
+[MIT](LICENSE).
+`skills/first-reader/` keeps the license of its source (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
