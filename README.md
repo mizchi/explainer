@@ -43,8 +43,8 @@ AI から人間へ概念を説明するための、スキルと道具です。
 ## 例：図の道具の選び方（チートシート）
 
 - 資料：[`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md)「どの図を、どの道具で描くか」
-- vlmkit-anim・D2（TALA / ELK / dagre）・SVG・HTML を、問いの順に選ぶ表と、D2 の 3 つのエンジンを同じサンプルで比べた結果（`samples/compare.mjs`）
-- 測って分かったこと：箱ごとの direction は TALA しか守らない（ELK と dagre は黙って無視する）。TALA は seed で配置がすべて変わり、箱が増えると急に遅くなる
+- Mermaid で済むなら Mermaid、足りない構造なら D2（TALA / ELK / dagre）、D2 に乗らない自由な図なら SVG / HTML。道具の出力を写す図は vlmkit-anim。同じサンプルを Mermaid と D2 の 3 つのエンジンで描いて比べた結果（`samples/compare.mjs`）つき
+- 測って分かったこと：箱の中の向きは、Mermaid だと中の箱が外とつながると無視され、ELK と dagre は常に黙って無視する。守ったのは TALA だけ。TALA は seed で配置がすべて変わり、箱が増えると急に遅くなる
 
 ## 使い方
 
@@ -79,7 +79,7 @@ npm run test:figures   # figure-check の回帰テスト
 | `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
 | `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
 
-スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。
+スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid` も入れます。
 `first-reader` は Python 3 の標準ライブラリだけで動きます。
 
 `first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
@@ -121,7 +121,7 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `skills/explainer/scripts/verify-doc.mjs` | 検証（checks / vlmkit-anim / 引用照合 / vlmkit ゲート） |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → 自己完結 HTML |
 | `skills/explainer/scripts/tlc-to-scene.mjs` | TLC の状態グラフ・反例 → vlmkit-anim の図と事実シート |
-| `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
+| `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
 | `tests/figure-check/` | figure-check の回帰テスト（悪い図がそれぞれの検査で落ちるか） |
 | `personas/` | 読み手のペルソナ |
 | `docs/<topic>/` | 資料：`README.md`, `checks.json`, `examples/`, `figures/` |

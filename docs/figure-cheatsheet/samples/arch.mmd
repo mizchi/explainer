@@ -1,0 +1,28 @@
+%% arch.d2 と同じ構造を Mermaid の flowchart で。サブグラフは入れ子の箱になる
+flowchart TD
+  browser[ブラウザ]
+  mobile[アプリ]
+  subgraph edge[エッジ]
+    cdn[CDN]
+    gw[API Gateway]
+  end
+  subgraph svc[サービス]
+    auth[認証]
+    order[注文]
+    pay[決済]
+  end
+  subgraph data[データ]
+    pg[(Postgres)]
+    redis[(Redis)]
+    mq[[キュー]]
+  end
+  browser --> cdn
+  browser --> gw
+  mobile --> gw
+  gw --> auth
+  gw --> order
+  order --> pay
+  order --> pg
+  auth --> redis
+  pay --> mq
+  pay --> pg

@@ -1,0 +1,2 @@
+{ "labels": ["変更を書く", "テストを回す", "レビュー", "直す", "マージ", "もう一度"],
+  "edges": ["start->test", "test->review", "test->fix", "review->fix", "review->merge", "fix->test"] }

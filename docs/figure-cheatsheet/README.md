@@ -1,34 +1,79 @@
-# どの図を、どの道具で描くか：vlmkit-anim・D2（TALA / ELK / dagre）・SVG・HTML
+# どの図を、どの道具で描くか：Mermaid・D2（TALA / ELK / dagre）・SVG・HTML・vlmkit-anim
 
 <!-- persona: ../../personas/mizchi.md -->
 
-> **想定読者**：図をエージェントに D2 や SVG で書かせていて、どれを使うかをその場の勘で決めている人。
-> D2 の文法の入門は省きます。
+> **想定読者**：図をエージェントに Mermaid・D2・SVG で書かせていて、どれを使うかをその場の勘で決めている人。
+> Mermaid と D2 の文法の入門は省きます。
 > 扱うのは 2 つです。どの問いにどの道具とエンジンを使うか。そして、それぞれで実際に起きた失敗です。
 > 所要 10 分。
-> エンジンの比較は `samples/compare.mjs` の出力です。図はすべて `figure-check.mjs` を通し、出てきたシートを目で見ました。
+> 道具とエンジンの比較は `samples/compare.mjs` の出力です。同じサンプルを Mermaid と D2 の 3 つのエンジンで描きました。図はすべて `figure-check.mjs` を通し、出てきたシートを目で見ました。
 > 本文の出力は `npm run verify:cheatsheet` で再実行して照合しています。
-> D2 は v0.9.0 です（TALA が MPL-2.0 で公開され、同梱された版。[d2lang.com/blog/tala-is-open-source](https://d2lang.com/blog/tala-is-open-source/)）。
+> D2 は v0.9.0 です（TALA が MPL-2.0 で公開され、同梱された版。[d2lang.com/blog/tala-is-open-source](https://d2lang.com/blog/tala-is-open-source/)）。Mermaid は 12.0.0 です。
 
 ---
 
-## 0. 一枚で：上から順に当てる
+## 0. 一枚で：Mermaid → D2 → SVG / HTML の順に当てる
 
 | 順 | 問い | 道具 | 決め手 |
 |---|---|---|---|
-| 1 | 時間の順序や状態遷移が主役で、その事実を道具（TLC、import グラフ）が出せるか | **vlmkit-anim** | 図を事実シートと照合できる（`check --expect`） |
-| 2 | 時間の順序が主役だが、道具の出力は無いか | **D2 `sequence_diagram`** | エンジンに依らない。配置は D2 が自前で行う |
-| 3 | 位置そのものに意味があるか（包含・範囲・平面上の配置） | **SVG を手で書く** | 座標を自分で決められる |
-| 4 | 文字とコードが主で、箱は区切りにすぎないか | **HTML の図** | ページのライト / ダークに従い、スマホで 1 列に落とせる |
-| 5 | 一方向に流れる長い DAG か、戻る辺のある手順か | **D2 + ELK** | 層に積む。入口が先頭に来る。速い |
-| 6 | 箱の入れ子（アーキテクチャ）か。箱ごとに向きを変える、一部の位置を固定する、別の箱の近くに置くか | **D2 + TALA** | 4 つとも TALA しかできない |
+| 1 | Mermaid で書けて、描いて崩れないか（フロー・シーケンス・状態遷移など） | **Mermaid** | GitHub の Markdown（PR 本文・Issue・README）が、そのまま図として描く。ビルドが要らず、読み手も直せる |
+| 2 | Mermaid では足りない構造か（下の 4 つ） | **D2** | 箱と線の図のまま、配置を細かく決められる |
+| 3 | D2 の「箱と線」に乗らない自由な図か | **SVG / HTML** | 位置そのものに意味があるなら SVG。文字とコードが主なら HTML |
+
+Mermaid では足りず、D2 を考えるのは、次のどれかに当たるときです（1 節で測りました）。
+
+- 箱（サブグラフ）の中の向きを変えたいのに、中の箱が外とつながっている。Mermaid は、中の向きを黙って無視しました。
+- 箱の名前の上を線が通る。Mermaid でも D2 の ELK / dagre でも起きました。D2 の TALA なら避けられました。
+- 一部の箱の位置を固定したい。あるいは、ある箱を別の箱の近くに置きたい（D2 の TALA の `top` / `left` と `near`）。
+- 箱が多く、どのエンジンで並べるかを選びたい（2 節）。
+
+D2 にするなら、エンジンは次のように選びます。
+
+| 図 | エンジン | 決め手 |
+|---|---|---|
+| 一方向に流れる長い DAG、戻る辺のある手順、何度も描き直す大きい図 | **ELK** | 層に積む。入口が先頭に来る。速い。1 つ足しても配置があまり動かない |
+| 箱の入れ子（アーキテクチャ）。箱ごとに向きを変える、一部の位置を固定する、別の箱の近くに置く | **TALA** | 後ろの 3 つは TALA しかできない。箱の名前の上に線を通さない |
 
 dagre は、このサンプルでは ELK に勝る場面がありませんでした。
 描ける機能は ELK と同じで、速さも同じくらい、線が箱の名前を通る失敗も同じく起きます。
 
+**別枠：図が道具の出力を写すとき**（TLC の状態グラフ、反例の手順、import グラフ）は、どの順序よりも先に **vlmkit-anim** を使います。
+図を、道具の出力から作った事実シートと照合できるのは vlmkit-anim だけです（`check --expect`）。
+
 ---
 
-## 1. D2 のエンジン：測った結果
+## 1. Mermaid で足りるか：測った結果
+
+D2 のサンプルと同じ構造を Mermaid の flowchart で書き、`figure-check.mjs` に通しました。
+
+<!-- output: compare -->
+```
+mermaid（同じサンプルを Mermaid の flowchart で）
+  arch     check ✗ through（light, mobile） "データ" / tiny（mobile） "サービス" 9.0px, "Postgres" 9.0px, "Redis" 9.0px
+  pipeline check ✗ tiny（mobile） "checkout" 3.0px, "install" 3.0px, "lint" 3.0px
+  loop     check ✓ 0
+  サブグラフ同士を辺でつなぐ：✓ サブグラフの中が縦に並んだ（direction TB が効いた）
+  中の箱同士をサブグラフをまたいでつなぐ：✗ サブグラフの中も横に並んだ（direction TB が無視された）
+```
+
+- **戻る辺のある手順（loop）は、Mermaid で足りました。** 検査の ✗ は 0 です（下の図 0）。こういう図は Mermaid にします。
+- **サブグラフの中の向きは、中の箱が外とつながると無視されます。** 「ビルド」の中の「固める」から「配布」の中の「送る」へ辺を引くと、`direction TB` を書いたサブグラフの中も横一列になりました。エラーは出ません。
+  同じつなぎ方でも、D2 の TALA は中を縦に保ちました（下）。
+- **アーキテクチャ図では、サブグラフの名前「データ」の上を線が通りました。** D2 の ELK / dagre と同じ失敗です。TALA では起きませんでした（2 節の `check`）。
+- 横に長い DAG は、Mermaid でもスマホで 3px になりました。D2 と同じく、縦に流します。
+
+<!-- output: compare -->
+```
+  tala  中の箱同士を箱をまたいでつなぐ（固める -> 送る）と ✓ 中が縦に並んだ
+```
+
+GitHub の Markdown は Mermaid のコードブロックを図として描きます（[GitHub Docs: Creating diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams)）。
+PR の説明に置く図は、Mermaid で足りるなら Mermaid が一番安く済みます。
+このリポジトリの資料では、`figures/<name>.mmd` を `figure-check.mjs --write` が `<name>.svg` にし、Markdown からはその SVG を参照します。
+
+---
+
+## 2. D2 のエンジン：測った結果
 
 `samples/` の 5 つの D2 を、3 つのエンジンで描いて比べました。
 
@@ -75,7 +120,7 @@ check（figure-check の ✗）
 
 - **TALA は、direction を書かないと入口が上に来ないことがある。** アーキテクチャ図で、データ層が一番上、ブラウザが一番下になりました。流れを上から読ませたいときは `direction: down` を書きます。
 - **ELK と dagre は、箱の名前（エッジ・サービス・データ）の上に線を通す。** 箱をまたぐ線が、上端の中央にある名前を横切ります。TALA では起きませんでした。
-- **横に長い DAG は、エンジンによらずスマホで読めない。** 16 本の辺の CI パイプラインを `direction: right` で描くと、375px 幅では文字が 4〜5px になりました。縦に流せば通ります（下の図 2）。
+- **横に長い DAG は、エンジンによらずスマホで読めない。** 16 本の辺の CI パイプラインを `direction: right` で描くと、375px 幅では文字が 4〜5px になりました。縦に流せば通ります（3 節の図 2）。
 
 ### 足したときの動きと、seed
 
@@ -114,7 +159,20 @@ time（描画時間の倍率。箱 10 個のときを 1 とする）
 
 ---
 
-## 2. サンプル
+## 3. サンプル
+
+### 図 0：戻る辺のある手順（Mermaid で済む）
+
+![Mermaid で描いた手順。変更を書き、テストを回し、通ればレビュー、落ちれば直してもう一度。レビューで承認されればマージ](figures/loop.svg)
+
+<!-- source: figures/loop.mmd -->
+```mermaid
+flowchart TD
+  start[変更を書く] --> test[テストを回す]
+  test -->|通る| review[レビュー]
+```
+
+箱の入れ子も配置の指定も要らない図なので、Mermaid で足ります。
 
 ### 図 1：アーキテクチャ（TALA）
 
@@ -150,7 +208,7 @@ ELK は、分岐を同じ層に揃え、合流を 1 か所（gate）に集めま
 
 ![外は横、中は縦。ビルドの箱の中は取得・コンパイル・固めるが縦に並び、配布の箱へ横に進む](figures/nested-dir.svg)
 
-同じファイルを ELK で描くと、箱の中も横一列になります（1 節の `nested`）。
+同じファイルを ELK で描くと、箱の中も横一列になります（2 節の `nested`）。
 
 ### 図 4：時間の順序（sequence_diagram）
 
@@ -161,10 +219,11 @@ TLC の反例のように、道具が順序を出せるなら vlmkit-anim の `s
 
 ---
 
-## 3. 形式ごとに、最初に確かめること
+## 4. 形式ごとに、最初に確かめること
 
 | 道具 | 最初に確かめること | 確かめ方 |
 |---|---|---|
+| Mermaid | サブグラフの中の向きが効いているか。サブグラフの名前を線が通っていないか | 図を見る。`figure-check.mjs` の `through` |
 | vlmkit-anim | 図が道具の出力と一致するか | `vlmkit-anim check --expect`（事実シートは道具から作る） |
 | D2 + TALA | 入口が上か。線の分かれ目が別の矢印に見えないか | `direction` を書く。seed を並べて見る |
 | D2 + ELK / dagre | 箱の名前を線が通っていないか。箱ごとの direction を書いていないか | `figure-check.mjs` の `through`。direction は図を見る |
@@ -184,7 +243,7 @@ TLC の反例のように、道具が順序を出せるなら vlmkit-anim の `s
 
 ELK と dagre は、箱ごとの `direction` を黙って無視し、外の向きで並べます。
 箱ごとに向きを変えられるのは TALA だけです。
-TALA に切り替えるか、ELK のまま箱の中に `grid-columns: 1` を書きます（1 節の `nested`。ELK でも縦に並びました）。
+TALA に切り替えるか、ELK のまま箱の中に `grid-columns: 1` を書きます（2 節の `nested`。ELK でも縦に並びました）。
 
 </details>
 
@@ -206,5 +265,20 @@ seed を変えて、配置を選び直します（`d2 --layout=tala --tala-seeds
 選んだ seed はファイルに `# d2-flags: --tala-seeds=N` と書き、描き直しても同じ図にします。
 v0.9.0 は、ファイルの `vars` に seed を書けません。
 機械の検査は、線がどの矢印に見えるかを判定しません。このずれは、シートを目で見て見つけるしかありません。
+
+</details>
+
+4. PR の説明に、レビューの手順（書く → テスト → レビュー → 直す → もう一度）の図を置きたい。どの道具にするか。同じ PR で、サービスの箱の中を縦に並べ、その中の箱を別の箱の中とつなぐアーキテクチャ図も置きたい。そちらはどうするか。
+
+<details><summary>答え</summary>
+
+手順の図は Mermaid です。
+戻る辺のある手順は Mermaid で崩れず（1 節の loop は ✗ 0）、GitHub の Markdown がそのまま描きます。
+
+アーキテクチャ図は D2 の TALA です。
+Mermaid は、サブグラフの中の箱が外とつながると、中の `direction` を黙って無視します。
+D2 の ELK / dagre は、箱ごとの direction をそもそも無視します。
+同じつなぎ方で中の向きを保てたのは TALA だけでした。
+PR には、D2 から作った SVG を添付します。
 
 </details>

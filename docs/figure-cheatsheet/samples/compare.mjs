@@ -10,6 +10,7 @@
 //   nested    箱ごとの direction: down が守られたか（中の箱が縦に並んだか）
 //   stable    arch.d2 に 1 行足したとき、元からある箱がどれだけ動いたか（図の対角線に対する割合）
 //   seeds     TALA は同じ入力・同じ seed で同じ図になるか。seed を変えると変わるか
+//   mermaid   同じサンプルを Mermaid で描いたときの figure-check の ✗ と、サブグラフの direction
 //   time      箱の数を増やしたときの描画時間（中央値 3 回）。時間は環境で変わるので、倍率だけ見る
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
@@ -35,6 +36,19 @@ const render = (file, engine, extra = []) => {
   return { svg: readFileSync(out, 'utf8'), ms };
 };
 const sample = (name) => join(here, `${name}.d2`);
+
+// figure-check の ✗ を種類ごとにまとめる。事実シートが無いことは、比べる対象ではないので数えない
+function tally(stdout) {
+  const kinds = {};
+  const KIND = [[/text overlap/, 'overlap'], [/outside the figure/, 'clipped'], [/cross a box edge/, 'crossing'], [/line runs through/, 'through'], [/under 9px/, 'tiny'], [/^vlmkit/, 'vlmkit'], [/^mermaid/, 'mermaid']];
+  for (const m of stdout.matchAll(/^ {2}✗ (?:(light|dark|mobile): )?(.*)$/gm)) {
+    const k = KIND.find(([re]) => re.test(m[2]))?.[1];
+    if (!k) continue;
+    (kinds[k] ??= { views: [], what: m[2].match(/: (".*)$/)?.[1] ?? '' }).views.push(m[1] ?? '-');
+  }
+  const s = Object.entries(kinds).map(([k, v]) => `${k}（${v.views.join(', ')}）${v.what ? ` ${v.what}` : ''}`).join(' / ');
+  return s ? `✗ ${s}` : '✓ 0';
+}
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -77,6 +91,15 @@ for (const e of ENGINES) {
   const vertical = col.every((p) => Math.abs(p.x - col[0].x) < 5) && col[0].y < col[1].y && col[1].y < col[2].y;
   console.log(`  ${e.padEnd(5)} ${vertical ? '✓ 中が縦に並んだ' : '✗ 中も横に並んだ（外の direction: right に従った）'}`);
 }
+// 箱の中の箱同士を、箱をまたいでつないでも守られるか（Mermaid はここで崩れる。下の mermaid 節）
+const crossFile = join(tmp, 'nested-cross.d2');
+writeFileSync(crossFile, readFileSync(sample('nested-dir'), 'utf8').replace('build -> deploy', 'build.pack -> deploy.push'));
+{
+  const b = await boxes(render(crossFile, 'tala').svg);
+  const col = ['build.fetch', 'build.compile', 'build.pack'].map((k) => b[k]);
+  const vertical = col.every((p) => Math.abs(p.x - col[0].x) < 5) && col[0].y < col[1].y && col[1].y < col[2].y;
+  console.log(`  tala  中の箱同士を箱をまたいでつなぐ（固める -> 送る）と ${vertical ? '✓ 中が縦に並んだ' : '✗ 中も横に並んだ'}`);
+}
 // 代わりの手：箱の中を grid-columns: 1 にする（辺はそのまま引かれる）
 const gridFile = join(tmp, 'nested-grid.d2');
 writeFileSync(gridFile, readFileSync(sample('nested-dir'), 'utf8').replaceAll('direction: down', 'grid-columns: 1'));
@@ -109,17 +132,32 @@ for (const name of ['arch', 'pipeline', 'loop']) {
     writeFileSync(f, `vars: {d2-config: {layout-engine: ${e}}}\n${readFileSync(sample(name), 'utf8')}`);
     spawnSync(d2, ['fmt', f]);
     const r = spawnSync('node', [figureCheck, f, '--write', '--out', join(tmp, `${name}-${e}`)], { encoding: 'utf8', cwd: repo, env: { ...process.env, NO_COLOR: '1' } });
-    const kinds = {};
-    const KIND = [[/text overlap/, 'overlap'], [/outside the figure/, 'clipped'], [/cross a box edge/, 'crossing'], [/line runs through/, 'through'], [/under 9px/, 'tiny'], [/^vlmkit/, 'vlmkit']];
-    for (const m of r.stdout.matchAll(/^ {2}✗ (?:(light|dark|mobile): )?(.*)$/gm)) {
-      const k = KIND.find(([re]) => re.test(m[2]))?.[1];
-      if (!k) continue; // 事実シートが無いことは、比べる対象ではない
-      (kinds[k] ??= { views: [], what: m[2].match(/: (".*)$/)?.[1] ?? '' }).views.push(m[1] ?? '-');
-    }
-    const s = Object.entries(kinds).map(([k, v]) => `${k}（${v.views.join(', ')}）${v.what ? ` ${v.what}` : ''}`).join(' / ');
-    console.log(`  ${name.padEnd(8)} ${e.padEnd(5)} ${s ? `✗ ${s}` : '✓ 0'}`);
+    console.log(`  ${name.padEnd(8)} ${e.padEnd(5)} ${tally(r.stdout)}`);
     copyFileSync(join(tmp, `${name}-${e}`, `${name}-${e}.sheet.png`), join(tmp, `${name}-${e}.sheet.png`));
   }
+}
+
+// ---- mermaid ----
+// 同じサンプルを Mermaid の flowchart で描き、figure-check に通す。中の並びは、描いた SVG の箱の位置で見る
+console.log('\nmermaid（同じサンプルを Mermaid の flowchart で）');
+const mermaidJs = join(dirname(createRequire(join(repo, 'package.json')).resolve('mermaid/package.json')), 'dist/mermaid.min.js');
+for (const name of ['arch', 'pipeline', 'loop']) {
+  const f = join(tmp, `${name}-mermaid.mmd`);
+  copyFileSync(join(here, `${name}.mmd`), f);
+  const r = spawnSync('node', [figureCheck, f, '--write', '--out', join(tmp, `${name}-mermaid`)], { encoding: 'utf8', cwd: repo, env: { ...process.env, NO_COLOR: '1' } });
+  console.log(`  ${name.padEnd(8)} check ${tally(r.stdout)}`);
+}
+for (const [name, what] of [['nested-dir', 'サブグラフ同士を辺でつなぐ'], ['nested-dir-cross', '中の箱同士をサブグラフをまたいでつなぐ']]) {
+  await page.setContent('<body></body>');
+  await page.addScriptTag({ path: mermaidJs });
+  const pos = await page.evaluate(async (src) => {
+    mermaid.initialize({ startOnLoad: false, htmlLabels: false, flowchart: { htmlLabels: false }, deterministicIds: true });
+    document.body.innerHTML = (await mermaid.render('fig', src)).svg;
+    const at = (id) => { const r = document.querySelector(`g.node[id*="-${id}-"]`).getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; };
+    return ['fetch', 'compile', 'pack'].map(at);
+  }, readFileSync(join(here, `${name}.mmd`), 'utf8'));
+  const vertical = pos.every((p) => Math.abs(p.x - pos[0].x) < 5) && pos[0].y < pos[1].y && pos[1].y < pos[2].y;
+  console.log(`  ${what}：${vertical ? '✓ サブグラフの中が縦に並んだ（direction TB が効いた）' : '✗ サブグラフの中も横に並んだ（direction TB が無視された）'}`);
 }
 
 // ---- stable ----

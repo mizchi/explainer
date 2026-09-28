@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // 手で書いた概念図（SVG / HTML / D2）を描画し、機械で検査し、目で見るための画像を作る。
 //
-//   node figure-check.mjs <fig.svg | fig.fig.html | fig.d2> [--facts f.facts.json] [--write] [--out dir]
+//   node figure-check.mjs <fig.svg | fig.fig.html | fig.d2 | fig.mmd> [--facts f.facts.json] [--write] [--out dir]
 //
 // 1. D2 は d2 で SVG にする（既定は TALA。ファイルの vars.d2-config.layout-engine があればそれ）。
 //    ほかのフラグは、ファイルの `# d2-flags: --tala-seeds=5` の行から渡す。
+//    Mermaid（.mmd）は、プロジェクトの mermaid をブラウザで動かして SVG にする。--write のとき <name>.svg を隣に書く
 //    --write のとき <name>.svg として隣に書く
 // 2. ブラウザで描画し、3 つの見え方を 1 枚にまとめた <out>/<name>.sheet.png を作る
 //      ライト 760px ・ ダーク 760px ・ スマホ 375px
@@ -15,7 +16,7 @@
 //      crossing  文字が箱の枠線をまたいでいる（SVG の rect、HTML の枠線）
 //      through   線（矢印・接続線）が文字の中を通っている
 //      tiny      スマホ幅で文字の高さが 9px 未満になる
-//      facts     事実シートの labels がすべて図にあり、forbidden が図に無い。D2 なら edges が D2 の中にある
+//      facts     事実シートの labels がすべて図にあり、forbidden が図に無い。D2 / Mermaid なら edges がソースの中にある
 //      vlmkit    図だけのページに check integrity と check a11y contrast を通す
 //    HTML の図は --write のとき、Markdown から参照するための <name>.fig.png も書く
 //
@@ -31,11 +32,11 @@ const { values: opt, positionals } = parseArgs({
   options: { facts: { type: 'string' }, write: { type: 'boolean', default: false }, out: { type: 'string' } },
 });
 const src = resolve(positionals[0] ?? '');
-if (!existsSync(src)) { console.error('usage: figure-check.mjs <fig.svg|fig.fig.html|fig.d2> [--facts f.json] [--write]'); process.exit(2); }
+if (!existsSync(src)) { console.error('usage: figure-check.mjs <fig.svg|fig.fig.html|fig.d2|fig.mmd> [--facts f.json] [--write]'); process.exit(2); }
 
 const dir = dirname(src);
 const kind = src.endsWith('.fig.html') ? 'html' : extname(src).slice(1);
-const name = basename(src).replace(/\.fig\.html$|\.svg$|\.d2$/, '');
+const name = basename(src).replace(/\.fig\.html$|\.svg$|\.d2$|\.mmd$/, '');
 const out = resolve(opt.out ?? join(dir, '.figure-check', name));
 mkdirSync(out, { recursive: true });
 const root = findUp(dir, 'package.json') ?? process.cwd();
@@ -45,6 +46,20 @@ const { chromium } = projectRequire('playwright');
 let failures = 0;
 const ok = (m) => console.log(`  ✓ ${m}`);
 const ng = (m, fix) => { failures++; console.log(`  ✗ ${m}${fix ? `\n    → ${fix}` : ''}`); };
+// Mermaid の flowchart の辺を「a->b」の形で取り出す。a[ラベル] --> b --> c は 2 本。|ラベル| と -- ラベル --> は読み飛ばす
+function mermaidEdges(source) {
+  const edges = [];
+  const arrow = /\s*(?:<?-->|<?==>|<?-\.->|---|===|-\.-)(?:\|[^|]*\|)?\s*/;
+  for (const raw of source.split('\n')) {
+    const line = raw.replace(/%%.*$/, '').replace(/--\s[^->]+?\s-->/g, '-->').trim();
+    const parts = line.split(arrow);
+    if (parts.length < 2) continue;
+    const ids = parts.map((x) => x.match(/^([\w-]+)/)?.[1]);
+    if (ids.some((x) => !x)) continue;
+    for (let i = 0; i + 1 < ids.length; i++) edges.push(`${ids[i]}->${ids[i + 1]}`);
+  }
+  return edges;
+}
 // D2 の辺を「a.b->c」の形で取り出す。箱の { } の中の辺は箱の名前を前に付け、a -> b -> c は 2 本に分ける
 function d2Edges(source) {
   const scope = [], edges = [];
@@ -71,7 +86,7 @@ const sh = (cmd, args) => spawnSync(cmd, args, { encoding: 'utf8' });
 console.log(`figure ${basename(src)} (${kind})`);
 
 // ---- 1. 図の本体（HTML の断片）を作る ----------------------------------------------
-let figureHtml, d2Source = null;
+let figureHtml, d2Source = null, mmdSource = null;
 if (kind === 'd2') {
   const d2 = [join(root, '.tools/d2'), 'd2'].find((p) => sh(p, ['--version']).status === 0);
   if (!d2) { ng('d2 is not installed', 'put the d2 binary at .tools/d2 or on PATH'); process.exit(1); }
@@ -95,6 +110,29 @@ if (kind === 'd2') {
     ng(`${name}.svg is stale or missing`, 're-run with --write after editing the .d2');
   else ok(`${name}.svg matches the .d2`);
   figureHtml = svg.replace(/<\?xml[^>]*>/, '');
+} else if (kind === 'mmd') {
+  let mermaidJs;
+  try { mermaidJs = join(dirname(projectRequire.resolve('mermaid/package.json')), 'dist/mermaid.min.js'); }
+  catch { ng('mermaid is not installed in this project', 'npm i -D mermaid'); process.exit(1); }
+  mmdSource = readFileSync(src, 'utf8');
+  const b = await chromium.launch();
+  const p = await b.newPage();
+  await p.setContent('<body></body>');
+  await p.addScriptTag({ path: mermaidJs });
+  // 文字は SVG の <text> で描かせる（foreignObject の HTML だと、ここの文字の検査が届かない）。id は固定し、毎回同じ SVG にする
+  // id は図の名前から作る。1 ページに複数の Mermaid の図を置いても、SVG の中の CSS（#id …）がぶつからない
+  const r = await p.evaluate(async ([s, id]) => {
+    mermaid.initialize({ startOnLoad: false, htmlLabels: false, flowchart: { htmlLabels: false }, deterministicIds: true });
+    try { return { svg: (await mermaid.render(id, s)).svg }; } catch (e) { return { error: String(e.message ?? e).split('\n')[0] }; }
+  }, [mmdSource, `mmd-${name.replace(/[^\w-]/g, '-')}`]);
+  await b.close();
+  if (r.error) { ng(`mermaid: ${r.error}`); process.exit(1); }
+  ok('mermaid: rendered');
+  if (opt.write) { writeFileSync(join(dir, `${name}.svg`), r.svg); ok(`wrote ${name}.svg`); }
+  else if (!existsSync(join(dir, `${name}.svg`)) || readFileSync(join(dir, `${name}.svg`), 'utf8') !== r.svg)
+    ng(`${name}.svg is stale or missing`, 're-run with --write after editing the .mmd');
+  else ok(`${name}.svg matches the .mmd`);
+  figureHtml = r.svg;
 } else if (kind === 'svg') {
   figureHtml = readFileSync(src, 'utf8').replace(/<\?xml[^>]*>/, '');
 } else if (kind === 'html') {
@@ -147,7 +185,8 @@ for (const v of variants) {
         const rs = [...range.getClientRects()];
         if (rs.length) r = rs.reduce((a, b) => ({ left: Math.min(a.left, b.left), top: Math.min(a.top, b.top), right: Math.max(a.right, b.right), bottom: Math.max(a.bottom, b.bottom) }));
       }
-      return { el, text: el.textContent.trim().replace(/\s+/g, ' ').slice(0, 40), left: r.left, top: r.top, right: r.right, bottom: r.bottom, h: (r.bottom - r.top) };
+      // Mermaid の辺のラベル（.edgeLabel）は、背景の箱ごと線の上に置く作りなので、線が通っても隠れる
+      return { el, onLine: !!el.closest('.edgeLabel'), text: el.textContent.trim().replace(/\s+/g, ' ').slice(0, 40), left: r.left, top: r.top, right: r.right, bottom: r.bottom, h: (r.bottom - r.top) };
     }).filter((b) => b.text && b.right > b.left);
     // 入れ子（親と子、text と tspan）は重なりとして数えない：祖先の番号を持たせる
     boxes.forEach((b, i) => { b.i = i; });
@@ -247,7 +286,7 @@ for (const key of ['light', 'mobile']) {
 for (const key of ['light', 'mobile']) {
   const { boxes, strokes } = geometry[key];
   const hit = [];
-  for (const b of boxes)
+  for (const b of boxes.filter((x) => !x.onLine))
     for (const st of strokes)
       if (st.pts.some((p) => p.x > b.left + 1 && p.x < b.right - 1 && p.y > b.top + 1 && p.y < b.bottom - 1)) hit.push(`"${b.text}"`);
   const uniq = [...new Set(hit)];
@@ -266,14 +305,14 @@ if (existsSync(factsPath)) {
   const present = (facts.forbidden ?? []).filter((l) => text.includes(norm(l)));
   present.length ? ng(`facts: forbidden label(s) drawn: ${present.map((l) => `"${l}"`).join(', ')}`) : ok(`facts: ${facts.forbidden?.length ?? 0} forbidden label(s) absent`);
   if (facts.edges) {
-    if (!d2Source) ng('facts: "edges" can only be checked for a .d2 figure');
+    if (!d2Source && !mmdSource) ng('facts: "edges" can only be checked for a .d2 or .mmd figure');
     else {
-      const drawn = new Set(d2Edges(d2Source));
+      const drawn = new Set(d2Source ? d2Edges(d2Source) : mermaidEdges(mmdSource));
       const lack = facts.edges.filter((e) => !drawn.has(e));
       const extra = [...drawn].filter((e) => !facts.edges.includes(e));
       lack.length || extra.length
         ? ng(`facts: edges differ (missing: ${lack.join(', ') || '-'}; not in facts: ${extra.join(', ') || '-'})`)
-        : ok(`facts: ${facts.edges.length} edge(s) exactly as in the D2`);
+        : ok(`facts: ${facts.edges.length} edge(s) exactly as in the ${d2Source ? 'D2' : 'Mermaid'}`);
     }
   }
 } else ng(`no fact sheet (${basename(factsPath)})`, 'list the labels the figure must show; a figure checked only against itself proves nothing');

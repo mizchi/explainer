@@ -12,6 +12,8 @@ const cases = [
   ['clipped.svg', /outside the figure/],
   ['nested-edges.d2', null],
   ['wrong-edges.d2', /edges differ/],
+  ['mermaid-good.mmd', null],
+  ['mermaid-edges.mmd', /edges differ/],
 ];
 let bad = 0;
 for (const [file, want] of cases) {

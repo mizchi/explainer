@@ -9,6 +9,13 @@
       ]
     },
     {
+      "name": "mermaid-version",
+      "cmd": "node -p \"require('mermaid/package.json').version\"",
+      "expect": [
+        "12.0.0"
+      ]
+    },
+    {
       "name": "compare",
       "cmd": "node samples/compare.mjs",
       "expect": [
@@ -26,6 +33,7 @@
         "  tala  ✓ 中が縦に並んだ",
         "  elk   ✗ 中も横に並んだ（外の direction: right に従った）",
         "  dagre ✗ 中も横に並んだ（外の direction: right に従った）",
+        "  tala  中の箱同士を箱をまたいでつなぐ（固める -> 送る）と ✓ 中が縦に並んだ",
         "  elk   grid-columns: 1 に替えると ✓ 中が縦に並んだ",
         "  dagre grid-columns: 1 に替えると ✓ 中が縦に並んだ",
         "entry（入口が流れの先頭に来たか）",
@@ -48,6 +56,12 @@
         "  loop     tala  ✓ 0",
         "  loop     elk   ✓ 0",
         "  loop     dagre ✓ 0",
+        "mermaid（同じサンプルを Mermaid の flowchart で）",
+        "  arch     check ✗ through（light, mobile） \"データ\" / tiny（mobile） \"サービス\" 9.0px, \"Postgres\" 9.0px, \"Redis\" 9.0px",
+        "  pipeline check ✗ tiny（mobile） \"checkout\" 3.0px, \"install\" 3.0px, \"lint\" 3.0px",
+        "  loop     check ✓ 0",
+        "  サブグラフ同士を辺でつなぐ：✓ サブグラフの中が縦に並んだ（direction TB が効いた）",
+        "  中の箱同士をサブグラフをまたいでつなぐ：✗ サブグラフの中も横に並んだ（direction TB が無視された）",
         "stable（arch に 1 つ足したとき、元の箱が動いた距離 / 図の対角線）",
         "  tala  箱を 1 つ（通知） 少し動く / 外に箱を 1 つ（管理画面） 大きく動く / 線を 1 本 少し動く",
         "  elk   箱を 1 つ（通知） 少し動く / 外に箱を 1 つ（管理画面） 少し動く / 線を 1 本 ほぼ動かない",
