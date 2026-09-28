@@ -6,7 +6,6 @@
 // 1. D2 は d2 で SVG にする（既定は TALA。ファイルの vars.d2-config.layout-engine があればそれ）。
 //    ほかのフラグは、ファイルの `# d2-flags: --tala-seeds=5` の行から渡す。
 //    Mermaid（.mmd）は、プロジェクトの mermaid をブラウザで動かして SVG にする。--write のとき <name>.svg を隣に書く
-//    --write のとき <name>.svg として隣に書く
 // 2. ブラウザで描画し、3 つの見え方を 1 枚にまとめた <out>/<name>.sheet.png を作る
 //      ライト 760px ・ ダーク 760px ・ スマホ 375px
 //    → このシートを Read で開き、目で確かめる（文字の重なり・線が文字を横切る・意味の取り違えは、機械では拾いきれない）
@@ -18,6 +17,10 @@
 //      tiny      スマホ幅で文字の高さが 9px 未満になる
 //      facts     事実シートの labels がすべて図にあり、forbidden が図に無い。D2 / Mermaid なら edges がソースの中にある
 //      vlmkit    図だけのページに check integrity と check a11y contrast を通す
+//      arrows    D2 / Mermaid（と data-edge を付けた SVG）の矢印の読みやすさ（figure-arrows.mjs）
+//                  ✗ shared   2 本の辺が長く重なって走る   ✗ through  辺が端点でない箱の中を通る
+//                  △ cross    交差   △ detour  遠回り   △ against  流れと逆向き（△ は落とさないが、辺のシートで目で見る）
+//                辺を 1 本ずつ赤くした <out>/<name>.edges.png も作る。これも Read で開いて、各矢印が「どこからどこへ」と読めるか確かめる
 //    HTML の図は --write のとき、Markdown から参照するための <name>.fig.png も書く
 //
 // 事実シート <name>.facts.json：{ "labels": ["…"], "forbidden": ["…"], "edges": ["a->b"] }
@@ -26,10 +29,11 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
+import { arrowScore, collectArrows, edgeSheet, flowDirection, judgeArrows } from './figure-arrows.mjs';
 
 const { values: opt, positionals } = parseArgs({
   allowPositionals: true,
-  options: { facts: { type: 'string' }, write: { type: 'boolean', default: false }, out: { type: 'string' } },
+  options: { facts: { type: 'string' }, write: { type: 'boolean', default: false }, out: { type: 'string' }, json: { type: 'string' } },
 });
 const src = resolve(positionals[0] ?? '');
 if (!existsSync(src)) { console.error('usage: figure-check.mjs <fig.svg|fig.fig.html|fig.d2|fig.mmd> [--facts f.json] [--write]'); process.exit(2); }
@@ -39,13 +43,16 @@ const kind = src.endsWith('.fig.html') ? 'html' : extname(src).slice(1);
 const name = basename(src).replace(/\.fig\.html$|\.svg$|\.d2$|\.mmd$/, '');
 const out = resolve(opt.out ?? join(dir, '.figure-check', name));
 mkdirSync(out, { recursive: true });
-const root = findUp(dir, 'package.json') ?? process.cwd();
+// 道具（.tools/d2、node_modules）は、図の近くか、実行したディレクトリの近くの package.json から探す
+const root = findUp(dir, 'package.json') ?? findUp(process.cwd(), 'package.json') ?? process.cwd();
 const projectRequire = createRequire(join(root, 'package.json'));
 const { chromium } = projectRequire('playwright');
 
 let failures = 0;
 const ok = (m) => console.log(`  ✓ ${m}`);
-const ng = (m, fix) => { failures++; console.log(`  ✗ ${m}${fix ? `\n    → ${fix}` : ''}`); };
+const summary = { fail: [], look: [], arrowScore: null, sheet: null, edges: null };
+const ng = (m, fix) => { failures++; summary.fail.push(m); console.log(`  ✗ ${m}${fix ? `\n    → ${fix}` : ''}`); };
+const look = (m) => { summary.look.push(m); console.log(`  △ ${m}`); };
 // Mermaid の flowchart の辺を「a->b」の形で取り出す。a[ラベル] --> b --> c は 2 本。|ラベル| と -- ラベル --> は読み飛ばす
 function mermaidEdges(source) {
   const edges = [];
@@ -160,6 +167,7 @@ const variants = [
 ];
 const shots = {};
 const geometry = {};
+let arrows = null, arrowResult = null, edgesPng = null;
 for (const v of variants) {
   const p = await browser.newPage({ viewport: { width: v.width, height: 900 }, colorScheme: v.scheme, deviceScaleFactor: 2 });
   await p.setContent(page(v.scheme), { waitUntil: 'networkidle' });
@@ -167,6 +175,16 @@ for (const v of variants) {
   const png = join(out, `${name}.${v.key}.png`);
   await fig.screenshot({ path: png });
   shots[v.key] = png;
+  // 矢印：ライトの見え方で 1 回だけ測り、1 本ずつ強調した画像も撮る
+  if (v.key === 'light' && ['d2', 'mmd', 'svg'].includes(kind)) {
+    arrows = await p.evaluate(collectArrows);
+    if (arrows.edges.length) {
+      arrowResult = judgeArrows(arrows, flowDirection(d2Source ?? mmdSource ?? '', kind));
+      const flagged = [...new Set([...arrowResult.fail, ...arrowResult.look.filter((x) => x.kind !== 'cross')].flatMap((x) => x.edges))];
+      edgesPng = join(out, `${name}.edges.png`);
+      await edgeSheet(p, browser, arrows, flagged, edgesPng);
+    }
+  }
   // 文字の箱：SVG なら text 要素、HTML なら直下に文字を持つ要素
   geometry[v.key] = await p.evaluate(() => {
     const figure = document.querySelector('#figure');
@@ -292,6 +310,13 @@ for (const key of ['light', 'mobile']) {
   const uniq = [...new Set(hit)];
   uniq.length ? ng(`${key}: a line runs through ${uniq.length} label(s): ${uniq.slice(0, 3).join(', ')}`, 'route the line around the label, or move the label') : ok(`${key}: no line runs through a label (${strokes.length} lines)`);
 }
+// 矢印の読みやすさ
+if (arrowResult) {
+  for (const x of arrowResult.fail) ng(`arrows: ${x.msg}`, x.kind === 'shared' ? 'D2 なら seed やエンジンを変える（figure-variants.mjs で並べて選ぶ）。箱の並びを変えるか、辺を 1 本にまとめる' : '箱の並びを変える。D2 なら seed やエンジンを変える（figure-variants.mjs）');
+  for (const x of arrowResult.look) look(`arrows: ${x.msg}`);
+  if (!arrowResult.fail.length) ok(`arrows: ${arrows.edges.length} edge(s), none share a trunk or pass through a box`);
+  summary.arrowScore = arrowScore(arrowResult);
+} else if (['d2', 'mmd'].includes(kind)) ng('arrows: no edges found in the rendered SVG', 'the D2 / Mermaid output format may have changed; figure-arrows.mjs cannot see the arrows');
 const tiny = geometry.mobile.boxes.filter((b) => b.h < 9);
 tiny.length ? ng(`mobile: ${tiny.length} label(s) render under 9px tall: ${tiny.slice(0, 3).map((b) => `"${b.text}" ${b.h.toFixed(1)}px`).join(', ')}`, 'the figure is too wide for its text; fewer columns, larger font, or a taller layout') : ok('mobile: every label is at least 9px tall');
 
@@ -331,5 +356,8 @@ if (existsSync(vlmkit)) {
 } else console.log('  - vlmkit not installed; skipped');
 
 console.log(`\n  look at it: ${sheetPng}`);
+if (edgesPng) console.log(`  look at the arrows: ${edgesPng}（赤い線が 1 本ずつ、どこからどこへ読めるか）`);
+summary.sheet = sheetPng; summary.edges = edgesPng; summary.light = shots.light;
+if (opt.json) writeFileSync(opt.json, JSON.stringify(summary, null, 2));
 console.log(failures === 0 ? 'figure verdict: CLEAN (now look at the sheet)' : `figure verdict: ${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

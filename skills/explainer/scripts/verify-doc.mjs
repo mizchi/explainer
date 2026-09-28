@@ -111,7 +111,8 @@ if (handMade.length) console.log('figures (hand-made: figure-check)');
 for (const f of handMade) {
   const r = sh(`node ${join(here, 'figure-check.mjs')} ${join(figDir, f)}${opt.write ? ' --write' : ''}`);
   const fails = r.out.split('\n').filter((l) => l.trim().startsWith('✗'));
-  r.code === 0 ? ok(`${f}: CLEAN (sheet: figures/.figure-check/${f.replace(/\.fig\.html$|\.svg$|\.d2$|\.mmd$/, '')}/)`) : ng(`${f}: ${fails.length} problem(s): ${fails.map((l) => l.trim().slice(2)).slice(0, 2).join(' / ')}`, `node ${join(here, 'figure-check.mjs')} ${join(figDir, f)} — then look at the sheet`);
+  const looks = r.out.split('\n').filter((l) => l.trim().startsWith('△')).length;
+  r.code === 0 ? ok(`${f}: CLEAN${looks ? `, △ ${looks}（辺のシートで目で見る）` : ''} (sheet: figures/.figure-check/${f.replace(/\.fig\.html$|\.svg$|\.d2$|\.mmd$/, '')}/)`) : ng(`${f}: ${fails.length} problem(s): ${fails.map((l) => l.trim().slice(2)).slice(0, 2).join(' / ')}`, `node ${join(here, 'figure-check.mjs')} ${join(figDir, f)} — then look at the sheet`);
 }
 
 // ---- 3. prose ----------------------------------------------------------------

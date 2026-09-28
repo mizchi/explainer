@@ -58,6 +58,7 @@ npm run verify:book    # docs/inductive-invariant-book を検証 → book verdic
 npm run build:book     # docs/inductive-invariant-book/dist/*.html を生成
 npm run verify:cheatsheet   # docs/figure-cheatsheet を検証（エンジンの比較を再実行する。2 分ほど）
 npm run figure -- docs/formal-methods/figures/coverage.svg   # 図 1 枚を描画・検査。出てきたシートを目で見る
+npm run figure:variants -- docs/figure-cheatsheet/figures/arch.d2   # D2 / Mermaid の配置の候補を点数つきで並べる。見比べて選ぶ
 npm run test:figures   # figure-check の回帰テスト
 ```
 
@@ -122,6 +123,8 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `skills/explainer/scripts/build-html.mjs` | Markdown → 自己完結 HTML |
 | `skills/explainer/scripts/tlc-to-scene.mjs` | TLC の状態グラフ・反例 → vlmkit-anim の図と事実シート |
 | `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
+| `skills/explainer/scripts/figure-arrows.mjs` | 矢印の読みやすさの検査と、辺を 1 本ずつ強調したシート（figure-check が使う） |
+| `skills/explainer/scripts/figure-variants.mjs` | D2 / Mermaid の配置の候補（TALA の seed・ELK・dagre、向き）を描き、点数つきで並べる |
 | `tests/figure-check/` | figure-check の回帰テスト（悪い図がそれぞれの検査で落ちるか） |
 | `personas/` | 読み手のペルソナ |
 | `docs/<topic>/` | 資料：`README.md`, `checks.json`, `examples/`, `figures/` |

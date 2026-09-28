@@ -16,7 +16,8 @@
     "build:cheatsheet": "node skills/explainer/scripts/build-html.mjs docs/figure-cheatsheet/README.md",
     "setup:d2": "sh scripts/setup-d2.sh",
     "test:figures": "node tests/figure-check/run.mjs",
-    "figure": "node skills/explainer/scripts/figure-check.mjs"
+    "figure": "node skills/explainer/scripts/figure-check.mjs",
+    "figure:variants": "node skills/explainer/scripts/figure-variants.mjs"
   },
   "devDependencies": {
     "@informalsystems/quint": "^0.32.0",

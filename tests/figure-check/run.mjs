@@ -14,6 +14,8 @@ const cases = [
   ['wrong-edges.d2', /edges differ/],
   ['mermaid-good.mmd', null],
   ['mermaid-edges.mmd', /edges differ/],
+  ['arrows-shared.d2', /重なって走る/],
+  ['arrows-through.svg', /の中を通る/],
 ];
 let bad = 0;
 for (const [file, want] of cases) {

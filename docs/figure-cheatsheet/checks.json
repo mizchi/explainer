@@ -77,6 +77,23 @@
         "  dagre ほぼ伸びない（40 個で 3 倍未満）",
         "  箱 40 個で TALA は ELK の 10 倍以上"
       ]
+    },
+    {
+      "name": "arrows-shared",
+      "cmd": "node ../../skills/explainer/scripts/figure-check.mjs ../../tests/figure-check/fixtures/arrows-shared.d2 --out $TMP/arrows-shared; true",
+      "expect": [
+        "  ✗ arrows: browser->edge.cdn と browser->edge.gw が 222px 重なって走る。分かれ目が、別の箱同士をつなぐ矢印に見える"
+      ]
+    },
+    {
+      "name": "arrows-variants",
+      "cmd": "node ../../skills/explainer/scripts/figure-variants.mjs ../../tests/figure-check/fixtures/arrows-shared.d2 --out $TMP/arrows-variants",
+      "expect": [
+        "  #1 TALA seed 6                減点  0  矢印  1  △ 1",
+        "  #2 TALA seed 5                減点  0  矢印  2  △ 1",
+        "  #3 ELK                        減点  2  矢印  0  △ 0   light: a line runs through 3 label(s): \"エッジ\", \"サービス\", \"データ\"",
+        "  #5 TALA seed 1                減点  3  矢印 10  △ 0   arrows: browser->edge.cdn と browser->edge.gw が 222px 重なって走る。"
+      ]
     }
   ]
 }
