@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/mizchi/explainer",
   "repository": "https://github.com/mizchi/explainer",
+  "license": "MIT",
   "keywords": [
     "explanation",
     "documentation",
