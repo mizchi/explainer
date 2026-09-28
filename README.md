@@ -40,6 +40,12 @@ AI から人間へ概念を説明するための、スキルと道具です。
   - `03-strengthening.md`：CTI から足すべき条件を読み取る演習
 - 本全体の検査（`verify-book.mjs`）：学習目標と理解度チェックの対応、概念を導入前に使っていないか、章の読了時間、演習の出発点が落ちて答えが通るか、章の依存図
 
+## 例：図の道具の選び方（チートシート）
+
+- 資料：[`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md)「どの図を、どの道具で描くか」
+- Mermaid で済むなら Mermaid、足りない構造なら D2（TALA / ELK / dagre）、D2 に乗らない自由な図なら SVG / HTML。道具の出力を写す図は vlmkit-anim。同じサンプルを Mermaid と D2 の 3 つのエンジンで描いて比べた結果（`samples/compare.mjs`）つき
+- 測って分かったこと：箱の中の向きは、Mermaid だと中の箱が外とつながると無視され、ELK と dagre は常に黙って無視する。守ったのは TALA だけ。TALA は seed で配置がすべて変わり、箱が増えると急に遅くなる
+
 ## 使い方
 
 ```sh
@@ -50,6 +56,7 @@ npm run verify         # docs/formal-methods を検証 → verdict: VERIFIED
 npm run build          # docs/formal-methods/dist/index.html を生成
 npm run verify:book    # docs/inductive-invariant-book を検証 → book verdict: VERIFIED
 npm run build:book     # docs/inductive-invariant-book/dist/*.html を生成
+npm run verify:cheatsheet   # docs/figure-cheatsheet を検証（エンジンの比較を再実行する。2 分ほど）
 npm run figure -- docs/formal-methods/figures/coverage.svg   # 図 1 枚を描画・検査。出てきたシートを目で見る
 npm run test:figures   # figure-check の回帰テスト
 ```
@@ -72,7 +79,7 @@ npm run test:figures   # figure-check の回帰テスト
 | `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
 | `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
 
-スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。
+スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid` も入れます。
 `first-reader` は Python 3 の標準ライブラリだけで動きます。
 
 `first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
@@ -114,7 +121,7 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `skills/explainer/scripts/verify-doc.mjs` | 検証（checks / vlmkit-anim / 引用照合 / vlmkit ゲート） |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → 自己完結 HTML |
 | `skills/explainer/scripts/tlc-to-scene.mjs` | TLC の状態グラフ・反例 → vlmkit-anim の図と事実シート |
-| `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
+| `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
 | `tests/figure-check/` | figure-check の回帰テスト（悪い図がそれぞれの検査で落ちるか） |
 | `personas/` | 読み手のペルソナ |
 | `docs/<topic>/` | 資料：`README.md`, `checks.json`, `examples/`, `figures/` |

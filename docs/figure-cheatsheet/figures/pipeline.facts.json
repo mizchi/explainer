@@ -1,0 +1,2 @@
+{ "labels": ["checkout", "install", "build", "gate", "prod"],
+  "edges": ["checkout->install", "install->lint", "install->typecheck", "install->build", "build->unit", "build->e2e", "build->image", "lint->gate", "typecheck->gate", "unit->gate", "e2e->gate", "image->scan", "scan->gate", "gate->staging", "staging->smoke", "smoke->prod"] }

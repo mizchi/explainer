@@ -1,0 +1,11 @@
+%% nested-dir.mmd の最後の辺だけを、中の箱同士（固める → 送る）に替えたもの
+flowchart LR
+  subgraph build[ビルド]
+    direction TB
+    fetch[取得] --> compile[コンパイル] --> pack[固める]
+  end
+  subgraph deploy[配布]
+    direction TB
+    push[送る] --> roll[入れ替える]
+  end
+  pack --> push

@@ -1,0 +1,8 @@
+%% loop.d2 と同じ、戻る辺のある手順
+flowchart TD
+  start[変更を書く] --> test[テストを回す]
+  test -->|通る| review[レビュー]
+  test -->|落ちる| fix[直す]
+  review -->|指摘| fix
+  review -->|承認| merge[マージ]
+  fix -->|もう一度| test

@@ -1,0 +1,11 @@
+%% nested-dir.d2 と同じ。外は横、サブグラフの中は縦。サブグラフ同士を辺でつなぐ
+flowchart LR
+  subgraph build[ビルド]
+    direction TB
+    fetch[取得] --> compile[コンパイル] --> pack[固める]
+  end
+  subgraph deploy[配布]
+    direction TB
+    push[送る] --> roll[入れ替える]
+  end
+  build --> deploy

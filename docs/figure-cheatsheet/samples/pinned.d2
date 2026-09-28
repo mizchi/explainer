@@ -1,0 +1,15 @@
+# 一部の位置を固定し、残りと線の引き回しを TALA に任せる
+client: クライアント
+client.top: 0
+client.left: 0
+db: DB {shape: cylinder}
+db.top: 0
+db.left: 640
+api: API
+cache: キャッシュ
+worker: ワーカー
+client -> api
+api -> cache
+api -> db
+worker -> db
+api -> worker

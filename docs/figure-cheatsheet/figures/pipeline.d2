@@ -1,0 +1,24 @@
+# ELK：長い DAG は層に積む。横に流すとスマホで文字が 4〜5px になった（samples/compare.mjs）ので、縦に流す
+vars: {
+  d2-config: {
+    layout-engine: elk
+  }
+}
+direction: down
+*.style.font-size: 22
+checkout -> install
+install -> lint
+install -> typecheck
+install -> build
+build -> unit
+build -> e2e
+build -> image
+lint -> gate
+typecheck -> gate
+unit -> gate
+e2e -> gate
+image -> scan
+scan -> gate
+gate -> staging
+staging -> smoke
+smoke -> prod

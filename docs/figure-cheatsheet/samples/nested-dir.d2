@@ -1,0 +1,16 @@
+# 外は横、中は縦：箱ごとに direction を変える
+direction: right
+build: ビルド {
+  direction: down
+  fetch: 取得
+  compile: コンパイル
+  pack: 固める
+  fetch -> compile -> pack
+}
+deploy: 配布 {
+  direction: down
+  push: 送る
+  roll: 入れ替える
+  push -> roll
+}
+build -> deploy

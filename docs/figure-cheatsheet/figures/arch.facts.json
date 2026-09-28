@@ -1,0 +1,2 @@
+{ "labels": ["ブラウザ", "アプリ", "エッジ", "API Gateway", "サービス", "決済", "データ", "Postgres", "キュー"],
+  "edges": ["browser->edge.cdn", "browser->edge.gw", "mobile->edge.gw", "edge.gw->svc.auth", "edge.gw->svc.order", "svc.order->svc.pay", "svc.order->data.pg", "svc.auth->data.redis", "svc.pay->data.mq", "svc.pay->data.pg"] }

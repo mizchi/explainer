@@ -1,0 +1,2 @@
+{ "labels": ["ビルド", "取得", "コンパイル", "固める", "配布", "送る", "入れ替える"],
+  "edges": ["build.fetch->build.compile", "build.compile->build.pack", "deploy.push->deploy.roll", "build->deploy"] }

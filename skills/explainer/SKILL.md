@@ -25,6 +25,7 @@ ELI5 との違いは 2 つ。
 npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright
 ```
 
+Mermaid の図（`figures/*.mmd`）を使うときは `mermaid` も入れます。
 形式手法の例を扱うときは、TLC（Java 11+）や Apalache（Java 17+）、`z3-solver` も入れます。
 `verify-doc.mjs` は `$TLA2TOOLS`（tla2tools.jar）と `$APALACHE`（apalache-mc）を、リポジトリの `.tools/` から探します。
 
@@ -99,7 +100,7 @@ npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright
 - 時間の順序があるとき
 - 包含関係があるとき
 
-図は vlmkit-anim のシーン（JSON）で描く。当てはまる kind が無い概念図は、SVG / HTML / D2 で直接書き、`scripts/figure-check.mjs` で描画・検査して、出てきたシートを目で見て直す（`references/figures.md` の「手で描く図」）。
+図は vlmkit-anim のシーン（JSON）で描く。当てはまる kind が無い概念図は、Mermaid で済むなら Mermaid、足りない構造なら D2、D2 に乗らない自由な図なら SVG / HTML で直接書く。どれも `scripts/figure-check.mjs` で描画・検査して、出てきたシートを目で見て直す（`references/figures.md` の「手で描く図」）。
 
 vlmkit-anim の図の検査は 3 つ。
 
@@ -177,5 +178,5 @@ node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直
 | `references/figures.md` | 問い → 図の種類の対応、事実シートの作り方、vlmkit-anim の手順 |
 | `scripts/verify-doc.mjs` | 検証（checks / 図 / 引用 / HTML） |
 | `scripts/build-html.mjs` | README.md → 自己完結 HTML（SVG をインラインで埋め込む） |
-| `scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 の図を描画し、重なり・はみ出し・枠線や線と文字の交差・小さすぎる文字・事実シートを検査し、目で見るシートを作る |
+| `scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画し、重なり・はみ出し・枠線や線と文字の交差・小さすぎる文字・事実シートを検査し、目で見るシートを作る |
 | `scripts/tlc-to-scene.mjs` | TLC の状態グラフと反例 → vlmkit-anim の state-machine シーンと事実シート |

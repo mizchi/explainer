@@ -1,0 +1,12 @@
+# sequence_diagram：時間の順序。配置は D2 が自前で行い、レイアウトエンジンに依らない
+shape: sequence_diagram
+*.style.font-size: 22
+client: クライアント
+api: API
+db: DB
+client -> api: 注文
+api -> db: BEGIN
+api -> db: INSERT
+db -> api: ok
+api -> db: COMMIT
+api -> client: 201
