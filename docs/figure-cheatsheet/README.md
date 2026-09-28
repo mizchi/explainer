@@ -1,0 +1,210 @@
+# どの図を、どの道具で描くか：vlmkit-anim・D2（TALA / ELK / dagre）・SVG・HTML
+
+<!-- persona: ../../personas/mizchi.md -->
+
+> **想定読者**：図をエージェントに D2 や SVG で書かせていて、どれを使うかをその場の勘で決めている人。
+> D2 の文法の入門は省きます。
+> 扱うのは 2 つです。どの問いにどの道具とエンジンを使うか。そして、それぞれで実際に起きた失敗です。
+> 所要 10 分。
+> エンジンの比較は `samples/compare.mjs` の出力です。図はすべて `figure-check.mjs` を通し、出てきたシートを目で見ました。
+> 本文の出力は `npm run verify:cheatsheet` で再実行して照合しています。
+> D2 は v0.9.0 です（TALA が MPL-2.0 で公開され、同梱された版。[d2lang.com/blog/tala-is-open-source](https://d2lang.com/blog/tala-is-open-source/)）。
+
+---
+
+## 0. 一枚で：上から順に当てる
+
+| 順 | 問い | 道具 | 決め手 |
+|---|---|---|---|
+| 1 | 時間の順序や状態遷移が主役で、その事実を道具（TLC、import グラフ）が出せるか | **vlmkit-anim** | 図を事実シートと照合できる（`check --expect`） |
+| 2 | 時間の順序が主役だが、道具の出力は無いか | **D2 `sequence_diagram`** | エンジンに依らない。配置は D2 が自前で行う |
+| 3 | 位置そのものに意味があるか（包含・範囲・平面上の配置） | **SVG を手で書く** | 座標を自分で決められる |
+| 4 | 文字とコードが主で、箱は区切りにすぎないか | **HTML の図** | ページのライト / ダークに従い、スマホで 1 列に落とせる |
+| 5 | 一方向に流れる長い DAG か、戻る辺のある手順か | **D2 + ELK** | 層に積む。入口が先頭に来る。速い |
+| 6 | 箱の入れ子（アーキテクチャ）か。箱ごとに向きを変える、一部の位置を固定する、別の箱の近くに置くか | **D2 + TALA** | 4 つとも TALA しかできない |
+
+dagre は、このサンプルでは ELK に勝る場面がありませんでした。
+描ける機能は ELK と同じで、速さも同じくらい、線が箱の名前を通る失敗も同じく起きます。
+
+---
+
+## 1. D2 のエンジン：測った結果
+
+`samples/` の 5 つの D2 を、3 つのエンジンで描いて比べました。
+
+### 描けるもの
+
+<!-- output: compare -->
+```
+support（描けるか）
+  固定位置（top / left） tala  ✓ 描ける
+  固定位置（top / left） elk   ✗ Object "client" has attribute "top" and/or "left" set, but layout engine "elk" does not support locked positions.
+  near: 別の箱      tala  ✓ 描ける
+  near: 別の箱      elk   ✗ Object "note" has "near" set to another object, but layout engine "elk" only supports constant values for "near".
+
+nested（箱ごとの direction: down が守られたか）
+  tala  ✓ 中が縦に並んだ
+  elk   ✗ 中も横に並んだ（外の direction: right に従った）
+  dagre ✗ 中も横に並んだ（外の direction: right に従った）
+  elk   grid-columns: 1 に替えると ✓ 中が縦に並んだ
+```
+
+固定位置と `near: 別の箱` は、ELK と dagre ではエラーになります。気づけます。
+
+**箱ごとの direction は、エラーになりません。** ELK と dagre は、中の `direction: down` を黙って無視し、外の向きで並べます。
+`d2 validate` も通るので、図を見るまで気づけません。
+ELK のまま箱の中を縦にしたいなら、`direction: down` の代わりに `grid-columns: 1` を書きます。
+
+### 起きた失敗
+
+<!-- output: compare -->
+```
+entry（入口が流れの先頭に来たか）
+  loop     tala  ✓ start が一番上
+  pipeline elk   ✓ checkout が一番左
+  arch     tala  ✗ 一番上は data.pg（入口 browser ではない）
+  arch     elk   ✓ browser が一番上
+
+check（figure-check の ✗）
+  arch     tala  ✗ tiny（mobile） "アプリ" 9.0px, "キュー" 9.0px
+  arch     elk   ✗ through（light, mobile） "エッジ", "サービス", "データ"
+  arch     dagre ✗ through（light, mobile） "エッジ", "データ"
+  pipeline tala  ✗ tiny（mobile） "checkout" 4.0px, "install" 4.0px, "lint" 4.0px
+  pipeline elk   ✗ tiny（mobile） "checkout" 5.0px, "install" 5.0px, "lint" 5.0px
+```
+
+- **TALA は、direction を書かないと入口が上に来ないことがある。** アーキテクチャ図で、データ層が一番上、ブラウザが一番下になりました。流れを上から読ませたいときは `direction: down` を書きます。
+- **ELK と dagre は、箱の名前（エッジ・サービス・データ）の上に線を通す。** 箱をまたぐ線が、上端の中央にある名前を横切ります。TALA では起きませんでした。
+- **横に長い DAG は、エンジンによらずスマホで読めない。** 16 本の辺の CI パイプラインを `direction: right` で描くと、375px 幅では文字が 4〜5px になりました。縦に流せば通ります（下の図 2）。
+
+### 足したときの動きと、seed
+
+<!-- output: compare -->
+```
+stable（arch に 1 つ足したとき、元の箱が動いた距離 / 図の対角線）
+  tala  箱を 1 つ（通知） 少し動く / 外に箱を 1 つ（管理画面） 大きく動く / 線を 1 本 少し動く
+  elk   箱を 1 つ（通知） 少し動く / 外に箱を 1 つ（管理画面） 少し動く / 線を 1 本 ほぼ動かない
+  dagre 箱を 1 つ（通知） 少し動く / 外に箱を 1 つ（管理画面） ほぼ動かない / 線を 1 本 ほぼ動かない
+
+seeds（TALA）
+  同じ入力・既定の seed で 2 回：同じ SVG
+  seed を 1 つずつ 1〜9 に変える：9 通りの配置
+  ファイルの vars に tala-seeds: [5]：✗ "tala-seeds" needs a value
+```
+
+- TALA は、同じ入力と同じ seed なら毎回同じ図になります。
+- ただし、seed を変えると配置がすべて変わります（9 通りの seed で 9 通り）。1 つ足しても大きく動きます。公式の記事が書いている弱点のとおりです。
+- レビューで差分を見る図や、少しずつ育てる図には、ELK のほうが向いています。
+- **気に入らない配置は、seed を変えて選び直す。** 図 1 は、既定の seed でブラウザからの 2 本が 1 点で分かれ、CDN と API Gateway の間の矢印に見えました。seed 4〜9 を並べて見比べ、5 を選びました。
+- v0.9.0 では、seed をファイルの `vars` に書けません（上の `needs a value`）。このリポジトリでは、ファイルに `# d2-flags: --tala-seeds=5` の行を書き、`figure-check.mjs` がそれを d2 に渡します。
+
+### 速さ
+
+<!-- output: compare -->
+```
+time（描画時間の倍率。箱 10 個のときを 1 とする）
+  tala  急に伸びる（40 個で 8 倍以上）
+  elk   ほぼ伸びない（40 個で 3 倍未満）
+  dagre ほぼ伸びない（40 個で 3 倍未満）
+  箱 40 個で TALA は ELK の 10 倍以上
+```
+
+参考までに、この環境で 3 回測ったときは、箱 40 個で TALA が 4〜5 秒、ELK が 0.1 秒未満でした（実測値は環境で変わるので、照合はしていません）。
+エージェントが描き直すループを回すなら、箱が数十を超える図は ELK にします。
+
+---
+
+## 2. サンプル
+
+### 図 1：アーキテクチャ（TALA）
+
+![TALA で描いたアーキテクチャ図。ブラウザとアプリがエッジに入り、サービスを経てデータ層に届く。箱の名前の上を線が通らない](figures/arch.svg)
+
+<!-- source: figures/arch.d2 -->
+```d2
+# d2-flags: --tala-seeds=5
+direction: down
+```
+
+TALA を選んだ理由は、箱の入れ子があることと、流れの向きがはっきりしないことです。
+`direction: down` を書いたのは、入口を上にするためです。
+
+### 図 2：長い DAG（ELK、縦に流す）
+
+![ELK で縦に流した CI パイプライン。install から lint・typecheck・build に分かれ、gate で合流して prod へ](figures/pipeline.svg)
+
+<!-- source: figures/pipeline.d2 -->
+```d2
+vars: {
+  d2-config: {
+    layout-engine: elk
+  }
+}
+direction: down
+```
+
+ELK は、分岐を同じ層に揃え、合流を 1 か所（gate）に集めます。
+横に流すとスマホで文字が潰れるので、縦に流しました。
+
+### 図 3：箱ごとに向きを変える（TALA）
+
+![外は横、中は縦。ビルドの箱の中は取得・コンパイル・固めるが縦に並び、配布の箱へ横に進む](figures/nested-dir.svg)
+
+同じファイルを ELK で描くと、箱の中も横一列になります（1 節の `nested`）。
+
+### 図 4：時間の順序（sequence_diagram）
+
+![クライアントが API に注文し、API が DB に BEGIN・INSERT・COMMIT を送り、クライアントに 201 を返す](figures/sequence.svg)
+
+TLC の反例のように、道具が順序を出せるなら vlmkit-anim の `sequence` か `distributed` で描き、事実シートと照合します。
+道具の出力が無い説明用の順序なら、これで足ります。
+
+---
+
+## 3. 形式ごとに、最初に確かめること
+
+| 道具 | 最初に確かめること | 確かめ方 |
+|---|---|---|
+| vlmkit-anim | 図が道具の出力と一致するか | `vlmkit-anim check --expect`（事実シートは道具から作る） |
+| D2 + TALA | 入口が上か。線の分かれ目が別の矢印に見えないか | `direction` を書く。seed を並べて見る |
+| D2 + ELK / dagre | 箱の名前を線が通っていないか。箱ごとの direction を書いていないか | `figure-check.mjs` の `through`。direction は図を見る |
+| D2（どのエンジンでも） | スマホ幅で文字が 9px 以上あるか | `figure-check.mjs` の `tiny`。長い流れは縦にする |
+| SVG / HTML | ダークで区別がつくか。スマホで 1 列に落ちるか | `figure-check.mjs` のシート（ライト・ダーク・スマホ） |
+
+機械の検査を通っても、見た目の意味は取り違えられます（図 1 の「CDN と API Gateway の間の矢印」）。
+シートは毎回、目で見ます。手順は `skills/explainer/references/figures.md` の「手で描く図」にあります。
+
+---
+
+## 理解度チェック
+
+1. サービスの箱の中だけ縦に並べたい。ELK で `direction: down` を書いたら、エラーは出ずに横一列になった。何が起きていて、どうするか。
+
+<details><summary>答え</summary>
+
+ELK と dagre は、箱ごとの `direction` を黙って無視し、外の向きで並べます。
+箱ごとに向きを変えられるのは TALA だけです。
+TALA に切り替えるか、ELK のまま箱の中に `grid-columns: 1` を書きます（1 節の `nested`。ELK でも縦に並びました）。
+
+</details>
+
+2. 60 個の箱のモジュール依存図を、エージェントに何度も描き直させたい。どのエンジンにするか。
+
+<details><summary>答え</summary>
+
+ELK です。
+TALA は箱の数に対して描画時間が急に伸びます（箱 40 個で ELK の 10 倍以上）。1 つ足すだけで配置が大きく変わるので、描き直すたびに図の見た目も変わります。
+依存図は一方向の流れなので、ELK の層で読めます。
+
+</details>
+
+3. TALA で描いたアーキテクチャ図の矢印が 1 点で分かれ、別の箱同士をつなぐ矢印に見える。`figure-check.mjs` は CLEAN だった。どう直すか。
+
+<details><summary>答え</summary>
+
+seed を変えて、配置を選び直します（`d2 --layout=tala --tala-seeds=N`）。
+選んだ seed はファイルに `# d2-flags: --tala-seeds=N` と書き、描き直しても同じ図にします。
+v0.9.0 は、ファイルの `vars` に seed を書けません。
+機械の検査は、線がどの矢印に見えるかを判定しません。このずれは、シートを目で見て見つけるしかありません。
+
+</details>

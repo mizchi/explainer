@@ -1,0 +1,1 @@
+{ "labels": ["取得", "コンパイル"], "edges": ["build.fetch->build.compile", "build.compile->build.pack", "build->deploy"] }

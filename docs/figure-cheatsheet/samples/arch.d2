@@ -1,0 +1,27 @@
+# アーキテクチャ図：箱の入れ子と、双方向に近い依存。流れの向きは無い
+browser: ブラウザ
+mobile: アプリ
+edge: エッジ {
+  cdn: CDN
+  gw: API Gateway
+}
+svc: サービス {
+  auth: 認証
+  order: 注文
+  pay: 決済
+}
+data: データ {
+  pg: Postgres {shape: cylinder}
+  redis: Redis {shape: cylinder}
+  mq: キュー {shape: queue}
+}
+browser -> edge.cdn
+browser -> edge.gw
+mobile -> edge.gw
+edge.gw -> svc.auth
+edge.gw -> svc.order
+svc.order -> svc.pay
+svc.order -> data.pg
+svc.auth -> data.redis
+svc.pay -> data.mq
+svc.pay -> data.pg

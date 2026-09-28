@@ -1,0 +1,68 @@
+{
+  "$comment": "本文に載せる出力はここで再実行して照合する。時間の実測値と一時ファイルの場所は、回ごとに変わるので照合しない。",
+  "checks": [
+    {
+      "name": "d2-version",
+      "cmd": "../../.tools/d2 --version",
+      "expect": [
+        "v0.9.0"
+      ]
+    },
+    {
+      "name": "compare",
+      "cmd": "node samples/compare.mjs",
+      "expect": [
+        "support（描けるか）",
+        "  固定位置（top / left） tala  ✓ 描ける",
+        "  固定位置（top / left） elk   ✗ Object \"client\" has attribute \"top\" and/or \"left\" set, but layout engine \"elk\" does not support locked positions.",
+        "  固定位置（top / left） dagre ✗ Object \"client\" has attribute \"top\" and/or \"left\" set, but layout engine \"dagre\" does not support locked positions.",
+        "  箱ごとの direction tala  ✓ 描ける",
+        "  箱ごとの direction elk   ✓ 描ける",
+        "  箱ごとの direction dagre ✓ 描ける",
+        "  near: 別の箱      tala  ✓ 描ける",
+        "  near: 別の箱      elk   ✗ Object \"note\" has \"near\" set to another object, but layout engine \"elk\" only supports constant values for \"near\".",
+        "  near: 別の箱      dagre ✗ Object \"note\" has \"near\" set to another object, but layout engine \"dagre\" only supports constant values for \"near\".",
+        "nested（箱ごとの direction: down が守られたか）",
+        "  tala  ✓ 中が縦に並んだ",
+        "  elk   ✗ 中も横に並んだ（外の direction: right に従った）",
+        "  dagre ✗ 中も横に並んだ（外の direction: right に従った）",
+        "  elk   grid-columns: 1 に替えると ✓ 中が縦に並んだ",
+        "  dagre grid-columns: 1 に替えると ✓ 中が縦に並んだ",
+        "entry（入口が流れの先頭に来たか）",
+        "  loop     tala  ✓ start が一番上",
+        "  loop     elk   ✓ start が一番上",
+        "  loop     dagre ✓ start が一番上",
+        "  pipeline tala  ✓ checkout が一番左",
+        "  pipeline elk   ✓ checkout が一番左",
+        "  pipeline dagre ✓ checkout が一番左",
+        "  arch     tala  ✗ 一番上は data.pg（入口 browser ではない）",
+        "  arch     elk   ✓ browser が一番上",
+        "  arch     dagre ✓ browser が一番上",
+        "check（figure-check の ✗）",
+        "  arch     tala  ✗ tiny（mobile） \"アプリ\" 9.0px, \"キュー\" 9.0px",
+        "  arch     elk   ✗ through（light, mobile） \"エッジ\", \"サービス\", \"データ\"",
+        "  arch     dagre ✗ through（light, mobile） \"エッジ\", \"データ\"",
+        "  pipeline tala  ✗ tiny（mobile） \"checkout\" 4.0px, \"install\" 4.0px, \"lint\" 4.0px",
+        "  pipeline elk   ✗ tiny（mobile） \"checkout\" 5.0px, \"install\" 5.0px, \"lint\" 5.0px",
+        "  pipeline dagre ✗ tiny（mobile） \"checkout\" 4.0px, \"install\" 4.0px, \"lint\" 4.0px",
+        "  loop     tala  ✓ 0",
+        "  loop     elk   ✓ 0",
+        "  loop     dagre ✓ 0",
+        "stable（arch に 1 つ足したとき、元の箱が動いた距離 / 図の対角線）",
+        "  tala  箱を 1 つ（通知） 少し動く / 外に箱を 1 つ（管理画面） 大きく動く / 線を 1 本 少し動く",
+        "  elk   箱を 1 つ（通知） 少し動く / 外に箱を 1 つ（管理画面） 少し動く / 線を 1 本 ほぼ動かない",
+        "  dagre 箱を 1 つ（通知） 少し動く / 外に箱を 1 つ（管理画面） ほぼ動かない / 線を 1 本 ほぼ動かない",
+        "  （ほぼ動かない < 5%、少し動く 5〜20%、大きく動く ≥ 20%）",
+        "seeds（TALA）",
+        "  同じ入力・既定の seed で 2 回：同じ SVG",
+        "  seed を 1 つずつ 1〜9 に変える：9 通りの配置",
+        "  ファイルの vars に tala-seeds: [5]：✗ \"tala-seeds\" needs a value",
+        "time（描画時間の倍率。箱 10 個のときを 1 とする）",
+        "  tala  急に伸びる（40 個で 8 倍以上）",
+        "  elk   ほぼ伸びない（40 個で 3 倍未満）",
+        "  dagre ほぼ伸びない（40 個で 3 倍未満）",
+        "  箱 40 個で TALA は ELK の 10 倍以上"
+      ]
+    }
+  ]
+}

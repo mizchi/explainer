@@ -40,6 +40,12 @@ AI から人間へ概念を説明するための、スキルと道具です。
   - `03-strengthening.md`：CTI から足すべき条件を読み取る演習
 - 本全体の検査（`verify-book.mjs`）：学習目標と理解度チェックの対応、概念を導入前に使っていないか、章の読了時間、演習の出発点が落ちて答えが通るか、章の依存図
 
+## 例：図の道具の選び方（チートシート）
+
+- 資料：[`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md)「どの図を、どの道具で描くか」
+- vlmkit-anim・D2（TALA / ELK / dagre）・SVG・HTML を、問いの順に選ぶ表と、D2 の 3 つのエンジンを同じサンプルで比べた結果（`samples/compare.mjs`）
+- 測って分かったこと：箱ごとの direction は TALA しか守らない（ELK と dagre は黙って無視する）。TALA は seed で配置がすべて変わり、箱が増えると急に遅くなる
+
 ## 使い方
 
 ```sh
@@ -50,6 +56,7 @@ npm run verify         # docs/formal-methods を検証 → verdict: VERIFIED
 npm run build          # docs/formal-methods/dist/index.html を生成
 npm run verify:book    # docs/inductive-invariant-book を検証 → book verdict: VERIFIED
 npm run build:book     # docs/inductive-invariant-book/dist/*.html を生成
+npm run verify:cheatsheet   # docs/figure-cheatsheet を検証（エンジンの比較を再実行する。2 分ほど）
 npm run figure -- docs/formal-methods/figures/coverage.svg   # 図 1 枚を描画・検査。出てきたシートを目で見る
 npm run test:figures   # figure-check の回帰テスト
 ```

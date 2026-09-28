@@ -1,0 +1,13 @@
+# 戻る辺のある流れ：入口が上に来てほしい
+direction: down
+start: 変更を書く
+test: テストを回す
+review: レビュー
+fix: 直す
+merge: マージ
+start -> test
+test -> review: 通る
+test -> fix: 落ちる
+review -> fix: 指摘
+review -> merge: 承認
+fix -> test: もう一度

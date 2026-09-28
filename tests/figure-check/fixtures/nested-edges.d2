@@ -1,0 +1,9 @@
+# 箱の中の辺と、つないだ辺（a -> b -> c）を、事実シートの辺として読めるか
+direction: right
+build: ビルド {
+  direction: down
+  fetch: 取得
+  compile: コンパイル
+  fetch -> compile -> pack
+}
+build -> deploy: 送る

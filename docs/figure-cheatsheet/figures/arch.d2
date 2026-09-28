@@ -1,0 +1,32 @@
+# TALA：アーキテクチャ図。入口を上にしたいので direction: down を書く
+# 既定の seed（1,2,3）では、ブラウザからの 2 本が 1 点で分かれ、CDN と API Gateway の間の矢印に見えた。seed 4〜9 を並べて見て、5 を選んだ
+# d2-flags: --tala-seeds=5
+direction: down
+*.style.font-size: 22
+*.*.style.font-size: 22
+browser: ブラウザ
+mobile: アプリ
+edge: エッジ {
+  cdn: CDN
+  gw: API Gateway
+}
+svc: サービス {
+  auth: 認証
+  order: 注文
+  pay: 決済
+}
+data: データ {
+  pg: Postgres {shape: cylinder}
+  redis: Redis {shape: cylinder}
+  mq: キュー {shape: queue}
+}
+browser -> edge.cdn
+browser -> edge.gw
+mobile -> edge.gw
+edge.gw -> svc.auth
+edge.gw -> svc.order
+svc.order -> svc.pay
+svc.order -> data.pg
+svc.auth -> data.redis
+svc.pay -> data.mq
+svc.pay -> data.pg

@@ -1,0 +1,18 @@
+# TALA：箱ごとに direction を変えられるのは TALA だけ。ELK と dagre はエラーにならず、中の direction を黙って無視する
+direction: right
+*.style.font-size: 22
+*.*.style.font-size: 22
+build: ビルド {
+  direction: down
+  fetch: 取得
+  compile: コンパイル
+  pack: 固める
+  fetch -> compile -> pack
+}
+deploy: 配布 {
+  direction: down
+  push: 送る
+  roll: 入れ替える
+  push -> roll
+}
+build -> deploy

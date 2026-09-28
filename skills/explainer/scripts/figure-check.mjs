@@ -4,6 +4,7 @@
 //   node figure-check.mjs <fig.svg | fig.fig.html | fig.d2> [--facts f.facts.json] [--write] [--out dir]
 //
 // 1. D2 は d2 で SVG にする（既定は TALA。ファイルの vars.d2-config.layout-engine があればそれ）。
+//    ほかのフラグは、ファイルの `# d2-flags: --tala-seeds=5` の行から渡す。
 //    --write のとき <name>.svg として隣に書く
 // 2. ブラウザで描画し、3 つの見え方を 1 枚にまとめた <out>/<name>.sheet.png を作る
 //      ライト 760px ・ ダーク 760px ・ スマホ 375px
@@ -44,6 +45,26 @@ const { chromium } = projectRequire('playwright');
 let failures = 0;
 const ok = (m) => console.log(`  ✓ ${m}`);
 const ng = (m, fix) => { failures++; console.log(`  ✗ ${m}${fix ? `\n    → ${fix}` : ''}`); };
+// D2 の辺を「a.b->c」の形で取り出す。箱の { } の中の辺は箱の名前を前に付け、a -> b -> c は 2 本に分ける
+function d2Edges(source) {
+  const scope = [], edges = [];
+  for (const raw of source.split('\n')) {
+    const line = raw.replace(/^\s*#.*$/, '').trim();
+    if (!line || line.startsWith('(')) continue;
+    const open = line.match(/^([\w.-]+)\s*(?::[^{]*)?\{$/);
+    if (open) { scope.push(open[1]); continue; }
+    if (line === '}') { scope.pop(); continue; }
+    const body = line.replace(/:\s[^>]*$|:\s*\{.*$/, '');
+    const parts = body.split(/\s*(<->|->|<-|--)\s*/);
+    if (parts.length < 3) continue;
+    const at = (id) => [...scope, id.trim()].join('.');
+    for (let i = 0; i + 2 < parts.length; i += 2) {
+      const [a, op, b] = [at(parts[i]), parts[i + 1], at(parts[i + 2])];
+      edges.push(op === '<-' ? `${b}->${a}` : `${a}->${b}`);
+    }
+  }
+  return edges;
+}
 function findUp(d, f) { for (; d !== dirname(d); d = dirname(d)) if (existsSync(join(d, f))) return d; return null; }
 const sh = (cmd, args) => spawnSync(cmd, args, { encoding: 'utf8' });
 
@@ -62,8 +83,11 @@ if (kind === 'd2') {
   const svgOut = join(out, `${name}.svg`);
   // 既定は TALA。ファイルが vars.d2-config.layout-engine を持っていれば、それに従う
   const engine = d2Source.match(/layout-engine:\s*(\w+)/)?.[1];
-  const r = sh(d2, [...(engine ? [] : ['--layout=tala']), '--pad=16', src, svgOut]);
-  ok(`layout: ${engine ?? 'tala (default)'}`);
+  // ファイルの中に書けない d2 のフラグは、`# d2-flags: --tala-seeds=5` の行で渡す
+  // （d2 v0.9.0 は vars.d2-config.tala-seeds を受け付けない）
+  const flags = d2Source.match(/^#\s*d2-flags:\s*(.+)$/m)?.[1].trim().split(/\s+/) ?? [];
+  const r = sh(d2, [...(engine ? [] : ['--layout=tala']), '--pad=16', ...flags, src, svgOut]);
+  ok(`layout: ${engine ?? 'tala (default)'}${flags.length ? ` ${flags.join(' ')}` : ''}`);
   if (r.status !== 0) { ng(`d2 render failed: ${(r.stderr || '').trim().split('\n').at(-1)}`); process.exit(1); }
   const svg = readFileSync(svgOut, 'utf8');
   if (opt.write) { writeFileSync(join(dir, `${name}.svg`), svg); ok(`wrote ${name}.svg`); }
@@ -244,7 +268,7 @@ if (existsSync(factsPath)) {
   if (facts.edges) {
     if (!d2Source) ng('facts: "edges" can only be checked for a .d2 figure');
     else {
-      const drawn = new Set([...d2Source.matchAll(/^\s*([\w.]+)\s*(->|<-|<->|--)\s*([\w.]+)/gm)].map((m) => (m[2] === '<-' ? `${m[3]}->${m[1]}` : `${m[1]}->${m[3]}`)));
+      const drawn = new Set(d2Edges(d2Source));
       const lack = facts.edges.filter((e) => !drawn.has(e));
       const extra = [...drawn].filter((e) => !facts.edges.includes(e));
       lack.length || extra.length

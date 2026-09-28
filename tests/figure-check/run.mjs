@@ -10,6 +10,8 @@ const cases = [
   ['crosses-edge.svg', /cross a box edge/],
   ['overlap.svg', /text overlap/],
   ['clipped.svg', /outside the figure/],
+  ['nested-edges.d2', null],
+  ['wrong-edges.d2', /edges differ/],
 ];
 let bad = 0;
 for (const [file, want] of cases) {
