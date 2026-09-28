@@ -138,6 +138,15 @@ One plugin, `explainer`, contains three skills.
 
 From a shell: `claude plugin marketplace add mizchi/explainer` and `claude plugin install explainer@explainer`.
 
+The skills can also be installed with [`npx skills`](https://github.com/vercel-labs/skills) or [APM](https://github.com/microsoft/apm) (checked with skills 1.7.0 and apm-cli 0.32.0; both put the three skills in `.claude/skills/`, byte-identical to this repository).
+
+```sh
+npx skills add mizchi/explainer --skill '*' -a claude-code   # --list to see the skills first
+apm install mizchi/explainer --target claude
+```
+
+Install all three. `explainer-book` runs `explainer`'s `verify-doc.mjs` from the sibling directory (`../../explainer/scripts/`).
+
 | Skill | When to use it |
 |---|---|
 | `explainer` | A crash course for one reader. Claims and figures are checked with tools |

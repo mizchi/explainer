@@ -138,6 +138,15 @@ npm run readme:images  # README の画像（docs/readme/*.png）を作り直す
 
 シェルからは `claude plugin marketplace add mizchi/explainer` と `claude plugin install explainer@explainer` です。
 
+[`npx skills`](https://github.com/vercel-labs/skills) や [APM](https://github.com/microsoft/apm) でも入れられます（skills 1.7.0 と apm-cli 0.32.0 で確認。どちらも 3 つのスキルを `.claude/skills/` に置き、中身はこのリポジトリと同じでした）。
+
+```sh
+npx skills add mizchi/explainer --skill '*' -a claude-code   # 先に --list で一覧を見られる
+apm install mizchi/explainer --target claude
+```
+
+3 つとも入れてください。`explainer-book` は、隣のディレクトリにある `explainer` の `verify-doc.mjs`（`../../explainer/scripts/`）を呼びます。
+
 | スキル | 使う場面 |
 |---|---|
 | `explainer` | 1 人の読み手に向けた速習資料。主張と図を道具で検証する |

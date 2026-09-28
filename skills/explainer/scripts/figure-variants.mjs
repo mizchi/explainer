@@ -105,7 +105,7 @@ const page = await browser.newPage({ viewport: { width: 1400, height: 800 }, dev
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 await page.setContent(`<body style="margin:0;padding:12px;background:#888;font:13px system-ui,'Noto Sans JP';display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start">
 ${results.map((r, n) => `<div style="background:#fff;padding:6px;width:330px"><div style="font-weight:600">#${n + 1} ${esc(r.label)}</div>
-<div>減点 ${r.penalty}（✗ ${r.fail.length}）　矢印 ${r.score}　△ ${r.look.length}</div>
+<div>減点 ${r.penalty}（✗ ${r.fail.length}） · 矢印 ${r.score} · △ ${r.look.length}</div>
 ${r.fail.slice(0, 2).map((m) => `<div style="color:#b3261e">✗ ${esc(m.slice(0, 70))}</div>`).join('')}
 ${r.light && existsSync(r.light) ? `<img src="data:image/png;base64,${readFileSync(r.light).toString('base64')}" style="width:330px;display:block;margin-top:4px">` : '<div>（描けなかった）</div>'}</div>`).join('')}</body>`);
 const sheet = join(out, `${name}.variants.png`);
