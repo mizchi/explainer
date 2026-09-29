@@ -91,4 +91,10 @@ await shrink('arrows-edges', join(tmp, 'shared', 'arrows-shared.edges.png'));
 sh('node', [join(scripts, 'figure-variants.mjs'), bad, '--out', join(tmp, 'variants')]);
 await shrink('arrows-variants', join(tmp, 'variants', 'arrows-shared.variants.png'));
 
+// 6. 端末の中の AA：D2 が日本語のラベルで崩した AA と、手で描いた AA
+for (const [name, file] of [['aa-broken', 'aa-d2-ja-broken'], ['aa-good', 'aa-ja-boxes']]) {
+  sh('node', [join(scripts, 'aa-check.mjs'), join(repo, `tests/figure-check/fixtures/${file}.txt`), '--out', join(tmp, file)]);
+  await shrink(name, join(tmp, file, `${file}.term.png`), 720);
+}
+
 await browser.close();
