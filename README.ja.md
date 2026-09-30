@@ -7,6 +7,38 @@ AI から人間へ概念を説明するための、スキルと道具です。
 コーディングエージェントが書く速さに、人間の理解が追いつかなくなっています（[Geoffrey Litt, *Understanding is the new bottleneck*](https://www.geoffreylitt.com/2026/07/02/understanding-is-the-new-bottleneck)）。
 このリポジトリは、読み手 1 人のために、**その人が知らないことだけ**を、**道具で検証した主張と図**で書くためのものです。
 
+## インストール
+
+Claude Code のプラグインとして入れる場合（このリポジトリがそのままマーケットプレイスで、プラグイン `explainer` に 3 つのスキルが入っています）：
+
+```
+/plugin marketplace add mizchi/explainer
+/plugin install explainer@explainer
+```
+
+シェルからは `claude plugin marketplace add mizchi/explainer` と `claude plugin install explainer@explainer` です。
+
+[`npx skills`](https://github.com/vercel-labs/skills) や [APM](https://github.com/microsoft/apm) でも入れられます（skills 1.7.0 と apm-cli 0.32.0 で確認。どちらも 3 つのスキルを `.claude/skills/` に置き、中身はこのリポジトリと同じでした）。
+
+```sh
+npx skills add mizchi/explainer --skill '*' -a claude-code   # 先に --list で一覧を見られる
+apm install mizchi/explainer --target claude
+```
+
+3 つとも入れてください。`explainer-book` は、隣のディレクトリにある `explainer` の `verify-doc.mjs`（`../../explainer/scripts/`）を呼びます。
+
+| スキル | 使う場面 |
+|---|---|
+| `explainer` | 1 人の読み手に向けた速習資料。主張と図を道具で検証する |
+| `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
+| `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
+
+スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid` も入れます。
+`first-reader` は Python 3 の標準ライブラリだけで動きます。
+
+`first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
+日本語の下書きでも 1 段落ずつ読ませられるよう、`feed.py` の語数の数え方を変えています。
+
 ## 何をするか
 
 ```
@@ -125,39 +157,6 @@ npm run figure:variants -- docs/figure-cheatsheet/figures/arch.d2   # D2 / Merma
 npm run test:figures   # figure-check の回帰テスト
 npm run readme:images  # README の画像（docs/readme/*.png）を作り直す
 ```
-
-## インストール（Claude Code プラグイン）
-
-このリポジトリは、そのまま Claude Code のプラグインマーケットプレイスです。
-1 つのプラグイン `explainer` に、3 つのスキルが入っています。
-
-```
-/plugin marketplace add mizchi/explainer
-/plugin install explainer@explainer
-```
-
-シェルからは `claude plugin marketplace add mizchi/explainer` と `claude plugin install explainer@explainer` です。
-
-[`npx skills`](https://github.com/vercel-labs/skills) や [APM](https://github.com/microsoft/apm) でも入れられます（skills 1.7.0 と apm-cli 0.32.0 で確認。どちらも 3 つのスキルを `.claude/skills/` に置き、中身はこのリポジトリと同じでした）。
-
-```sh
-npx skills add mizchi/explainer --skill '*' -a claude-code   # 先に --list で一覧を見られる
-apm install mizchi/explainer --target claude
-```
-
-3 つとも入れてください。`explainer-book` は、隣のディレクトリにある `explainer` の `verify-doc.mjs`（`../../explainer/scripts/`）を呼びます。
-
-| スキル | 使う場面 |
-|---|---|
-| `explainer` | 1 人の読み手に向けた速習資料。主張と図を道具で検証する |
-| `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
-| `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
-
-スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid` も入れます。
-`first-reader` は Python 3 の標準ライブラリだけで動きます。
-
-`first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
-日本語の下書きでも 1 段落ずつ読ませられるよう、`feed.py` の語数の数え方を変えています。
 
 ## スキルの効果を測る（evals）
 

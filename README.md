@@ -7,6 +7,38 @@ Skills and tools for explaining concepts from an AI to a human.
 Coding agents now write faster than people can understand what they wrote ([Geoffrey Litt, *Understanding is the new bottleneck*](https://www.geoffreylitt.com/2026/07/02/understanding-is-the-new-bottleneck)).
 This repository is for writing, for one reader, **only what that reader does not already know**, with **claims and figures checked by tools**.
 
+## Install
+
+As a Claude Code plugin (this repository is itself a plugin marketplace; one plugin, `explainer`, contains three skills):
+
+```
+/plugin marketplace add mizchi/explainer
+/plugin install explainer@explainer
+```
+
+From a shell: `claude plugin marketplace add mizchi/explainer` and `claude plugin install explainer@explainer`.
+
+The skills can also be installed with [`npx skills`](https://github.com/vercel-labs/skills) or [APM](https://github.com/microsoft/apm) (checked with skills 1.7.0 and apm-cli 0.32.0; both put the three skills in `.claude/skills/`, byte-identical to this repository).
+
+```sh
+npx skills add mizchi/explainer --skill '*' -a claude-code   # --list to see the skills first
+apm install mizchi/explainer --target claude
+```
+
+Install all three. `explainer-book` runs `explainer`'s `verify-doc.mjs` from the sibling directory (`../../explainer/scripts/`).
+
+| Skill | When to use it |
+|---|---|
+| `explainer` | A crash course for one reader. Claims and figures are checked with tools |
+| `explainer-book` | A chaptered course. Checks learning objectives, concept order, reading time and exercises |
+| `first-reader` | Has simulated readers read a draft one paragraph at a time before publishing. Reports where they drop off and what stays with them the next day. Does not rewrite |
+
+Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures.
+`first-reader` needs only the Python 3 standard library.
+
+`first-reader` is bundled from [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
+`feed.py` counts words differently so that Japanese drafts can also be read one paragraph at a time.
+
 ## What it does
 
 ```
@@ -125,39 +157,6 @@ npm run figure:variants -- docs/figure-cheatsheet/figures/arch.d2   # lay out D2
 npm run test:figures   # regression tests for figure-check
 npm run readme:images  # rebuild the README images (docs/readme/*.png)
 ```
-
-## Install (Claude Code plugin)
-
-This repository is itself a Claude Code plugin marketplace.
-One plugin, `explainer`, contains three skills.
-
-```
-/plugin marketplace add mizchi/explainer
-/plugin install explainer@explainer
-```
-
-From a shell: `claude plugin marketplace add mizchi/explainer` and `claude plugin install explainer@explainer`.
-
-The skills can also be installed with [`npx skills`](https://github.com/vercel-labs/skills) or [APM](https://github.com/microsoft/apm) (checked with skills 1.7.0 and apm-cli 0.32.0; both put the three skills in `.claude/skills/`, byte-identical to this repository).
-
-```sh
-npx skills add mizchi/explainer --skill '*' -a claude-code   # --list to see the skills first
-apm install mizchi/explainer --target claude
-```
-
-Install all three. `explainer-book` runs `explainer`'s `verify-doc.mjs` from the sibling directory (`../../explainer/scripts/`).
-
-| Skill | When to use it |
-|---|---|
-| `explainer` | A crash course for one reader. Claims and figures are checked with tools |
-| `explainer-book` | A chaptered course. Checks learning objectives, concept order, reading time and exercises |
-| `first-reader` | Has simulated readers read a draft one paragraph at a time before publishing. Reports where they drop off and what stays with them the next day. Does not rewrite |
-
-Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures.
-`first-reader` needs only the Python 3 standard library.
-
-`first-reader` is bundled from [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
-`feed.py` counts words differently so that Japanese drafts can also be read one paragraph at a time.
 
 ## Measuring the skills (evals)
 
