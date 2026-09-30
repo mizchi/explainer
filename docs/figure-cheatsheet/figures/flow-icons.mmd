@@ -1,0 +1,6 @@
+%% アイコンつきの流れ（Mermaid）。<set>:<name> で書く。figure-check がプロジェクトのアイコンセットを登録して描く
+flowchart LR
+  user@{ icon: "lucide:user", label: "利用者", pos: "b" }
+  api@{ icon: "lucide:server", label: "API", pos: "b" }
+  db@{ icon: "logos:postgresql", label: "Postgres", pos: "b" }
+  user --> api --> db

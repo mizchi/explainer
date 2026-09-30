@@ -127,6 +127,9 @@ if (kind === 'd2') {
   await p.setContent('<body></body>');
   await p.addScriptTag({ path: mermaidJs });
   // 文字は SVG の <text> で描かせる（foreignObject の HTML だと、ここの文字の検査が届かない）。id は固定し、毎回同じ SVG にする
+  // アイコン：プロジェクトに入っている Iconify のセット（lucide・logos）を登録する。図からは A@{ icon: "lucide:database" } で使う
+  const packs = ['lucide', 'logos'].flatMap((n) => { try { return [{ name: n, icons: projectRequire(`@iconify-json/${n}/icons.json`) }]; } catch { return []; } });
+  if (packs.length) await p.evaluate((ps) => mermaid.registerIconPacks(ps.map((x) => ({ name: x.name, icons: x.icons }))), packs);
   // id は図の名前から作る。1 ページに複数の Mermaid の図を置いても、SVG の中の CSS（#id …）がぶつからない
   const r = await p.evaluate(async ([s, id]) => {
     mermaid.initialize({ startOnLoad: false, htmlLabels: false, flowchart: { htmlLabels: false }, deterministicIds: true });
@@ -319,6 +322,20 @@ if (arrowResult) {
 } else if (['d2', 'mmd'].includes(kind)) ng('arrows: no edges found in the rendered SVG', 'the D2 / Mermaid output format may have changed; figure-arrows.mjs cannot see the arrows');
 const tiny = geometry.mobile.boxes.filter((b) => b.h < 9);
 tiny.length ? ng(`mobile: ${tiny.length} label(s) render under 9px tall: ${tiny.slice(0, 3).map((b) => `"${b.text}" ${b.h.toFixed(1)}px`).join(', ')}`, 'the figure is too wide for its text; fewer columns, larger font, or a taller layout') : ok('mobile: every label is at least 9px tall');
+
+// アイコン・画像：図の中に埋め込まれているか（外のファイルを指したままだと、資料の HTML に貼ったときに消える）
+const hrefs = [...figureHtml.matchAll(/<image\b[^>]*?\s(?:xlink:)?href="([^"]*)"/g)].map((m) => m[1]);
+const loose = hrefs.filter((h) => !h.startsWith('data:'));
+loose.length ? ng(`icons: ${loose.length} image(s) not embedded: ${loose.slice(0, 3).join(', ')}`, 'the file is missing or unreadable; put it with icons.mjs add, or fix the path (relative to the .d2)') : hrefs.length && ok(`icons: ${hrefs.length} image(s) embedded`);
+// D2 のアイコンは、出典とライセンスを figures/icons/ICONS.md に残す（icons.mjs add が書く）
+if (d2Source) {
+  const used = [...new Set([...d2Source.matchAll(/icon:\s*(\S+?\.svg)/g)].map((m) => m[1]).filter((u) => !/^https?:/.test(u)))];
+  if (used.length) {
+    const recorded = (u) => { const md = join(dir, dirname(u), 'ICONS.md'); return existsSync(md) && readFileSync(md, 'utf8').includes(`| \`${basename(u)}\``); };
+    const missing = used.filter((u) => !recorded(u));
+    missing.length ? ng(`icons: no source / license recorded for ${missing.join(', ')}`, 'add icons with icons.mjs add, which records them in ICONS.md next to the icon') : ok(`icons: ${used.length} icon(s) recorded in ICONS.md`);
+  }
+}
 
 const factsPath = opt.facts ?? join(dir, `${name}.facts.json`);
 if (existsSync(factsPath)) {

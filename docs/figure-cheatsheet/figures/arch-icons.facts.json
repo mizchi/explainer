@@ -1,0 +1,2 @@
+{ "labels": ["ブラウザ", "アプリ", "認証", "注文", "決済", "Postgres", "Redis"],
+  "edges": ["browser->order", "app->order", "browser->auth", "order->pay", "order->pg", "auth->redis", "pay->pg"] }
