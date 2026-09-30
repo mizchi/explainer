@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const tool = join(here, '../../skills/explainer/scripts/figure-check.mjs');
-const aaTool = join(here, '../../skills/explainer/scripts/aa-check.mjs'); // .txt（端末に出す AA）
 const cases = [
   ['good.svg', null],
   ['line-through.svg', /a line runs through/],
@@ -17,15 +16,10 @@ const cases = [
   ['mermaid-edges.mmd', /edges differ/],
   ['arrows-shared.d2', /重なって走る/],
   ['arrows-through.svg', /の中を通る/],
-  ['aa-ja-boxes.txt', null],
-  ['aa-ja-tree.txt', null],
-  ['aa-d2-ja-broken.txt', /joint/],
-  ['aa-too-wide.txt', /wrap/],
-  ['aa-tab.txt', /tab:/],
 ];
 let bad = 0;
 for (const [file, want] of cases) {
-  const r = spawnSync('node', [file.endsWith('.txt') ? aaTool : tool, join(here, 'fixtures', file), '--out', join(here, '.out', file)], { encoding: 'utf8' });
+  const r = spawnSync('node', [tool, join(here, 'fixtures', file), '--out', join(here, '.out', file)], { encoding: 'utf8' });
   const out = r.stdout + r.stderr;
   const fails = out.split('\n').filter((l) => l.includes('✗'));
   const pass = want ? fails.some((l) => want.test(l)) : r.status === 0;

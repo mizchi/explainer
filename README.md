@@ -33,7 +33,7 @@ Install all three. `explainer-book` runs `explainer`'s `verify-doc.mjs` from the
 | `explainer-book` | A chaptered course. Checks learning objectives, concept order, reading time and exercises |
 | `first-reader` | Has simulated readers read a draft one paragraph at a time before publishing. Reports where they drop off and what stays with them the next day. Does not rewrite |
 
-Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures, and `@xterm/xterm @xterm/addon-unicode11` to check AA.
+Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures.
 `first-reader` needs only the Python 3 standard library.
 
 `first-reader` is bundled from [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
@@ -116,19 +116,6 @@ The two framed in red failed the machine check "browser→CDN and browser→API 
 Layout candidates (made by `figure-variants.mjs`): TALA seeds 1–6, ELK and dagre, sorted by penalty.
 Only seeds 6 and 5 have no ✗. You choose among those by eye and record why in a comment in the source.
 
-### 5. Explaining inside a terminal (AA)
-
-> In the explainer skill, when asked for an explanation inside a TUI, I want an option to output it as AA (text art) too. Check that it doesn't break visually either.
-
-![D2's AA with Japanese labels, as a terminal draws it](docs/readme/aa-broken.png)
-
-`aa-check.mjs` has a terminal emulator (xterm.js) draw the AA and checks the cell grid it actually laid out.
-Above is D2's AA output with Japanese labels: D2 put spaces between full-width characters and the right edges of the boxes moved. The check fails it with 8 broken joints.
-
-![Hand-drawn AA with Japanese labels](docs/readme/aa-good.png)
-
-The same procedure drawn by hand with ASCII lines, sizing each box by counting a full-width character as 2 columns. No ✗. The skill replies with this kind of AA inside a code block.
-
 ## Example: a formal methods crash course for mizchi
 
 - Persona: [`personas/mizchi.md`](personas/mizchi.md) (built from public information; facts and guesses kept apart)
@@ -169,7 +156,6 @@ npm run figure -- docs/formal-methods/figures/coverage.svg   # render and check 
 npm run figure:variants -- docs/figure-cheatsheet/figures/arch.d2   # lay out D2 / Mermaid candidates with scores; compare and choose
 npm run test:figures   # regression tests for figure-check
 npm run readme:images  # rebuild the README images (docs/readme/*.png)
-npm run aa -- tests/figure-check/fixtures/aa-ja-boxes.txt   # check an AA (text diagram) in a real terminal emulator
 ```
 
 ## Measuring the skills (evals)
@@ -220,7 +206,6 @@ Unit tests for the `first-reader` scripts: `python3 tests/first-reader/test_firs
 | `skills/explainer/references/` | Guides for personas, writing and figures |
 | `skills/explainer/scripts/verify-doc.mjs` | Verification (checks / vlmkit-anim / quotes / vlmkit gates) |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → self-contained HTML |
-| `skills/explainer/scripts/aa-check.mjs` | Draws an AA (text diagram) in a terminal emulator (xterm.js), checks wrapping, tabs and box joints, and saves how the terminal shows it |
 | `skills/explainer/scripts/tlc-to-scene.mjs` | TLC state graphs and counterexamples → vlmkit-anim figures and fact sheets |
 | `skills/explainer/scripts/figure-check.mjs` | Renders and checks hand-written SVG / HTML / D2 / Mermaid figures, and makes a sheet to look at (light, dark, phone) |
 | `skills/explainer/scripts/figure-arrows.mjs` | Arrow readability checks, and a sheet with each edge highlighted in turn (used by figure-check) |

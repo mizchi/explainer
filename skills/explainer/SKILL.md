@@ -1,6 +1,6 @@
 ---
 name: explainer
-description: 特定の読み手に向けて、概念・PR・設計を「冗長にならない水準」の速習資料として説明し、図と主張を道具で検証する。読み手のペルソナ（既に知っていること・知らないこと・読み方）を質問と公開情報から作り、その差分だけを書く。図は vlmkit-anim で事実シートに照らして描き、本文に引用するコード・出力は再実行して照合し、HTML は vlmkit のゲートに通す。Use when the user says "explain this to me / to <person>", "速習資料", "解説ドキュメント", "この PR を理解したい", "わかるように説明して", "I can't keep up with what the agent wrote", or when a reviewer asks what a change does and the answer needs more than a paragraph. Also when the user wrote an explanation themselves and lost confidence in it. In a terminal (TUI) session, or when asked for "AA" / "ターミナルで", reply with a text diagram (AA) checked by scripts/aa-check.mjs instead of HTML.
+description: 特定の読み手に向けて、概念・PR・設計を「冗長にならない水準」の速習資料として説明し、図と主張を道具で検証する。読み手のペルソナ（既に知っていること・知らないこと・読み方）を質問と公開情報から作り、その差分だけを書く。図は vlmkit-anim で事実シートに照らして描き、本文に引用するコード・出力は再実行して照合し、HTML は vlmkit のゲートに通す。Use when the user says "explain this to me / to <person>", "速習資料", "解説ドキュメント", "この PR を理解したい", "わかるように説明して", "I can't keep up with what the agent wrote", or when a reviewer asks what a change does and the answer needs more than a paragraph. Also when the user wrote an explanation themselves and lost confidence in it.
 ---
 
 # explainer
@@ -24,8 +24,6 @@ ELI5 との違いは 2 つ。
 ```sh
 npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright
 ```
-
-AA を検査するときは `@xterm/xterm @xterm/addon-unicode11` も入れます。
 
 Mermaid の図（`figures/*.mmd`）を使うときは `mermaid` も入れます。
 形式手法の例を扱うときは、TLC（Java 11+）や Apalache（Java 17+）、`z3-solver` も入れます。
@@ -126,17 +124,6 @@ vlmkit-anim の図の検査は 3 つ。
 - `layout`：重なりやはみ出しがないか。
 - `still`：SVG を出して、一度は目で見る。
 
-#### TUI の中で聞かれたとき（AA で返す）
-
-端末（Claude Code の TUI など）の中で説明を求められ、図が要るときは、HTML を作らずに返答の中に AA（テキストの図）を置く。
-読み手が「AA で」「ターミナルで」と言ったときも同じ。
-
-- まず、番号付きの手順か字下げの木で足りないかを考える。
-- 描いたら `scripts/aa-check.mjs` で端末（xterm.js）に描かせて検査し、出てきた画像を目で見る。全角 1 字は 2 桁。1 字でも数え間違えると、箱の辺がずれる。
-- 日本語のラベルを箱に入れるなら、線は ASCII（`+ - |`）で手で描く。D2 の AA は、日本語のラベルで崩れる。
-
-手順と描き方は `references/aa.md`。
-
 ### 7. 検証
 
 `<doc-dir>/checks.json` に、本文が引用する出力を再生成するコマンドと、期待する行を書く。
@@ -204,12 +191,10 @@ node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直
 |---|---|
 | `references/persona.md` | ペルソナのテンプレートと、作り方 |
 | `references/writing.md` | 資料の型、文体、理解度チェックの作り方 |
-| `references/aa.md` | TUI で AA を返すときの手順と描き方 |
 | `references/figures.md` | 問い → 図の種類の対応、事実シートの作り方、vlmkit-anim の手順 |
 | `scripts/verify-doc.mjs` | 検証（checks / 図 / 引用 / HTML） |
 | `scripts/build-html.mjs` | README.md → 自己完結 HTML（SVG をインラインで埋め込む） |
 | `scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画し、重なり・はみ出し・枠線や線と文字の交差・小さすぎる文字・事実シートを検査し、目で見るシートを作る |
 | `scripts/figure-arrows.mjs` | 矢印の読みやすさ（2 本が重なって走る・箱を突き抜ける・交差・遠回り・逆向き）と、辺を 1 本ずつ強調したシート。figure-check が使う |
 | `scripts/figure-variants.mjs` | D2 / Mermaid の配置の候補（TALA の seed・ELK・dagre、向き）を描き、点数つきで並べる |
-| `scripts/aa-check.mjs` | 端末に出す AA を端末エミュレータ（xterm.js）に描かせ、折り返し・タブ・罫線のつながりを検査し、端末の見た目の画像を作る |
 | `scripts/tlc-to-scene.mjs` | TLC の状態グラフと反例 → vlmkit-anim の state-machine シーンと事実シート |

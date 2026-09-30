@@ -33,7 +33,7 @@ apm install mizchi/explainer --target claude
 | `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
 | `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
 
-スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid`、AA を検査するなら `@xterm/xterm @xterm/addon-unicode11` も入れます。
+スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid` も入れます。
 `first-reader` は Python 3 の標準ライブラリだけで動きます。
 
 `first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
@@ -116,19 +116,6 @@ apm install mizchi/explainer --target claude
 配置の候補（`figure-variants.mjs` が作る）。TALA の seed 1〜6・ELK・dagre で描き、減点の少ない順に並べたもの。
 ✗ が 0 だったのは seed 6 と 5 だけ。ここから目で見て選び、理由をソースのコメントに残す。
 
-### 5. 端末の中で説明する（AA）
-
-> explainer スキルでは、TUI の中で説明を求められたとき、AA としても出力できるようなオプションが欲しい。それも視覚的に崩れがないか確認する
-
-![日本語のラベルで D2 が出した AA を、端末に描かせたもの](docs/readme/aa-broken.png)
-
-`aa-check.mjs` は、AA を端末エミュレータ（xterm.js）に描かせ、端末が実際に並べた桁の格子で検査する。
-上は、日本語のラベルの図を D2 に AA で出させたもの。全角の字の間に空白が入り、箱の右の辺がずれた。検査は joint 8 か所で落とす。
-
-![日本語のラベルで手で描いた AA](docs/readme/aa-good.png)
-
-同じ手順を、線は ASCII、箱の幅は全角 1 字 = 2 桁で数えて手で描いたもの。✗ は 0。スキルは、こうした AA をコードブロックに入れて返答する。
-
 ## 例：mizchi 向けの形式手法の速習資料
 
 - ペルソナ：[`personas/mizchi.md`](personas/mizchi.md)（公開情報から作成。事実と推測を分けて記載）
@@ -169,7 +156,6 @@ npm run figure -- docs/formal-methods/figures/coverage.svg   # 図 1 枚を描�
 npm run figure:variants -- docs/figure-cheatsheet/figures/arch.d2   # D2 / Mermaid の配置の候補を点数つきで並べる。見比べて選ぶ
 npm run test:figures   # figure-check の回帰テスト
 npm run readme:images  # README の画像（docs/readme/*.png）を作り直す
-npm run aa -- tests/figure-check/fixtures/aa-ja-boxes.txt   # AA（テキストの図）を実物の端末エミュレータで検査する
 ```
 
 ## スキルの効果を測る（evals）
@@ -207,7 +193,6 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `skills/explainer/references/` | ペルソナ・文体・図のガイド |
 | `skills/explainer/scripts/verify-doc.mjs` | 検証（checks / vlmkit-anim / 引用照合 / vlmkit ゲート） |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → 自己完結 HTML |
-| `skills/explainer/scripts/aa-check.mjs` | 端末に出す AA を端末エミュレータ（xterm.js）に描かせ、折り返し・タブ・罫線のつながりを検査し、端末の見た目の画像を作る |
 | `skills/explainer/scripts/tlc-to-scene.mjs` | TLC の状態グラフ・反例 → vlmkit-anim の図と事実シート |
 | `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
 | `skills/explainer/scripts/figure-arrows.mjs` | 矢印の読みやすさの検査と、辺を 1 本ずつ強調したシート（figure-check が使う） |

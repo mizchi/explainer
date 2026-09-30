@@ -1,7 +1,0 @@
-docs/formal-methods/
-├── README.md      本文（Z3 と TLA+ の「OK」の読み方）
-├── checks.json    本文の出力を再生成するコマンド
-├── examples/
-│   ├── z3/        TypeScript の小さな関数と、その反例
-│   └── tla/       Counter のモデル（TLC / Apalache）
-└── figures/       図と事実シート
