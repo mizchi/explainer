@@ -33,7 +33,7 @@ Install all three. `explainer-book` runs `explainer`'s `verify-doc.mjs` from the
 | `explainer-book` | A chaptered course. Checks learning objectives, concept order, reading time and exercises |
 | `first-reader` | Has simulated readers read a draft one paragraph at a time before publishing. Reports where they drop off and what stays with them the next day. Does not rewrite |
 
-Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures.
+Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures, and `@iconify-json/lucide @iconify-json/logos` to use icons.
 `first-reader` needs only the Python 3 standard library.
 
 `first-reader` is bundled from [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
@@ -116,6 +116,17 @@ The two framed in red failed the machine check "browser→CDN and browser→API 
 Layout candidates (made by `figure-variants.mjs`): TALA seeds 1–6, ELK and dagre, sorted by penalty.
 Only seeds 6 and 5 have no ✗. You choose among those by eye and record why in a comment in the source.
 
+### 5. Icons
+
+> I want to bring in an SVG icon set and be able to use it.
+
+![Figures using the same icon sets from D2 and Mermaid](docs/readme/icons.png)
+
+- `icons.mjs` searches the installed Iconify sets (Lucide line icons, ISC; logos of technologies, CC0), lays candidates out in one image to choose from, and writes the chosen icon next to the figure, recording its source and license in `figures/icons/ICONS.md`.
+- A: D2 + ELK. Line icons inside the boxes, and logos (as `shape: image`, sized explicitly; unsized, the Postgres logo became the largest thing in the figure) for the products themselves.
+- B: Mermaid. `figure-check.mjs` registers the installed sets with Mermaid, so `lucide:user` or `logos:postgresql` can be used directly.
+- `figure-check.mjs` fails images that are not embedded in the figure (a missing file or wrong path) and D2 icons without a recorded source.
+
 ## Example: a formal methods crash course for mizchi
 
 - Persona: [`personas/mizchi.md`](personas/mizchi.md) (built from public information; facts and guesses kept apart)
@@ -156,6 +167,7 @@ npm run figure -- docs/formal-methods/figures/coverage.svg   # render and check 
 npm run figure:variants -- docs/figure-cheatsheet/figures/arch.d2   # lay out D2 / Mermaid candidates with scores; compare and choose
 npm run test:figures   # regression tests for figure-check
 npm run readme:images  # rebuild the README images (docs/readme/*.png)
+npm run icons -- search database --sheet /tmp/icons.png   # find icons and look at the candidates; then: npm run icons -- add lucide:database
 ```
 
 ## Measuring the skills (evals)
@@ -206,6 +218,7 @@ Unit tests for the `first-reader` scripts: `python3 tests/first-reader/test_firs
 | `skills/explainer/references/` | Guides for personas, writing and figures |
 | `skills/explainer/scripts/verify-doc.mjs` | Verification (checks / vlmkit-anim / quotes / vlmkit gates) |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → self-contained HTML |
+| `skills/explainer/scripts/icons.mjs` | Finds icons in the installed Iconify sets (lucide, logos), shows candidates in one image, places the chosen ones next to the figure and records their source and license in ICONS.md |
 | `skills/explainer/scripts/tlc-to-scene.mjs` | TLC state graphs and counterexamples → vlmkit-anim figures and fact sheets |
 | `skills/explainer/scripts/figure-check.mjs` | Renders and checks hand-written SVG / HTML / D2 / Mermaid figures, and makes a sheet to look at (light, dark, phone) |
 | `skills/explainer/scripts/figure-arrows.mjs` | Arrow readability checks, and a sheet with each edge highlighted in turn (used by figure-check) |
@@ -225,3 +238,4 @@ Unit tests for the `first-reader` scripts: `python3 tests/first-reader/test_firs
 
 [MIT](LICENSE).
 `skills/first-reader/` keeps the license of its source (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
+Icons placed in documents keep their sets' licenses (Lucide: ISC, logos: CC0; logos are their owners' trademarks), recorded per icon in `figures/icons/ICONS.md`.

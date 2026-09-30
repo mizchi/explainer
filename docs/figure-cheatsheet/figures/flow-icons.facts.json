@@ -1,0 +1,1 @@
+{ "labels": ["利用者", "API", "Postgres"], "edges": ["user->api", "api->db"] }

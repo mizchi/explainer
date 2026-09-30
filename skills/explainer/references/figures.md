@@ -125,6 +125,31 @@ D2 と Mermaid は、書いたのは意味（箱と辺）だけで、配置は�
 4. **直す**：目で見つけた誤りのうち、機械で捉えられる種類のものは、先に `figure-check.mjs` か `figure-arrows.mjs` の検査に足す（`tests/figure-check/` に悪い例を 1 つ足す）。意味の誤りは `forbidden` に足す。
 5. 上限は 5 回。それでも直らなければ、図をやめて文章にするか、分け方を変える。
 
+### アイコン
+
+アイコンは、箱の種類（利用者・サーバ・データベース）や、製品そのもの（PostgreSQL・Redis）を一目で分けたいときだけ使う。
+飾りのために足さない。ラベルは消さない（アイコンだけでは読めない人がいる）。
+
+`scripts/icons.mjs` が、プロジェクトに入っている Iconify のアイコンセットから探して、図の隣に置く。
+
+| セット | 中身 | ライセンス | 入れ方 |
+|---|---|---|---|
+| `lucide` | 線のアイコン（約 1900 個）。箱の中に置く | ISC | `npm i -D @iconify-json/lucide` |
+| `logos` | 技術のロゴ（色つき、約 2200 個）。その製品そのものを指すときだけ | CC0（ロゴは各社の商標） | `npm i -D @iconify-json/logos` |
+
+```
+node <skill>/scripts/icons.mjs search database --sheet /tmp/icons.png   # 候補を探し、1 枚に並べて目で選ぶ
+node <skill>/scripts/icons.mjs add lucide:database                      # figures/icons/database.svg を書き、ICONS.md に出典を残す
+node <skill>/scripts/icons.mjs inline lucide:database --size 24 --x 10 --y 10   # 手書きの SVG / HTML に貼る <svg>
+```
+
+- **D2**：`db: DB {icon: ./icons/database.svg}`。パスは `.d2` から見た相対パス。ロゴを主役にするなら `shape: image` にし、`width: 72; height: 72` のように大きさを決める（決めないと、ロゴが図の中で一番大きくなった）。
+- **Mermaid**：`db@{ icon: "lucide:database", label: "DB", pos: "b" }`。figure-check が、プロジェクトに入っているセットを Mermaid に登録して描く。
+- **SVG / HTML**：`icons.mjs inline` の出力を貼る。線の色は `--color` で決める（既定は `#1f2328`）。
+- figure-check は、次の 2 つを落とす。
+  - 図に埋め込まれていない画像。ファイルが無いか、パスが違うと、D2 は画像を埋め込まずにパスだけを残す。
+  - `ICONS.md` に出典の無い D2 のアイコン。`icons.mjs add` で置けば、自動で記録される。
+
 ### 形式ごとの注意
 
 - **SVG**：`viewBox` を狭く縦長にすると、スマホでも文字が小さくなりにくい（640 幅より 520 幅）。文字は 15px 以上。説明の文字は、矢印が出ていく側と反対に置く。

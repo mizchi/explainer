@@ -1,0 +1,23 @@
+# アイコンつきのアーキテクチャ（D2）。アイコンは icons.mjs add で figures/icons/ に置いた（出典は icons/ICONS.md）
+# 箱の中の線のアイコンは lucide、製品そのものを指すロゴは logos を shape: image で。ロゴは大きくなりすぎるので幅と高さを決める
+vars: {
+  d2-config: {
+    layout-engine: elk
+  }
+}
+direction: down
+*.style.font-size: 20
+browser: ブラウザ {icon: ./icons/globe.svg}
+app: アプリ {icon: ./icons/smartphone.svg}
+auth: 認証 {icon: ./icons/shield-check.svg}
+order: 注文 {icon: ./icons/shopping-cart.svg}
+pay: 決済 {icon: ./icons/credit-card.svg}
+pg: Postgres {shape: image; icon: ./icons/postgresql.svg; width: 72; height: 72}
+redis: Redis {shape: image; icon: ./icons/redis.svg; width: 72; height: 72}
+browser -> order
+app -> order
+browser -> auth
+order -> pay
+order -> pg
+auth -> redis
+pay -> pg

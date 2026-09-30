@@ -218,6 +218,37 @@ ELK は、分岐を同じ層に揃え、合流を 1 か所（gate）に集めま
 TLC の反例のように、道具が順序を出せるなら vlmkit-anim の `sequence` か `distributed` で描き、事実シートと照合します。
 道具の出力が無い説明用の順序なら、これで足ります。
 
+### 図 5：アイコンつきのアーキテクチャ（D2 + ELK）
+
+![ブラウザとアプリが注文へ、ブラウザが認証へ。注文は決済と Postgres へ、認証は Redis へ、決済は Postgres へ。箱には線のアイコン、Postgres と Redis はロゴ](figures/arch-icons.svg)
+
+<!-- source: figures/arch-icons.d2 -->
+```d2
+auth: 認証 {icon: ./icons/shield-check.svg}
+order: 注文 {icon: ./icons/shopping-cart.svg}
+pay: 決済 {icon: ./icons/credit-card.svg}
+pg: Postgres {shape: image; icon: ./icons/postgresql.svg; width: 72; height: 72}
+```
+
+アイコンは `icons.mjs add lucide:shopping-cart` のように置きました。出典とライセンスは `figures/icons/ICONS.md` にあります。
+箱の中には線のアイコン（lucide）、製品そのものにはロゴ（logos）を使いました。
+ロゴは `shape: image` で大きさを決めています。決めないと、ロゴが図の中で一番大きくなりました。
+
+### 図 6：アイコンつきの流れ（Mermaid）
+
+![利用者から API、API から Postgres へ。それぞれアイコンつき](figures/flow-icons.svg)
+
+<!-- source: figures/flow-icons.mmd -->
+```mermaid
+flowchart LR
+  user@{ icon: "lucide:user", label: "利用者", pos: "b" }
+  api@{ icon: "lucide:server", label: "API", pos: "b" }
+  db@{ icon: "logos:postgresql", label: "Postgres", pos: "b" }
+```
+
+Mermaid からは `<set>:<name>` で書きます。`figure-check.mjs` が、プロジェクトに入っているアイコンセットを Mermaid に登録して描きます。
+GitHub の Markdown で描かれる Mermaid には、このアイコンセットは登録されていません。PR の本文に貼るなら、アイコンを使わないか、SVG にして添付します。
+
 ---
 
 ## 4. 形式ごとに、最初に確かめること

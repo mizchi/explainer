@@ -91,4 +91,10 @@ await shrink('arrows-edges', join(tmp, 'shared', 'arrows-shared.edges.png'));
 sh('node', [join(scripts, 'figure-variants.mjs'), bad, '--out', join(tmp, 'variants')]);
 await shrink('arrows-variants', join(tmp, 'variants', 'arrows-shared.variants.png'));
 
+// 6. アイコン：D2 と Mermaid で、同じアイコンセット（lucide・logos）を使った図
+await tile('icons', [
+  [svg('docs/figure-cheatsheet/figures/arch-icons.svg'), 420],
+  [svg('docs/figure-cheatsheet/figures/flow-icons.svg'), 420],
+]);
+
 await browser.close();

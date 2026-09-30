@@ -52,7 +52,8 @@ export function collectArrows() {
     if (shape) nodes.push({ id, ...rect(shape) });
   }
   // Mermaid：箱は g.node（id は「<図>-flowchart-<id>-<n>」）、辺は path[data-edge]（id は「<図>-L_<from>_<to>_<n>」）
-  const mNodes = [...svg.querySelectorAll('g.node[id]')].map((g) => ({ el: g, id: g.id.replace(/^.*?flowchart-/, '').replace(/-\d+$/, '') }));
+  // アイコンや画像の箱は g.node ではなく g.icon-shape / g.image-shape になる
+  const mNodes = [...svg.querySelectorAll('g.node[id], g.icon-shape[id], g.image-shape[id]')].map((g) => ({ el: g, id: g.id.replace(/^.*?flowchart-/, '').replace(/-\d+$/, '') }));
   for (const n of mNodes) nodes.push({ id: n.id, ...rect(n.el) });
   for (const c of svg.querySelectorAll('g.cluster[id]')) nodes.push({ id: c.id.replace(/^.*?-(?=[^-]+$)/, ''), ...rect(c) });
   const ids = new Set(mNodes.map((n) => n.id));
