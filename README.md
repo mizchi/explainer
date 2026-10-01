@@ -199,7 +199,7 @@ In the 2026-09-25 to 27 runs, using only graders that don't depend on a shell, t
 | `crash-course` | +0.43 (3 runs each, 5th round) |
 | `crash-course-known-heavy` | +0.25 |
 | `crash-course-persona-implicit` | +0.12 |
-| `crash-course-persona-build` | +0.20; +0.40 in the 9th round, after adding the rule to record a provisional persona; +0.13 in the 10th, after adding a reply template (the persona file was written in 3 of 3 runs) |
+| `crash-course-persona-build` | +0.20; +0.40 in the 9th round, after adding the rule to record a provisional persona; +0.13 in the 10th, after adding a reply template (the persona file was written in 3 of 3 runs); +0.33 in the 11th, with a reply form for writing on assumptions too (every grader passed in all 3 runs with the skill) |
 | `pr-reader-first` | +0.50 |
 | `book` | +0.28 |
 | control case | no difference (no over-triggering) |
