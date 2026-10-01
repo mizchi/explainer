@@ -17,6 +17,7 @@ As a Claude Code plugin (this repository is itself a plugin marketplace; one plu
 ```
 
 From a shell: `claude plugin marketplace add mizchi/explainer` and `claude plugin install explainer@explainer`.
+To update an installed copy: `claude plugin marketplace update explainer` and then `claude plugin update explainer@explainer`. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 The skills can also be installed with [`npx skills`](https://github.com/vercel-labs/skills) or [APM](https://github.com/microsoft/apm) (checked with skills 1.7.0 and apm-cli 0.32.0; both put the three skills in `.claude/skills/`, byte-identical to this repository).
 

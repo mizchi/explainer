@@ -17,6 +17,7 @@ Claude Code のプラグインとして入れる場合（このリポジトリ�
 ```
 
 シェルからは `claude plugin marketplace add mizchi/explainer` と `claude plugin install explainer@explainer` です。
+入れたものを更新するときは、`claude plugin marketplace update explainer` のあとに `claude plugin update explainer@explainer` です。変更点は [CHANGELOG.md](CHANGELOG.md) にあります。
 
 [`npx skills`](https://github.com/vercel-labs/skills) や [APM](https://github.com/microsoft/apm) でも入れられます（skills 1.7.0 と apm-cli 0.32.0 で確認。どちらも 3 つのスキルを `.claude/skills/` に置き、中身はこのリポジトリと同じでした）。
 

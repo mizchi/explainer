@@ -1,7 +1,7 @@
 {
   "name": "explainer",
-  "version": "0.1.0",
-  "description": "Explain concepts, PRs and designs to one specific reader: build a persona, write only what they don't know, check every quoted output and figure with tools (vlmkit, vlmkit-anim), and test the draft on simulated readers (first-reader). Single crash courses or chaptered books.",
+  "version": "0.1.1",
+  "description": "Explain concepts, PRs and designs to one specific reader: build a persona, write only what they don't know, and check every quoted output and figure with tools. Figures from vlmkit-anim scenes, Mermaid, D2 (TALA / ELK / dagre), SVG or HTML, rendered and checked (overlaps, clipping, arrow readability, phone width), then looked at and fixed by eye; layout candidates side by side; Iconify icons (lucide, logos). Simulated beta readers (first-reader). Single crash courses or chaptered books.",
   "author": {
     "name": "mizchi",
     "url": "https://github.com/mizchi"
@@ -14,6 +14,11 @@
     "documentation",
     "learning",
     "persona",
+    "diagrams",
+    "d2",
+    "mermaid",
+    "svg",
+    "icons",
     "formal-methods",
     "vlmkit",
     "beta-reader"
