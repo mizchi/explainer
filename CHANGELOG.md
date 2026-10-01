@@ -1,7 +1,13 @@
 # Changelog
 
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
-Bump both when the skills change, so that installed copies see an update.
+Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
+
+## 0.3.0 — 2026-10-01
+
+No new changes; this release puts the version above every number used so far.
+0.2.0 appeared briefly on a working branch (and could be installed from it) before being renumbered to 0.1.1, so an installed 0.2.0 would see 0.1.1 and 0.1.2 as older.
+0.3.0 contains everything in 0.1.1 and 0.1.2 below. From here on, versions only go up.
 
 ## 0.1.2 — 2026-10-01
 
