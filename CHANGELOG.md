@@ -3,6 +3,14 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.3.1 — 2026-10-02
+
+Ideas from [HyperFrames](https://github.com/heygen-com/hyperframes) (Apache-2.0), rewritten for explainer (no code copied):
+
+- explainer: replies about a new reader separate what the request said from what was inferred (with reasons); an inference is never treated as an answer, including in non-interactive runs.
+- explainer: one sentence of what the document tells the reader, and a table of each section's job, made before writing and placed at the top; sections whose "why" does not lead back to that sentence are cut.
+- explainer: value before evidence (what changes for the reader by the second section, especially for PRs), and a two-way delete test after writing.
+
 ## 0.3.0 — 2026-10-01
 
 No new changes; this release puts the version above every number used so far.
