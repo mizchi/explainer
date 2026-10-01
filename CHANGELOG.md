@@ -3,6 +3,10 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update.
 
+## 0.1.2 — 2026-10-01
+
+- explainer: when writing on assumptions without the reader's answers, the reply opens with a fixed three-line form (what was written, the assumptions, the questions), so the assumptions reach the reader and not only the persona file.
+
 ## 0.1.1 — 2026-10-01
 
 ### Figures
