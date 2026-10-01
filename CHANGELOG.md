@@ -3,7 +3,7 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update.
 
-## 0.2.0 — 2026-10-01
+## 0.1.1 — 2026-10-01
 
 ### Figures
 
