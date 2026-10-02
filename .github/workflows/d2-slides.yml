@@ -19,6 +19,8 @@ name: d2-slides deck gates
 #
 # Deterministic and keyless: no VLM, no API key, no dev server, `d2` pinned.
 
+# The path filter sees only the first 300 files of a diff: the PR that moved this job here
+# from mizchi/vlmkit changed 1000+ files and the job did not start until this file changed.
 on:
   pull_request:
     paths:
