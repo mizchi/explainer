@@ -10,7 +10,7 @@
       "name": "explainer",
       "source": "./",
       "displayName": "explainer",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "description": "Seven skills: explainer (a persona-calibrated crash course with tool-verified claims and figures; Mermaid / D2 / SVG / HTML figures rendered, checked for overlaps and arrow readability, compared across layouts and fixed by eye; Iconify icons), explainer-book (chaptered learning material with objectives, concept order, reading budgets and executed exercises), first-reader (simulated beta readers: skim gate, no-lookahead timed reads, recall test; bundled from awesome-llm-apps, Apache-2.0), and from vlmkit: explain-with-anim and explanatory-animation (checked vlmkit-anim figures and animations), d2-diagram (D2 / TALA held to a fact sheet) and d2-slides (D2 decks checked with vlmkit gates).",
       "author": {
         "name": "mizchi",

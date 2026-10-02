@@ -3,6 +3,10 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.4.3 — 2026-10-02
+
+- explainer: in a verdict table, measured values come only from the request or executed output (hand-computed intervals and ratios stay out of the table), and pass criteria only from a source; with no source the criterion reads "depends on context" and the verdict is 確認. `references/figures.md` lists common criteria for logistic regression with their basis.
+
 ## 0.4.2 — 2026-10-02
 
 - explainer: data charts (distributions, relations, model diagnostics) are written as Vega-Lite specs (`figures/*.vl.json`); `figure-check.mjs` renders them with vega (no browser) and runs the same text checks, and `verify-doc.mjs` picks them up. Compute in JS when it can be written (aggregates, ROC / PR, calibration, GLM by IRLS), in Python when it needs statsmodels / lifelines etc.
