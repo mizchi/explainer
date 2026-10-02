@@ -9,7 +9,7 @@ AI から人間へ概念を説明するための、スキルと道具です。
 
 ## インストール
 
-Claude Code のプラグインとして入れる場合（このリポジトリがそのままマーケットプレイスで、プラグイン `explainer` に 3 つのスキルが入っています）：
+Claude Code のプラグインとして入れる場合（このリポジトリがそのままマーケットプレイスで、プラグイン `explainer` に 7 つのスキルが入っています）：
 
 ```
 /plugin marketplace add mizchi/explainer
@@ -19,20 +19,26 @@ Claude Code のプラグインとして入れる場合（このリポジトリ�
 シェルからは `claude plugin marketplace add mizchi/explainer` と `claude plugin install explainer@explainer` です。
 入れたものを更新するときは、`claude plugin marketplace update explainer` のあとに `claude plugin update explainer@explainer` です。変更点は [CHANGELOG.md](CHANGELOG.md) にあります。
 
-[`npx skills`](https://github.com/vercel-labs/skills) や [APM](https://github.com/microsoft/apm) でも入れられます（skills 1.7.0 と apm-cli 0.32.0 で確認。どちらも 3 つのスキルを `.claude/skills/` に置き、中身はこのリポジトリと同じでした）。
+[`npx skills`](https://github.com/vercel-labs/skills) や [APM](https://github.com/microsoft/apm) でも入れられます（skills 1.7.0 と apm-cli 0.32.0 で確認。どちらもスキルを `.claude/skills/` に置き、中身はこのリポジトリと同じでした）。
 
 ```sh
 npx skills add mizchi/explainer --skill '*' -a claude-code   # 先に --list で一覧を見られる
 apm install mizchi/explainer --target claude
 ```
 
-3 つとも入れてください。`explainer-book` は、隣のディレクトリにある `explainer` の `verify-doc.mjs`（`../../explainer/scripts/`）を呼びます。
+`explainer`・`explainer-book`・`first-reader` は一緒に入れてください。`explainer-book` は、隣のディレクトリにある `explainer` の `verify-doc.mjs`（`../../explainer/scripts/`）を呼びます。
 
 | スキル | 使う場面 |
 |---|---|
 | `explainer` | 1 人の読み手に向けた速習資料。主張と図を道具で検証する |
 | `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
 | `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
+| `explain-with-anim` | 「どう動くか・どういう構造か・この PR で何が変わるか」に、コードから描いた図（`vlmkit-anim facts` / `repo` / `pr`）と、それをなぞる文章で答える。図は事実シートで検査する |
+| `explanatory-animation` | `vlmkit-anim` のシーンを 1 つ書いて検査する。アルゴリズム・プロトコル・構造をアニメーションか静止図にし、事実シートとレイアウトで確かめる |
+| `d2-diagram` | TALA で配置する D2 の図。ターミナルで読み、`d2-facts.mjs` で「描かれたもの」を事実シートと突き合わせる |
+| `d2-slides` | Markdown 1 枚（図ごとに D2 フェンス）からスライドを作り、HTML にして vlmkit の gate で検査する |
+
+最後の 4 つは [mizchi/vlmkit](https://github.com/mizchi/vlmkit) から、`@mizchi/vlmkit-anim` パッケージ（`packages/vlmkit-anim/`）と一緒に移ってきました。0.24 からはここで開発します。
 
 スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid`、アイコンを使うなら `@iconify-json/lucide @iconify-json/logos` も入れます。
 `first-reader` は Python 3 の標準ライブラリだけで動きます。

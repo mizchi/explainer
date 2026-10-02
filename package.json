@@ -19,7 +19,9 @@
     "figure": "node skills/explainer/scripts/figure-check.mjs",
     "figure:variants": "node skills/explainer/scripts/figure-variants.mjs",
     "readme:images": "node scripts/readme-images.mjs",
-    "icons": "node skills/explainer/scripts/icons.mjs"
+    "icons": "node skills/explainer/scripts/icons.mjs",
+    "deck:example": "node skills/d2-slides/assets/build-deck.mjs examples/d2-slides/deck.md --out examples/d2-slides/built",
+    "test:d2": "node --test tests/d2/*.test.mjs"
   },
   "devDependencies": {
     "@iconify-json/logos": "^1.2.15",

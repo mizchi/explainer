@@ -9,7 +9,7 @@ This repository is for writing, for one reader, **only what that reader does not
 
 ## Install
 
-As a Claude Code plugin (this repository is itself a plugin marketplace; one plugin, `explainer`, contains three skills):
+As a Claude Code plugin (this repository is itself a plugin marketplace; one plugin, `explainer`, contains seven skills):
 
 ```
 /plugin marketplace add mizchi/explainer
@@ -19,20 +19,26 @@ As a Claude Code plugin (this repository is itself a plugin marketplace; one plu
 From a shell: `claude plugin marketplace add mizchi/explainer` and `claude plugin install explainer@explainer`.
 To update an installed copy: `claude plugin marketplace update explainer` and then `claude plugin update explainer@explainer`. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
-The skills can also be installed with [`npx skills`](https://github.com/vercel-labs/skills) or [APM](https://github.com/microsoft/apm) (checked with skills 1.7.0 and apm-cli 0.32.0; both put the three skills in `.claude/skills/`, byte-identical to this repository).
+The skills can also be installed with [`npx skills`](https://github.com/vercel-labs/skills) or [APM](https://github.com/microsoft/apm) (checked with skills 1.7.0 and apm-cli 0.32.0; both put the skills in `.claude/skills/`, byte-identical to this repository).
 
 ```sh
 npx skills add mizchi/explainer --skill '*' -a claude-code   # --list to see the skills first
 apm install mizchi/explainer --target claude
 ```
 
-Install all three. `explainer-book` runs `explainer`'s `verify-doc.mjs` from the sibling directory (`../../explainer/scripts/`).
+Install `explainer`, `explainer-book` and `first-reader` together: `explainer-book` runs `explainer`'s `verify-doc.mjs` from the sibling directory (`../../explainer/scripts/`).
 
 | Skill | When to use it |
 |---|---|
 | `explainer` | A crash course for one reader. Claims and figures are checked with tools |
 | `explainer-book` | A chaptered course. Checks learning objectives, concept order, reading time and exercises |
 | `first-reader` | Has simulated readers read a draft one paragraph at a time before publishing. Reports where they drop off and what stays with them the next day. Does not rewrite |
+| `explain-with-anim` | Answers "how does this work / how is it structured / what does this PR change" with a figure drawn from the code (`vlmkit-anim facts` / `repo` / `pr`), checked against its facts, and prose that walks it |
+| `explanatory-animation` | Writes and checks one `vlmkit-anim` scene: an algorithm, protocol or architecture as an animation or a still figure, held to a fact sheet and its layout |
+| `d2-diagram` | A D2 diagram laid out by TALA, read in the terminal, and held to a fact sheet by `d2-facts.mjs` (what the picture draws, not what the text says) |
+| `d2-slides` | A slide deck from one Markdown file with a D2 fence per figure, built to HTML and checked with vlmkit's gates |
+
+The last four came from [mizchi/vlmkit](https://github.com/mizchi/vlmkit) with the `@mizchi/vlmkit-anim` package (`packages/vlmkit-anim/`), which is developed here from 0.24.
 
 Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures, and `@iconify-json/lucide @iconify-json/logos` to use icons.
 `first-reader` needs only the Python 3 standard library.
