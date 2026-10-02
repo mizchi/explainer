@@ -138,6 +138,10 @@ export async function rasteriseFrames(tl: Timeline, frames: ScheduledFrame[], sc
     const out: Uint8Array[] = [];
     for (const f of frames) {
       await page.setContent(`<!doctype html><html><body style="margin:0;background:${tl.canvas.background ?? "#fff"}">${f.svg}</body></html>`);
+      // Two animation frames before the capture: right after setContent, headless Chromium
+      // can still have no composited frame, and captureScreenshot then fails with "Unable to
+      // capture screenshot" (once in CI on this loop, on a commit whose code had passed twice).
+      await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
       out.push(await page.screenshot({ clip: { x: 0, y: 0, width: tl.canvas.width, height: tl.canvas.height }, type: "png" }));
     }
     return out;
