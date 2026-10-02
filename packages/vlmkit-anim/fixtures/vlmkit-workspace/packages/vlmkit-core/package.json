@@ -1,0 +1,13 @@
+{
+  "name": "@mizchi/vlmkit-core",
+  "description": "VRT diff engine + shared types — pure image / DOM / a11y / visual comparison primitives.",
+  "dependencies": {
+    "@mizchi/vlmkit-judge": "workspace:*",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0"
+  },
+  "peerDependencies": {
+    "playwright": ">=1.61 <2",
+    "@jsquash/webp": "^1"
+  }
+}

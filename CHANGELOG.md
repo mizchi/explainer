@@ -3,6 +3,13 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.4.0 — 2026-10-02
+
+From [mizchi/vlmkit](https://github.com/mizchi/vlmkit), which keeps its frontend gates and hands its explanation and diagram tooling here:
+
+- `@mizchi/vlmkit-anim` (`packages/vlmkit-anim/`): the source, its writing guide (`docs/anim-ir.md`, now shipped in the package), fixtures, samples and all 280 tests. The npm name is unchanged; 0.23.2 was the last version published from vlmkit, and from 0.24 it is published from here (`vlmkit-anim-v*` tags, `.github/workflows/vlmkit-anim.yml`, OIDC).
+- Four skills: `explain-with-anim`, `explanatory-animation`, `d2-diagram`, `d2-slides`, with `d2-diagram`'s fact checker and `d2-slides`' deck builder and reviewer, their tests (`tests/d2/`, `npm run test:d2`), the worked deck (`examples/d2-slides/`, `npm run deck:example`) and the deck-gates workflow.
+
 ## 0.3.0 — 2026-10-01
 
 No new changes; this release puts the version above every number used so far.

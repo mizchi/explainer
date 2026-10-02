@@ -1,0 +1,87 @@
+{
+  "name": "@mizchi/vlmkit-anim",
+  "version": "0.23.2",
+  "description": "Declarative explanatory animation IR: a semantic Scene IR (sorting, arrays with pointers, stacks, queues, linked lists, state machines, heaps, binary search trees, distributed systems, matrices, graphs, charts, concept diagrams, vector; several of them composed in panes; value / callout / snapshot / group / text / relate annotations over named anchors in every kind) compiled to a keyframe Timeline IR, rendered by a tiny SVG + Web Animations web component or sampled headlessly to SVG frames, GIF and video.",
+  "license": "MIT",
+  "author": "mizchi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mizchi/explainer.git",
+    "directory": "packages/vlmkit-anim"
+  },
+  "homepage": "https://github.com/mizchi/explainer/tree/main/packages/vlmkit-anim#readme",
+  "bugs": {
+    "url": "https://github.com/mizchi/explainer/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**",
+    "docs/**",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "prepack": "npm run build",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json",
+    "samples": "node scripts/samples.mjs"
+  },
+  "bin": {
+    "vlmkit-anim": "./dist/cli.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./cli": {
+      "types": "./dist/cli.d.mts",
+      "import": "./dist/cli.mjs"
+    },
+    "./remark": {
+      "types": "./dist/remark.d.mts",
+      "import": "./dist/remark.mjs"
+    },
+    "./*.ts": {
+      "types": "./dist/*.d.mts",
+      "import": "./dist/*.mjs"
+    }
+  },
+  "dependencies": {
+    "gifenc": "^1.0.3",
+    "pngjs": "^7.0.0"
+  },
+  "peerDependencies": {
+    "@mizchi/vlmkit-ai": ">=0.23.2",
+    "@mizchi/vlmkit-animation-eval": ">=0.23.2",
+    "playwright": ">=1.61 <2"
+  },
+  "peerDependenciesMeta": {
+    "@mizchi/vlmkit-ai": {
+      "optional": true
+    },
+    "@mizchi/vlmkit-animation-eval": {
+      "optional": true
+    },
+    "playwright": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@mizchi/vlmkit-ai": "^0.23.2",
+    "@mizchi/vlmkit-animation-eval": "^0.23.2",
+    "@types/node": "^25.5.2",
+    "@types/pngjs": "^6.0.5",
+    "playwright": "1.63.0",
+    "tsdown": "^0.21.7",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.10"
+  }
+}

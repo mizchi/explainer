@@ -1,0 +1,9 @@
+{
+  "name": "@mizchi/vlmkit-ai",
+  "description": "VLM / LLM clients, reasoning pipeline, and NLP helpers used by VRT to interpret diff images and natural-language intent.",
+  "dependencies": {
+    "@mizchi/vlmkit-core": "workspace:*",
+    "@google/generative-ai": "^0.24.1",
+    "pngjs": "^7.0.0"
+  }
+}
