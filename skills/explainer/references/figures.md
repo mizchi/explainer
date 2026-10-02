@@ -55,6 +55,52 @@ SVG がシーンより古ければ落ちる。
 - `state ... drawn but the trace never enters it`：全状態を描き、反例だけを歩く図では想定内の警告。本文で「描いたが歩かない状態」の意味を説明する。
 - GIF は重い（13 状態で 5 MB）。README には SVG を置く。動きは `build-html.mjs` が作る再生ページ（`vlmkit-anim html`）で見せる。
 
+## データの図（グラフ）
+
+数値の分布・関係・モデルの診断を見せる図は、Vega-Lite の spec（`figures/<name>.vl.json`）で書く。
+`figure-check.mjs` が vega で SVG にし、ほかの図と同じ検査をする（`npm i -D vega vega-lite`）。
+
+- 文字が SVG の `<text>` のまま出るので、重なり・はみ出し・小さすぎる文字・事実シートの検査が届く。
+- spec は JSON なので、題と値を事実シートや `checks.json` と照合できる。
+- ブラウザを使わず、node だけで描ける。
+
+値の計算と描画は分ける。値はスクリプトで計算して spec のデータに入れ、本文に載せる値は `checks.json` で計算し直して照合する。
+計算は、JS で書ければ JS、書けなければ Python。
+
+| 計算 | JS / TS | Python が要る |
+|---|---|---|
+| 集計・分布・ROC / PR・キャリブレーション | 手で書ける（数十行） | |
+| GLM の係数と SE（IRLS） | `ml-matrix` で書ける（`docs/dataviz/` で statsmodels と小数 6 桁まで一致） | |
+| 検定（t・χ²・順位） | `@stdlib/stats` | |
+| PCA・k-means・決定木 | `ml-pca`・`ml-kmeans`・`ml-cart` | |
+| 混合効果・Cox・頑健 SE・因子分析・SHAP | 成熟したものが無い | statsmodels・lifelines・factor_analyzer・shap |
+| MCMC | Stan の CLI（cmdstan）の出力を読めばよい | どちらでも |
+
+Python で計算したときも、図は Vega-Lite の spec に値を入れて描くのがよい。
+matplotlib で描くなら、次の 2 つを守る。
+
+- SVG の文字を輪郭にしない：`plt.rcParams["svg.fonttype"] = "none"`。既定のままだと文字が path になり、`figure-check` は「drawn as outlines」で落とす（文字の検査がすべて素通りするため）。
+- `Glyph ... missing from font(s)` の警告は、失敗として扱う。PNG にその文字が豆腐（□）で出る。日本語のフォントには `≤` などの記号が無いことがある。ブラウザで描く図の豆腐は、`figure-check` が見つける。
+
+### 診断の図と判定表
+
+モデルや分析の診断を読み手に見せるときは、次の型にする。
+
+- 1 つの手法につき 1 枚。パネルの題に「何を見る図か — 何が見えれば合格か」を書く（例：「キャリブレーション — 対角線に沿う」）。題にこの形が無いパネルは、`figure-check` が △ で知らせる。
+- 合格の基準の線（対角線・陽性率・±2SE のバンド）は破線で描く。
+- スマホで読む資料では、パネルを 2 列に並べない。縦に積む（`vconcat`）。375px 幅で 2 列にすると、目盛りが 6px になる。
+- 本文に判定表を置く。
+
+  | 診断項目 | 実測値 | 合格基準 | 判定 | 次アクション |
+  |---|---|---|---|---|
+
+  - 実測値は、スクリプトの出力をそのまま写す。
+  - 判定（OK / 要対処 / 確認）と次アクションは、図と合格基準を見て書く。スクリプトの if で組み立てない（件数は基準内でも、図に形があることがある）。
+  - 要対処には、次アクションを必ず書く。すべて OK でも表を出す。
+
+例は `docs/dataviz/`（ロジスティック回帰の 4 パネル。JS で計算した値を、Python の値と照合している）。
+この型は、[atsushi-green/ds-ai-coding-skills](https://github.com/atsushi-green/ds-ai-coding-skills) の diagnostics スキルの考え方を参考に書いた（ライセンスの記載が無いので、文章とコードは使っていない）。
+
 ## 手で描く図（Mermaid / D2 / SVG / HTML）と、目で見るループ
 
 vlmkit-anim の kind に当てはまらない概念図（包含関係、使い分けの図、コードと箱が混ざる図）は、直接マークアップで書く。

@@ -14,6 +14,7 @@
     "build:book": "node skills/explainer/scripts/build-html.mjs docs/inductive-invariant-book/README.md docs/inductive-invariant-book/01-quickstart.md docs/inductive-invariant-book/02-reading-cti.md docs/inductive-invariant-book/03-strengthening.md",
     "verify:cheatsheet": "node skills/explainer/scripts/verify-doc.mjs docs/figure-cheatsheet",
     "build:cheatsheet": "node skills/explainer/scripts/build-html.mjs docs/figure-cheatsheet/README.md",
+    "verify:dataviz": "node skills/explainer/scripts/verify-doc.mjs docs/dataviz",
     "setup:d2": "sh scripts/setup-d2.sh",
     "test:figures": "node tests/figure-check/run.mjs",
     "figure": "node skills/explainer/scripts/figure-check.mjs",
@@ -31,7 +32,10 @@
     "@mizchi/vlmkit-anim": "^0.22.0",
     "marked": "^18.0.14",
     "mermaid": "^12.0.0",
+    "ml-matrix": "6.15.0",
     "playwright": "1.56.1",
+    "vega": "6.4.0",
+    "vega-lite": "6.4.3",
     "z3-solver": "^5.2.0"
   },
   "license": "MIT"

@@ -19,6 +19,9 @@ const cases = [
   ['icon-good.d2', null],
   ['icon-unrecorded.d2', /no source \/ license/],
   ['icon-missing.d2', /render failed|not embedded/],
+  ['chart-good.vl.json', null],
+  ['tofu.svg', /no glyph/],
+  ['outlined.svg', /drawn as outlines/],
 ];
 let bad = 0;
 for (const [file, want] of cases) {

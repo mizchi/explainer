@@ -1,0 +1,15 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "config": { "font": "system-ui, sans-serif", "axis": { "labelFontSize": 13, "titleFontSize": 14 }, "title": { "fontSize": 15 } },
+  "title": "キャリブレーション — 対角線に沿う",
+  "width": 300, "height": 240,
+  "layer": [
+    { "data": { "values": [{ "p": 0.1, "o": 0.12 }, { "p": 0.3, "o": 0.28 }, { "p": 0.5, "o": 0.55 }, { "p": 0.7, "o": 0.69 }] },
+      "mark": { "type": "line", "point": true },
+      "encoding": { "x": { "field": "p", "type": "quantitative", "title": "予測確率", "scale": { "domain": [0, 1] } },
+                    "y": { "field": "o", "type": "quantitative", "title": "実際の陽性率", "scale": { "domain": [0, 1] } } } },
+    { "data": { "values": [{ "p": 0, "o": 0 }, { "p": 1, "o": 1 }] },
+      "mark": { "type": "line", "strokeDash": [5, 4], "color": "gray" },
+      "encoding": { "x": { "field": "p", "type": "quantitative" }, "y": { "field": "o", "type": "quantitative" } } }
+  ]
+}

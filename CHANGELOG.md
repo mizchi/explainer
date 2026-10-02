@@ -3,6 +3,13 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.4.2 — 2026-10-02
+
+- explainer: data charts (distributions, relations, model diagnostics) are written as Vega-Lite specs (`figures/*.vl.json`); `figure-check.mjs` renders them with vega (no browser) and runs the same text checks, and `verify-doc.mjs` picks them up. Compute in JS when it can be written (aggregates, ROC / PR, calibration, GLM by IRLS), in Python when it needs statsmodels / lifelines etc.
+- explainer: diagnostic figures name what to look at and what passes in each panel title, draw the pass lines dashed, stack panels in one column for phones, and come with a verdict table (item, measured, criterion, verdict, next action) written by reading the figure, not by code. Ideas from atsushi-green/ds-ai-coding-skills (no license stated, so no text or code was taken).
+- figure-check: fails SVGs whose text is drawn as outlines (matplotlib's default; set `svg.fonttype = "none"`), fails characters that no installed font can draw (tofu), and looks for playwright in the figure's, the cwd's and its own package.json in turn.
+- docs/dataviz: the logistic-regression diagnostic in JS, checked against statsmodels / scikit-learn to 6 decimals.
+
 ## 0.4.1 — 2026-10-02
 
 (These changes were pushed on a branch as 0.3.1 and 0.3.2; released as 0.4.1, after 0.4.0.)
