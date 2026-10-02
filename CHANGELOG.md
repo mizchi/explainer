@@ -3,6 +3,18 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.4.1 — 2026-10-02
+
+(These changes were pushed on a branch as 0.3.1 and 0.3.2; released as 0.4.1, after 0.4.0.)
+
+Ideas from [HyperFrames](https://github.com/heygen-com/hyperframes) (Apache-2.0), rewritten for explainer (no code copied):
+
+- explainer: in the reply after writing on assumptions, the second line is always the message (what the document tells the reader, and its sections); caveats such as "unverified" come after the form.
+- explainer: the skill now triggers for small PR explanations and chat-only answers whenever a named reader is given (it was not being loaded in the PR eval cases).
+- explainer: replies about a new reader separate what the request said from what was inferred (with reasons); an inference is never treated as an answer, including in non-interactive runs.
+- explainer: one sentence of what the document tells the reader, and a table of each section's job, made before writing and placed at the top; sections whose "why" does not lead back to that sentence are cut.
+- explainer: value before evidence (what changes for the reader by the second section, especially for PRs), and a two-way delete test after writing.
+
 ## 0.4.0 — 2026-10-02
 
 From [mizchi/vlmkit](https://github.com/mizchi/vlmkit), which keeps its frontend gates and hands its explanation and diagram tooling here:

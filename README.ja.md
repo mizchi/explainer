@@ -194,6 +194,7 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `crash-course-persona-build` | 読み手の名前と所属しか分からないとき、書く前に確かめるか、仮定を明示するか。経歴を作り上げないか |
 | `book` | 1 章が quickstart か。各章に学習目標と答えつきの問いがあるか。演習の答えを実行して確かめるか |
 | `pr-reader-first` | 読み手が分からないとき、書く前に確かめるか、前提を明示するか |
+| `pr-value-first` | 差分だけでは影響が見えない PR（再試行の指数バックオフとジッタを、オンコールの SRE に説明する）で、障害時に何が変わるかを先に書き、コードを後に置くか |
 | `one-liner-control` | 対照。1 文で済む質問で、スキルを呼ばず、資料を作らないか |
 | `first-reader-no-rewrite` | 下書きのレビューで、読み手の体験を報告し、書き直さないか |
 

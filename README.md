@@ -194,6 +194,7 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `crash-course-persona-build` | Given only the reader's name and team, does it check before writing, or state its assumptions? Does it avoid inventing a background? |
 | `book` | Is chapter 1 a quickstart? Does each chapter have objectives and quizzes with answers? Does it run the exercise answers to check them? |
 | `pr-reader-first` | When the reader is unknown, does it check before writing, or state its assumptions? |
+| `pr-value-first` | For a PR whose impact the diff does not show (retry backoff with jitter, explained to an on-call SRE), does it say what changes during an outage first, and the code after? |
 | `one-liner-control` | Control. For a one-sentence question, does it avoid calling the skill and producing a document? |
 | `first-reader-no-rewrite` | When reviewing a draft, does it report the reader's experience without rewriting? |
 
