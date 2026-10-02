@@ -60,6 +60,13 @@ function render(src) {
     }
     return hold(`<figure role="img" aria-label="${alt}">${svg}<figcaption>${alt} ${link}</figcaption></figure>`);
   });
+  // 画像（PNG など）の図 → data: URI で埋め込む（出力の HTML 1 枚で完結させる。dist には figures/ を写さない）
+  const mime = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp' };
+  md = md.replace(/!\[([^\]]*)\]\((figures\/[^)]+?\.(png|jpe?g|gif|webp))\)/g, (all, alt, file, ext) => {
+    const path = join(docDir, file);
+    if (!existsSync(path)) return all;
+    return hold(`<figure><img src="data:${mime[ext]};base64,${readFileSync(path).toString('base64')}" alt="${alt}" style="max-width:100%;height:auto"><figcaption>${alt}</figcaption></figure>`);
+  });
   // 本の中のページへのリンクを .html に
   md = md.replace(/\]\(([\w.-]+\.md)(#[^)]*)?\)/g, (all, file, hash = '') =>
     mdNames.has(file) ? `](${htmlName(file)}${hash})` : all);

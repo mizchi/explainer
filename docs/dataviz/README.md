@@ -55,7 +55,13 @@ JS 版は 1 秒かからずに終わる（ブラウザは使わない）。
 | Vega-Lite、2 × 2 | 78 | スマホ幅で目盛りが 5px。落ちる |
 | Vega-Lite、縦に 4 段（下の図） | 78 | 通る |
 
+2 × 2 のスマホ幅（目盛りが 5px）：
+
+![Vega-Lite の 2 × 2 をスマホ幅で描いたもの](figures/before-2x2-mobile.png)
+
 matplotlib の PNG では、題の `≤` が豆腐（□）になった。日本語のフォント（IPAexGothic）にこの字形が無いため。
+
+![matplotlib の 2 × 2。右下の題の ≤ が □ になっている](figures/matplotlib-tofu.png)
 `savefig` は `Glyph 8804 ... missing` と警告するだけで、図はそのまま保存される。
 ブラウザで描く図の豆腐は、`figure-check.mjs` が「no glyph」で見つける。
 

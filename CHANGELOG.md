@@ -9,6 +9,7 @@ Bump both when the skills change, so that installed copies see an update. Never 
 - explainer: diagnostic figures name what to look at and what passes in each panel title, draw the pass lines dashed, stack panels in one column for phones, and come with a verdict table (item, measured, criterion, verdict, next action) written by reading the figure, not by code. Ideas from atsushi-green/ds-ai-coding-skills (no license stated, so no text or code was taken).
 - figure-check: fails SVGs whose text is drawn as outlines (matplotlib's default; set `svg.fonttype = "none"`), fails characters that no installed font can draw (tofu), and looks for playwright in the figure's, the cwd's and its own package.json in turn.
 - docs/dataviz: the logistic-regression diagnostic in JS, checked against statsmodels / scikit-learn to 6 decimals.
+- build-html: PNG / JPEG / GIF / WebP images under `figures/` are embedded as data URIs, so the built page shows them.
 
 ## 0.4.1 — 2026-10-02
 
