@@ -1,6 +1,6 @@
 ---
 name: explainer
-description: 特定の読み手に向けて、概念・PR・設計を「冗長にならない水準」の速習資料として説明し、図と主張を道具で検証する。読み手のペルソナ（既に知っていること・知らないこと・読み方）を質問と公開情報から作り、その差分だけを書く。図は vlmkit-anim で事実シートに照らして描き、本文に引用するコード・出力は再実行して照合し、HTML は vlmkit のゲートに通す。Use when the user says "explain this to me / to <person>", "速習資料", "解説ドキュメント", "この PR を理解したい", "わかるように説明して", "I can't keep up with what the agent wrote", "この PR を <人> が理解できるように説明して", or when a reviewer asks what a change does. Use it even for a small diff or a chat-only answer whenever a named reader (a reviewer, an on-call engineer, a teammate) is given. Also when the user wrote an explanation themselves and lost confidence in it.
+description: 特定の読み手に向けて、概念・PR・設計を「冗長にならない水準」の速習資料として説明し、図と主張を道具で検証する。読み手のペルソナ（既に知っていること・知らないこと・読み方）を質問と公開情報から作り、その差分だけを書く。図は vlmkit-anim で事実シートに照らして描き、本文に引用するコード・出力は再実行して照合し、HTML は vlmkit のゲートに通す。Use when the user says "explain this to me / to <person>", "速習資料", "解説ドキュメント", "この PR を理解したい", "わかるように説明して", "I can't keep up with what the agent wrote", "この PR を <人> が理解できるように説明して", or when a reviewer asks what a change does. Use it even for a small diff or a chat-only answer whenever a named reader (a reviewer, an on-call engineer, a teammate, a PM) is given. Also when model or analysis results (diagnostics, metrics, charts) must be explained to someone who decides on them, e.g. "このモデルを本番に出してよいか <人> が判断できるように". Also when the user wrote an explanation themselves and lost confidence in it.
 ---
 
 # explainer
@@ -25,7 +25,7 @@ ELI5 との違いは 2 つ。
 npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright
 ```
 
-Mermaid の図（`figures/*.mmd`）を使うときは `mermaid`、アイコンを使うときは `@iconify-json/lucide` と `@iconify-json/logos` も入れます。
+Mermaid の図（`figures/*.mmd`）を使うときは `mermaid`、データの図（`figures/*.vl.json`）を使うときは `vega` と `vega-lite`、アイコンを使うときは `@iconify-json/lucide` と `@iconify-json/logos` も入れます。
 形式手法の例を扱うときは、TLC（Java 11+）や Apalache（Java 17+）、`z3-solver` も入れます。
 `verify-doc.mjs` は `$TLA2TOOLS`（tla2tools.jar）と `$APALACHE`（apalache-mc）を、リポジトリの `.tools/` から探します。
 
@@ -154,6 +154,19 @@ Mermaid の図（`figures/*.mmd`）を使うときは `mermaid`、アイコン�
 - 包含関係があるとき
 
 図は vlmkit-anim のシーン（JSON）で描く。当てはまる kind が無い概念図は、Mermaid で済むなら Mermaid、足りない構造なら D2、D2 に乗らない自由な図なら SVG / HTML で直接書く。どれも `scripts/figure-check.mjs` で描画・検査して、出てきたシートと辺のシート（矢印を 1 本ずつ強調したもの）を目で見て直す。D2 と Mermaid は配置を道具が決めるので、不自然なら `scripts/figure-variants.mjs` で候補を並べて選び直す（`references/figures.md` の「手で描く図」）。
+データの図（分布・関係・モデルの診断）は Vega-Lite の spec（`figures/<name>.vl.json`）で書く。SVG を手で書かない、matplotlib の既定の SVG にしない。`figure-check.mjs` が描画・検査する（`references/figures.md` の「データの図」）。
+
+モデルや分析の診断結果を説明するときは、次の 3 つを必ず出す。
+
+1. 判定表を、伝えたいことの直後に置く。列はこの 5 つに固定する（用途別の表など、ほかの表は判定表の後に足す）。
+   ```
+   | 診断項目 | 実測値 | 合格基準 | 判定 | 次アクション |
+   ```
+   判定は OK / 要対処 / 確認 のどれか。要対処には次アクションを書く。判定は図と基準を見て書く（スクリプトの if で作らない）。
+2. 図のパネルの題は「何を見る図か — 何が見えれば合格か」（例：`キャリブレーション — 対角線に沿う`）。
+3. 合格の基準の線（対角線・陽性率・±2SE のバンド）は破線（`"strokeDash": [5, 4]`）。
+
+コマンドを実行できない環境でも、図は `.vl.json` の spec として書く。値から座標を手で計算して SVG を描かない（描き損じを検査できない）。本文には spec へのリンクと「未描画：`figure-check.mjs <spec> --write` で SVG になる」を書く。
 アイコン（データベース・サーバ・製品のロゴなど）は `scripts/icons.mjs` で探して図の隣に置き、D2・Mermaid・SVG のどれからでも使う（`references/figures.md` の「アイコン」）。
 
 vlmkit-anim の図の検査は 3 つ。
@@ -233,7 +246,7 @@ node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直
 | `references/figures.md` | 問い → 図の種類の対応、事実シートの作り方、vlmkit-anim の手順 |
 | `scripts/verify-doc.mjs` | 検証（checks / 図 / 引用 / HTML） |
 | `scripts/build-html.mjs` | README.md → 自己完結 HTML（SVG をインラインで埋め込む） |
-| `scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画し、重なり・はみ出し・枠線や線と文字の交差・小さすぎる文字・事実シートを検査し、目で見るシートを作る |
+| `scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図と Vega-Lite の spec を描画し、重なり・はみ出し・枠線や線と文字の交差・小さすぎる文字・豆腐（字形の無い文字）・輪郭になった文字・事実シートを検査し、目で見るシートを作る |
 | `scripts/figure-arrows.mjs` | 矢印の読みやすさ（2 本が重なって走る・箱を突き抜ける・交差・遠回り・逆向き）と、辺を 1 本ずつ強調したシート。figure-check が使う |
 | `scripts/figure-variants.mjs` | D2 / Mermaid の配置の候補（TALA の seed・ELK・dagre、向き）を描き、点数つきで並べる |
 | `scripts/icons.mjs` | Iconify のアイコンセット（lucide・logos）からアイコンを探し、候補を 1 枚に並べ、図の隣に置いて出典を ICONS.md に残す |

@@ -195,6 +195,7 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `book` | 1 章が quickstart か。各章に学習目標と答えつきの問いがあるか。演習の答えを実行して確かめるか |
 | `pr-reader-first` | 読み手が分からないとき、書く前に確かめるか、前提を明示するか |
 | `pr-value-first` | 差分だけでは影響が見えない PR（再試行の指数バックオフとジッタを、オンコールの SRE に説明する）で、障害時に何が変わるかを先に書き、コードを後に置くか |
+| `data-diagnostics` | ロジスティック回帰の診断を、本番に出すか判断する PM に説明するとき、判定表（診断項目・実測値・合格基準・判定・次アクション）を置き、パネルの題に合格条件を書き、基準の線を破線にし、図を Vega-Lite の spec で書くか |
 | `one-liner-control` | 対照。1 文で済む質問で、スキルを呼ばず、資料を作らないか |
 | `first-reader-no-rewrite` | 下書きのレビューで、読み手の体験を報告し、書き直さないか |
 

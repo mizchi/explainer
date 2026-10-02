@@ -105,14 +105,14 @@ for (const f of scenes) {
 // vlmkit-anim のシーンから描いたもの以外の図を figure-check.mjs に通す。目で見るシートもここで作られる
 const all = existsSync(figDir) ? readdirSync(figDir) : [];
 const handMade = all.filter((f) =>
-  f.endsWith('.d2') || f.endsWith('.mmd') || f.endsWith('.fig.html') ||
-  (f.endsWith('.svg') && !['.scene.json', '.d2', '.mmd'].some((x) => all.includes(f.replace(/\.svg$/, x)))));
+  f.endsWith('.d2') || f.endsWith('.mmd') || f.endsWith('.vl.json') || f.endsWith('.fig.html') ||
+  (f.endsWith('.svg') && !['.scene.json', '.d2', '.mmd', '.vl.json'].some((x) => all.includes(f.replace(/\.svg$/, x)))));
 if (handMade.length) console.log('figures (hand-made: figure-check)');
 for (const f of handMade) {
   const r = sh(`node ${join(here, 'figure-check.mjs')} ${join(figDir, f)}${opt.write ? ' --write' : ''}`);
   const fails = r.out.split('\n').filter((l) => l.trim().startsWith('✗'));
   const looks = r.out.split('\n').filter((l) => l.trim().startsWith('△')).length;
-  r.code === 0 ? ok(`${f}: CLEAN${looks ? `, △ ${looks}（辺のシートで目で見る）` : ''} (sheet: figures/.figure-check/${f.replace(/\.fig\.html$|\.svg$|\.d2$|\.mmd$/, '')}/)`) : ng(`${f}: ${fails.length} problem(s): ${fails.map((l) => l.trim().slice(2)).slice(0, 2).join(' / ')}`, `node ${join(here, 'figure-check.mjs')} ${join(figDir, f)} — then look at the sheet`);
+  r.code === 0 ? ok(`${f}: CLEAN${looks ? `, △ ${looks}（辺のシートで目で見る）` : ''} (sheet: figures/.figure-check/${f.replace(/\.fig\.html$|\.svg$|\.d2$|\.mmd$|\.vl\.json$/, '')}/)`) : ng(`${f}: ${fails.length} problem(s): ${fails.map((l) => l.trim().slice(2)).slice(0, 2).join(' / ')}`, `node ${join(here, 'figure-check.mjs')} ${join(figDir, f)} — then look at the sheet`);
 }
 
 // ---- 3. prose ----------------------------------------------------------------

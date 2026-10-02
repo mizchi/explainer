@@ -1,0 +1,30 @@
+{
+  "$comment": "本文に載せる出力はここで再実行して照合する。Python の値（samples/glm.py.json）は uv で glm.py を回して作ったもので、ここでは再実行しない（Python が無くても検証できるように）。",
+  "checks": [
+    {
+      "name": "versions",
+      "cmd": "node samples/versions.mjs",
+      "expect": [
+        "vega 6.4.0",
+        "vega-lite 6.4.3",
+        "ml-matrix 6.15.0"
+      ]
+    },
+    {
+      "name": "glm",
+      "cmd": "node samples/glm.mjs",
+      "expect": [
+        "b0          -0.910571  python  -0.910571  一致",
+        "b1           0.772060  python   0.772060  一致",
+        "b2          -0.560118  python  -0.560118  一致",
+        "se_b1        0.058105  python   0.058105  一致",
+        "auc          0.732040  python   0.732040  一致",
+        "ap           0.623659  python   0.623659  一致",
+        "brier        0.178981  python   0.178981  一致",
+        "rate         0.314000  python   0.314000  一致",
+        "binned_out   5.000000  python   5.000000  一致",
+        "spec: figures/glm.vl.json is up to date"
+      ]
+    }
+  ]
+}
