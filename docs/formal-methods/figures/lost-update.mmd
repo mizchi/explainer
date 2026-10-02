@@ -1,0 +1,40 @@
+---
+title: Counter の全到達可能状態 (a の pc, b の pc | count)
+config:
+  themeVariables:
+    fontSize: 20px
+  flowchart:
+    nodeSpacing: 14
+    rankSpacing: 34
+    padding: 6
+---
+flowchart TB
+  s0("R R | 0")
+  s1["W R | 0"]
+  s2["R W | 0"]
+  s3["D R | 1"]
+  s4["W W | 0"]
+  s5["R D | 1"]
+  s6["D W | 1"]
+  s7["D W | 1"]
+  s8["W D | 1"]
+  s9["W D | 1"]
+  s10[["D D | 2"]]
+  s11[["D D | 1"]]
+  s12[["D D | 2"]]
+  s0 -->|"Read(a)"| s1
+  s0 -->|"Read(b)"| s2
+  s1 -->|"Write(a)"| s3
+  s1 -->|"Read(b)"| s4
+  s2 -->|"Read(a)"| s4
+  s2 -->|"Write(b)"| s5
+  s3 -->|"Read(b)"| s6
+  s4 -->|"Write(a)"| s7
+  s4 -->|"Write(b)"| s8
+  s5 -->|"Read(a)"| s9
+  s6 -->|"Write(b)"| s10
+  s7 -->|"Write(b)"| s11
+  s8 -->|"Write(a)"| s11
+  s9 -->|"Write(a)"| s12
+  classDef path stroke-width:3px
+  class s0,s1,s3,s6,s10,s4,s7,s11 path

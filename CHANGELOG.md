@@ -3,6 +3,17 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.5.0 — 2026-10-02
+
+Removed `@mizchi/vlmkit-anim`. Figures are Mermaid or D2 text, held to a fact sheet (`*.facts.json`) and checked by `figure-check.mjs`; nothing is animated.
+
+- Removed: the `@mizchi/vlmkit-anim` package (`packages/vlmkit-anim/`, deprecated on npm), its release workflow, the `explain-with-anim` and `explanatory-animation` skills, and the `pr-visual` workflow that drew PR change maps with it.
+- explainer: `tlc-to-scene.mjs` is now `tlc-to-mermaid.mjs`. It reads the same TLC state graph and counterexample, and writes a Mermaid flowchart (initial state rounded, final states with side bars, the walked states thick) and its fact sheet, whose `edges` must match the figure's edges exactly. It still stops when a `--trace` / `--also` action is not a TLC transition.
+- explainer: `verify-doc.mjs` drops the scene checks; every figure goes through `figure-check.mjs`. `build-html.mjs` no longer makes step-by-step playback pages.
+- explainer-book: `verify-book.mjs` writes the chapter map as `figures/book-map.mmd` + `book-map.facts.json` (no title in the figure: a long book title overflowed on phones).
+- docs/formal-methods: the lost-update state graph is regenerated from TLC as Mermaid; the induction figure (reachable ⊂ NoLostUpdate ⊂ all states) is a D2 with nested containers, and `check-induction.mjs` checks its `reach` container against TLC's states.
+- Measured while converting, recorded in `references/figures.md`: Mermaid's stadium shape `([…])` draws a random outline on every render, so its SVG never matches the committed one (use `(…)`); Mermaid wraps a label at ~200px and the fact check then misses it (`flowchart.wrappingWidth`).
+
 ## 0.4.2 — 2026-10-02
 
 - explainer: data charts (distributions, relations, model diagnostics) are written as Vega-Lite specs (`figures/*.vl.json`); `figure-check.mjs` renders them with vega (no browser) and runs the same text checks, and `verify-doc.mjs` picks them up. Compute in JS when it can be written (aggregates, ROC / PR, calibration, GLM by IRLS), in Python when it needs statsmodels / lifelines etc.

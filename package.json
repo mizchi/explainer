@@ -2,7 +2,7 @@
   "name": "explainer",
   "private": true,
   "type": "module",
-  "description": "Persona-calibrated crash-course explainers, with figures and claims checked by tools (vlmkit, vlmkit-anim).",
+  "description": "Persona-calibrated crash-course explainers, with figures and claims checked by tools (vlmkit, D2, Mermaid).",
   "engines": {
     "node": ">=24"
   },
@@ -29,7 +29,6 @@
     "@iconify-json/lucide": "^1.2.137",
     "@informalsystems/quint": "^0.32.0",
     "@mizchi/vlmkit": "^0.22.0",
-    "@mizchi/vlmkit-anim": "^0.22.0",
     "marked": "^18.0.14",
     "mermaid": "^12.0.0",
     "ml-matrix": "6.15.0",

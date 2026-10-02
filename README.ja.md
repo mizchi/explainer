@@ -9,7 +9,7 @@ AI から人間へ概念を説明するための、スキルと道具です。
 
 ## インストール
 
-Claude Code のプラグインとして入れる場合（このリポジトリがそのままマーケットプレイスで、プラグイン `explainer` に 7 つのスキルが入っています）：
+Claude Code のプラグインとして入れる場合（このリポジトリがそのままマーケットプレイスで、プラグイン `explainer` に 5 つのスキルが入っています）：
 
 ```
 /plugin marketplace add mizchi/explainer
@@ -33,14 +33,12 @@ apm install mizchi/explainer --target claude
 | `explainer` | 1 人の読み手に向けた速習資料。主張と図を道具で検証する |
 | `explainer-book` | 章立ての学習資料。学習目標・概念の順序・読了時間・演習を検査する |
 | `first-reader` | 公開前の下書きを、模擬読者に 1 段落ずつ読ませる。どこで離脱し、翌日何が残ったかを報告する。書き直しはしない |
-| `explain-with-anim` | 「どう動くか・どういう構造か・この PR で何が変わるか」に、コードから描いた図（`vlmkit-anim facts` / `repo` / `pr`）と、それをなぞる文章で答える。図は事実シートで検査する |
-| `explanatory-animation` | `vlmkit-anim` のシーンを 1 つ書いて検査する。アルゴリズム・プロトコル・構造をアニメーションか静止図にし、事実シートとレイアウトで確かめる |
 | `d2-diagram` | TALA で配置する D2 の図。ターミナルで読み、`d2-facts.mjs` で「描かれたもの」を事実シートと突き合わせる |
 | `d2-slides` | Markdown 1 枚（図ごとに D2 フェンス）からスライドを作り、HTML にして vlmkit の gate で検査する |
 
-最後の 4 つは [mizchi/vlmkit](https://github.com/mizchi/vlmkit) から、`@mizchi/vlmkit-anim` パッケージ（`packages/vlmkit-anim/`）と一緒に移ってきました。0.24 からはここで開発します。
+最後の 2 つは [mizchi/vlmkit](https://github.com/mizchi/vlmkit) から移ってきました。図は Mermaid か D2 のテキストで描き、`figure-check.mjs` で検査します。アニメーションのパッケージ `@mizchi/vlmkit-anim` と、その 2 つのスキルは 0.5 で削除しました（CHANGELOG）。
 
-スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`、Node 24+）。Mermaid の図を使うなら `mermaid`、アイコンを使うなら `@iconify-json/lucide @iconify-json/logos` も入れます。
+スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit marked playwright mermaid`、Node 24+）。D2 の図を使うなら `d2` の CLI、アイコンを使うなら `@iconify-json/lucide @iconify-json/logos` も入れます。
 `first-reader` は Python 3 の標準ライブラリだけで動きます。
 
 `first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
@@ -51,13 +49,13 @@ apm install mizchi/explainer --target claude
 ```
 ペルソナ ─→ 問い ─→ 実物（実行できる例・モデル） ─→ 本文 + 図 ─→ 検証 ─→ HTML
   │                          │                          │           │
-  質問 + 公開情報        出力は貼る。打ち直さない     vlmkit-anim   verify-doc.mjs
-                                                   事実シート照合  (checks / 図 / 引用 / vlmkit)
+  質問 + 公開情報        出力は貼る。打ち直さない     Mermaid / D2  verify-doc.mjs
+                                                   + 事実シート   (checks / 図 / 引用 / vlmkit)
 ```
 
 - **ペルソナ**（`personas/`）：読み手が既に知っていることと、怪しいところ。資料から何を削るかを決める。
 - **スキル**（`skills/explainer/`）：手順、文体、図の選び方、検証の仕方。
-- **検証**：本文に引用した出力は `checks.json` で再実行して照合します。図は [`@mizchi/vlmkit-anim`](https://github.com/mizchi/vlmkit) で事実シートと照合し、ページは `vlmkit check integrity` / `check a11y contrast` に通します。
+- **検証**：本文に引用した出力は `checks.json` で再実行して照合します。図（Mermaid / D2 / SVG / HTML）は `figure-check.mjs` で事実シートと照合し、重なり・はみ出し・矢印の読みやすさを検査し、ページは `vlmkit check integrity` / `check a11y contrast` に通します。
 
 [ELI5](https://github.com/dreambigou/eli5) は、読み手を型（年齢・職種）で扱います。
 このスキルは、実在の 1 人をペルソナとして扱い、書いた主張を道具で検査します。
@@ -76,7 +74,7 @@ apm install mizchi/explainer --target claude
 
 ![形式手法の資料の図](docs/readme/formal-methods.png)
 
-- A：Counter の全到達可能状態。TLC の状態グラフから `tlc-to-scene.mjs` で生成した。オレンジの `D D | 1` が、更新が 1 回失われた終状態
+- A：Counter の全到達可能状態。TLC の状態グラフから `tlc-to-mermaid.mjs` で Mermaid として生成した。太枠は正しい順序と TLC の反例が辿った状態で、`D D | 1` が、更新が 1 回失われた終状態
 - B：CounterAtomic で、到達可能な状態 ⊂ NoLostUpdate ⊂ 全状態。「到達可能」の枠の中身は、TLC が列挙した状態と照合している。赤は、Z3 が見つけた帰納法の反例（CTI）。NoLostUpdate を満たすが到達不能な状態から、一歩で外へ出る
 - C：各検査がどの状態を見たか（手書きの SVG）
 - 資料：[`docs/formal-methods/README.md`](docs/formal-methods/README.md)
@@ -156,7 +154,7 @@ apm install mizchi/explainer --target claude
 ## 例：図の道具の選び方（チートシート）
 
 - 資料：[`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md)「どの図を、どの道具で描くか」
-- Mermaid で済むなら Mermaid、足りない構造なら D2（TALA / ELK / dagre）、D2 に乗らない自由な図なら SVG / HTML。道具の出力を写す図は vlmkit-anim。同じサンプルを Mermaid と D2 の 3 つのエンジンで描いて比べた結果（`samples/compare.mjs`）つき
+- Mermaid で済むなら Mermaid、足りない構造なら D2（TALA / ELK / dagre）、D2 に乗らない自由な図なら SVG / HTML。道具の出力を写す図は、その出力から図と事実シートを一緒に作る。同じサンプルを Mermaid と D2 の 3 つのエンジンで描いて比べた結果（`samples/compare.mjs`）つき
 - 測って分かったこと：箱の中の向きは、Mermaid だと中の箱が外とつながると無視され、ELK と dagre は常に黙って無視する。守ったのは TALA だけ。TALA は seed で配置がすべて変わり、箱が増えると急に遅くなる
 
 ## 使い方
@@ -212,10 +210,10 @@ claude plugin eval . --trust-plugin --allow-tools Bash Write Edit Agent -j 4
 | `skills/explainer/SKILL.md` | スキル本体（1 本の速習資料） |
 | `skills/explainer-book/SKILL.md` | 本版（章立ての学習資料）。`scripts/verify-book.mjs` が本全体を検査 |
 | `skills/explainer/references/` | ペルソナ・文体・図のガイド |
-| `skills/explainer/scripts/verify-doc.mjs` | 検証（checks / vlmkit-anim / 引用照合 / vlmkit ゲート） |
+| `skills/explainer/scripts/verify-doc.mjs` | 検証（checks / 図 / 引用照合 / vlmkit ゲート） |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → 自己完結 HTML |
 | `skills/explainer/scripts/icons.mjs` | 入っている Iconify のアイコンセット（lucide・logos）からアイコンを探し、候補を 1 枚に並べ、図の隣に置いて出典とライセンスを ICONS.md に残す |
-| `skills/explainer/scripts/tlc-to-scene.mjs` | TLC の状態グラフ・反例 → vlmkit-anim の図と事実シート |
+| `skills/explainer/scripts/tlc-to-mermaid.mjs` | TLC の状態グラフ・反例 → Mermaid の図と事実シート |
 | `skills/explainer/scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図を描画・検査し、目で見るシート（ライト・ダーク・スマホ）を作る |
 | `skills/explainer/scripts/figure-arrows.mjs` | 矢印の読みやすさの検査と、辺を 1 本ずつ強調したシート（figure-check が使う） |
 | `skills/explainer/scripts/figure-variants.mjs` | D2 / Mermaid の配置の候補（TALA の seed・ELK・dagre、向き）を描き、点数つきで並べる |

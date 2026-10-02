@@ -138,8 +138,9 @@ Write(p) ==
 ![Counter の全到達可能状態](figures/lost-update.svg)
 
 図は TLC の状態グラフ（`-dump dot`）から機械的に生成しています。
-図の状態と遷移は、TLC が列挙したものとちょうど一致します（`vlmkit-anim check --expect` で照合済み）。
+図の状態と遷移は、TLC が列挙したものとちょうど一致します（`checks.json` が TLC から図を作り直し、コミット済みの図と差分を取ります）。
 ラベルは「a の pc、b の pc | count」で、R = read、W = write、D = done です。
+角丸が初期状態、両脇に縦線のある箱が終状態、太枠は正しい順序と TLC の反例が辿った状態です。
 同じラベルの状態が 2 つあるのは、描いていない `tmp` の値が違うためです。
 
 読み方は 1 つです。
@@ -432,6 +433,7 @@ npm run verify           # 例の再実行 → 本文の出力と照合 → 図�
 | `examples/z3/*.mjs` | Z3 の例（npm `z3-solver`、TypeScript と同じ API） |
 | `examples/tla/*.tla`, `*.cfg` | TLA+ の例と TLC の設定（Apalache 用の型注釈つき） |
 | `examples/quint/*.qnt` | Quint の例（`npm` の `@informalsystems/quint`） |
-| `figures/*.scene.json` | 図の元（vlmkit-anim）。`*.expect.json` は図が守るべき事実 |
+| `figures/lost-update.mmd` | TLC の状態グラフから `tlc-to-mermaid.mjs` で生成した Mermaid。`*.facts.json` は図が守るべき事実（ラベルと辺） |
+| `figures/induction.d2` | 手で書いた D2。`reach` の中身は `figures/check-induction.mjs` が TLC の出力と照合する |
 | `figures/coverage.svg`, `figures/z3-answers.fig.html` | 手で書いた図。`*.facts.json` は図に必ず出る語。`figure-check.mjs` で検査する |
 | `checks.json` | 本文に引用した出力を再生成するコマンドと、期待する行 |
