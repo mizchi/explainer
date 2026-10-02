@@ -6,6 +6,7 @@ Bump both when the skills change, so that installed copies see an update. Never 
 ## 0.3.2 — 2026-10-02
 
 - explainer: in the reply after writing on assumptions, the second line is always the message (what the document tells the reader, and its sections); caveats such as "unverified" come after the form.
+- explainer: the skill now triggers for small PR explanations and chat-only answers whenever a named reader is given (it was not being loaded in the PR eval cases).
 
 ## 0.3.1 — 2026-10-02
 
