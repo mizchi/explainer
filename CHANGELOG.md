@@ -3,6 +3,10 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.3.2 — 2026-10-02
+
+- explainer: in the reply after writing on assumptions, the second line is always the message (what the document tells the reader, and its sections); caveats such as "unverified" come after the form.
+
 ## 0.3.1 — 2026-10-02
 
 Ideas from [HyperFrames](https://github.com/heygen-com/hyperframes) (Apache-2.0), rewritten for explainer (no code copied):
