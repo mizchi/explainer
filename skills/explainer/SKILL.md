@@ -154,7 +154,17 @@ Mermaid の図（`figures/*.mmd`）を使うときは `mermaid`、データの�
 - 包含関係があるとき
 
 図は vlmkit-anim のシーン（JSON）で描く。当てはまる kind が無い概念図は、Mermaid で済むなら Mermaid、足りない構造なら D2、D2 に乗らない自由な図なら SVG / HTML で直接書く。どれも `scripts/figure-check.mjs` で描画・検査して、出てきたシートと辺のシート（矢印を 1 本ずつ強調したもの）を目で見て直す。D2 と Mermaid は配置を道具が決めるので、不自然なら `scripts/figure-variants.mjs` で候補を並べて選び直す（`references/figures.md` の「手で描く図」）。
-データの図（分布・関係・モデルの診断）は Vega-Lite の spec（`.vl.json`）で書き、同じく `figure-check.mjs` で描画・検査する。診断の結果を伝えるときは、パネルの題に「何を見る図か — 合格条件」を書き、本文に判定表を置く（`references/figures.md` の「データの図」）。
+データの図（分布・関係・モデルの診断）は Vega-Lite の spec（`figures/<name>.vl.json`）で書く。SVG を手で書かない、matplotlib の既定の SVG にしない。`figure-check.mjs` が描画・検査する（`references/figures.md` の「データの図」）。
+
+モデルや分析の診断結果を説明するときは、次の 3 つを必ず出す。
+
+1. 判定表を、伝えたいことの直後に置く。列はこの 5 つに固定する（用途別の表など、ほかの表は判定表の後に足す）。
+   ```
+   | 診断項目 | 実測値 | 合格基準 | 判定 | 次アクション |
+   ```
+   判定は OK / 要対処 / 確認 のどれか。要対処には次アクションを書く。判定は図と基準を見て書く（スクリプトの if で作らない）。
+2. 図のパネルの題は「何を見る図か — 何が見えれば合格か」（例：`キャリブレーション — 対角線に沿う`）。
+3. 合格の基準の線（対角線・陽性率・±2SE のバンド）は破線（`"strokeDash": [5, 4]`）。
 アイコン（データベース・サーバ・製品のロゴなど）は `scripts/icons.mjs` で探して図の隣に置き、D2・Mermaid・SVG のどれからでも使う（`references/figures.md` の「アイコン」）。
 
 vlmkit-anim の図の検査は 3 つ。
