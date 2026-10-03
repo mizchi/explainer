@@ -64,7 +64,7 @@
     },
     {
       "name": "fig-lost-update-from-tlc",
-      "cmd": "node ../../skills/explainer/scripts/tlc-to-scene.mjs --dot $TMP/counter-full.dot --trace $TMP/counter.out --vars pc,count --bare --abbrev read=R,write=W,done=D --also 'Read(a),Write(a),Read(b),Write(b)' --layout tb --title 'Counter の全到達可能状態 (a の pc, b の pc | count)' --out $TMP/lost-update && diff $TMP/lost-update.scene.json figures/lost-update.scene.json && diff $TMP/lost-update.expect.json figures/lost-update.expect.json && echo 'figure matches TLC'",
+      "cmd": "node ../../skills/explainer/scripts/tlc-to-mermaid.mjs --dot $TMP/counter-full.dot --trace $TMP/counter.out --vars pc,count --bare --abbrev read=R,write=W,done=D --also 'Read(a),Write(a),Read(b),Write(b)' --layout tb --title 'Counter の全到達可能状態 (a の pc, b の pc | count)' --out $TMP/lost-update && diff $TMP/lost-update.mmd figures/lost-update.mmd && diff $TMP/lost-update.facts.json figures/lost-update.facts.json && echo 'figure matches TLC'",
       "expect": [
         "13 states, 14 transitions, 3 final",
         "figure matches TLC"

@@ -1,4 +1,4 @@
-# どの図を、どの道具で描くか：Mermaid・D2（TALA / ELK / dagre）・SVG・HTML・vlmkit-anim
+# どの図を、どの道具で描くか：Mermaid・D2（TALA / ELK / dagre）・SVG・HTML
 
 <!-- persona: ../../personas/mizchi.md -->
 
@@ -37,8 +37,9 @@ D2 にするなら、エンジンは次のように選びます。
 dagre は、このサンプルでは ELK に勝る場面がありませんでした。
 描ける機能は ELK と同じで、速さも同じくらい、線が箱の名前を通る失敗も同じく起きます。
 
-**別枠：図が道具の出力を写すとき**（TLC の状態グラフ、反例の手順、import グラフ）は、どの順序よりも先に **vlmkit-anim** を使います。
-図を、道具の出力から作った事実シートと照合できるのは vlmkit-anim だけです（`check --expect`）。
+**図が道具の出力を写すとき**（TLC の状態グラフ、反例の手順、import グラフ）も、形式は同じ順で選びます。
+違うのは、`.mmd` / `.d2` と事実シート（`*.facts.json`）を手で書かず、道具の出力からスクリプトで作ることです（例：`tlc-to-mermaid.mjs`）。
+`figure-check.mjs` が、事実シートの `edges` とソースの辺がちょうど一致するかを照合します。
 
 ---
 
@@ -215,8 +216,8 @@ ELK は、分岐を同じ層に揃え、合流を 1 か所（gate）に集めま
 
 ![クライアントが API に注文し、API が DB に BEGIN・INSERT・COMMIT を送り、クライアントに 201 を返す](figures/sequence.svg)
 
-TLC の反例のように、道具が順序を出せるなら vlmkit-anim の `sequence` か `distributed` で描き、事実シートと照合します。
-道具の出力が無い説明用の順序なら、これで足ります。
+TLC の反例のように道具が順序を出せるなら、その出力から図と事実シートを作って照合します。
+道具の出力が無い説明用の順序なら、手で書いたこれで足ります。
 
 ### 図 5：アイコンつきのアーキテクチャ（D2 + ELK）
 
@@ -256,7 +257,7 @@ GitHub の Markdown で描かれる Mermaid には、このアイコンセット
 | 道具 | 最初に確かめること | 確かめ方 |
 |---|---|---|
 | Mermaid | サブグラフの中の向きが効いているか。サブグラフの名前を線が通っていないか | 図を見る。`figure-check.mjs` の `through` |
-| vlmkit-anim | 図が道具の出力と一致するか | `vlmkit-anim check --expect`（事実シートは道具から作る） |
+| 道具の出力を写す図（どの形式でも） | 図が道具の出力と一致するか | 事実シートを道具から作り、`figure-check.mjs` の facts（`edges` はソースの辺とちょうど一致） |
 | D2 + TALA | 入口が上か。線の分かれ目が別の矢印に見えないか | `direction` を書く。`figure-check.mjs` の arrows（shared）。落ちたら `figure-variants.mjs` で seed を並べる |
 | D2 + ELK / dagre | 箱の名前を線が通っていないか。箱ごとの direction を書いていないか | `figure-check.mjs` の `through`。direction は図を見る |
 | D2（どのエンジンでも） | スマホ幅で文字が 9px 以上あるか | `figure-check.mjs` の `tiny`。長い流れは縦にする |

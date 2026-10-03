@@ -4,9 +4,8 @@
 //   node verify-doc.mjs <doc-dir> [--pages README.md,01-x.md,…] [--write] [--skip-html]
 //
 // 1. checks   <doc-dir>/checks.json のコマンドを再実行し、expect の各行が stdout に順に現れるか
-// 2. figures  <doc-dir>/figures/*.scene.json を vlmkit-anim check (+ --expect) / layout で検査し、
-//             still で描き直した SVG がコミット済みのものと一致するか (--write で上書き)
-// 2b. hand    手で書いた図（*.svg / *.fig.html / *.d2 / *.mmd）を figure-check.mjs に通す
+// 2. figures  図（*.svg / *.fig.html / *.d2 / *.mmd）を figure-check.mjs に通す。*.facts.json があれば照合し、
+//             --write で .d2 / .mmd から描いた SVG を上書きする
 // 3. prose    各ページ (既定は README.md) の <!-- output: name --> 直後のコードブロックが、その check の実出力にあるか
 //             <!-- source: path --> 直後のコードブロックが、そのファイルの一部と一致するか
 //             画像リンクとページ間リンク (*.md) の参照先が存在するか
@@ -32,7 +31,6 @@ const docDir = resolve(positionals[0] ?? '.');
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = findUp(docDir, 'package.json') ?? process.cwd();
 const bin = (name) => join(repoRoot, 'node_modules', '.bin', name);
-const anim = `node ${join(repoRoot, 'node_modules/@mizchi/vlmkit-anim/dist/cli.mjs')}`;
 const TMP = mkdtempSync(join(tmpdir(), 'explainer-verify-'));
 const env = { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0', TMP, TLA2TOOLS: join(repoRoot, '.tools/tla2tools.jar'),
   APALACHE: join(repoRoot, '.tools/apalache/bin/apalache-mc') };
@@ -78,36 +76,14 @@ if (existsSync(checksFile)) {
   }
 } else console.log('  (no checks.json)');
 
-// ---- 2. figures --------------------------------------------------------------
-console.log('figures (vlmkit-anim)');
+// ---- 2. figures（SVG / HTML / D2 / Mermaid） ---------------------------------------------
+// figure-check.mjs に通す。目で見るシートもここで作られる
 const figDir = join(docDir, 'figures');
-const scenes = existsSync(figDir) ? readdirSync(figDir).filter((f) => f.endsWith('.scene.json')) : [];
-for (const f of scenes) {
-  const base = join(figDir, f.replace(/\.scene\.json$/, ''));
-  const expect = existsSync(`${base}.expect.json`) ? ` --expect ${base}.expect.json` : '';
-  const c = sh(`${anim} check ${base}.scene.json${expect}`);
-  if (c.code !== 0) ng(`${f}: check failed`, c.out.split('\n').filter((l) => l.startsWith('✗')).join(' / '));
-  else if (!expect) ng(`${f}: no fact sheet (${base}.expect.json)`, 'write the facts the figure must show; a figure checked only against itself proves nothing');
-  else ok(`${f}: check + facts (${c.out.match(/facts .*$/m)?.[0] ?? ''})`);
-  const l = sh(`${anim} layout ${base}.scene.json`);
-  if (l.code !== 0) ng(`${f}: layout issues`, l.out.split('\n').find((x) => /overlap|clipped|crossed/.test(x)));
-  else ok(`${f}: layout clean`);
-  sh(`${anim} still ${base}.scene.json --out ${TMP}/${f}.svg`);
-  const fresh = readFileSync(`${TMP}/${f}.svg`, 'utf8');
-  const svg = `${base}.svg`;
-  if (opt.write) { writeFileSync(svg, fresh); ok(`${f}: wrote ${svg}`); }
-  else if (!existsSync(svg) || readFileSync(svg, 'utf8') !== fresh)
-    ng(`${f}: committed SVG is stale or missing`, `re-run with --write (the scene changed after the SVG was drawn)`);
-  else ok(`${f}: SVG up to date`);
-}
-
-// ---- 2b. 手で書いた図（SVG / HTML / D2 / Mermaid） ---------------------------------------------
-// vlmkit-anim のシーンから描いたもの以外の図を figure-check.mjs に通す。目で見るシートもここで作られる
 const all = existsSync(figDir) ? readdirSync(figDir) : [];
 const handMade = all.filter((f) =>
   f.endsWith('.d2') || f.endsWith('.mmd') || f.endsWith('.vl.json') || f.endsWith('.fig.html') ||
-  (f.endsWith('.svg') && !['.scene.json', '.d2', '.mmd', '.vl.json'].some((x) => all.includes(f.replace(/\.svg$/, x)))));
-if (handMade.length) console.log('figures (hand-made: figure-check)');
+  (f.endsWith('.svg') && !['.d2', '.mmd', '.vl.json'].some((x) => all.includes(f.replace(/\.svg$/, x)))));
+if (handMade.length) console.log('figures (figure-check)');
 for (const f of handMade) {
   const r = sh(`node ${join(here, 'figure-check.mjs')} ${join(figDir, f)}${opt.write ? ' --write' : ''}`);
   const fails = r.out.split('\n').filter((l) => l.trim().startsWith('✗'));

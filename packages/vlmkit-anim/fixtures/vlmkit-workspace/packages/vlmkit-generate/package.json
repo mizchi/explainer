@@ -1,8 +1,0 @@
-{
-  "name": "@mizchi/vlmkit-generate",
-  "description": "Generator contract for Playwright tests: turns a Markdown plan and generation rules into a Playwright spec source file.",
-  "dependencies": {
-    "@mizchi/vlmkit-ai": "workspace:*",
-    "typescript": "^6.0.2"
-  }
-}

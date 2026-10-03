@@ -1,0 +1,22 @@
+{
+  "labels": [
+    "型を満たす全状態",
+    "NoLostUpdate を満たす",
+    "到達可能 (TLC が列挙) = CountIsDone",
+    "0 | incr incr",
+    "1 | done incr",
+    "1 | incr done",
+    "2 | done done",
+    "-1 | done incr",
+    "0 | done done",
+    "Incr(a)",
+    "Incr(b)"
+  ],
+  "edges": [
+    "all.inv.reach.r0->all.inv.reach.r1",
+    "all.inv.reach.r0->all.inv.reach.r2",
+    "all.inv.reach.r1->all.inv.reach.r3",
+    "all.inv.reach.r2->all.inv.reach.r3",
+    "all.inv.cti->all.bad"
+  ]
+}

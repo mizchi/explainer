@@ -1,7 +1,0 @@
-{
-  "name": "@mizchi/vlmkit-plan",
-  "description": "Planner contract for Playwright test generation: turns a user story, seed test, PRD, and UI observations into a Markdown test plan.",
-  "dependencies": {
-    "@mizchi/vlmkit-ai": "workspace:*"
-  }
-}

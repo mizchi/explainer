@@ -9,7 +9,7 @@ This repository is for writing, for one reader, **only what that reader does not
 
 ## Install
 
-As a Claude Code plugin (this repository is itself a plugin marketplace; one plugin, `explainer`, contains seven skills):
+As a Claude Code plugin (this repository is itself a plugin marketplace; one plugin, `explainer`, contains five skills):
 
 ```
 /plugin marketplace add mizchi/explainer
@@ -33,14 +33,12 @@ Install `explainer`, `explainer-book` and `first-reader` together: `explainer-bo
 | `explainer` | A crash course for one reader. Claims and figures are checked with tools |
 | `explainer-book` | A chaptered course. Checks learning objectives, concept order, reading time and exercises |
 | `first-reader` | Has simulated readers read a draft one paragraph at a time before publishing. Reports where they drop off and what stays with them the next day. Does not rewrite |
-| `explain-with-anim` | Answers "how does this work / how is it structured / what does this PR change" with a figure drawn from the code (`vlmkit-anim facts` / `repo` / `pr`), checked against its facts, and prose that walks it |
-| `explanatory-animation` | Writes and checks one `vlmkit-anim` scene: an algorithm, protocol or architecture as an animation or a still figure, held to a fact sheet and its layout |
 | `d2-diagram` | A D2 diagram laid out by TALA, read in the terminal, and held to a fact sheet by `d2-facts.mjs` (what the picture draws, not what the text says) |
 | `d2-slides` | A slide deck from one Markdown file with a D2 fence per figure, built to HTML and checked with vlmkit's gates |
 
-The last four came from [mizchi/vlmkit](https://github.com/mizchi/vlmkit) with the `@mizchi/vlmkit-anim` package (`packages/vlmkit-anim/`), which is developed here from 0.24.
+The last two came from [mizchi/vlmkit](https://github.com/mizchi/vlmkit). Figures are Mermaid or D2 text checked by `figure-check.mjs`; the animation package `@mizchi/vlmkit-anim` and its two skills were removed in 0.5 (see CHANGELOG).
 
-Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright`, Node 24+). Add `mermaid` if you use Mermaid figures, and `@iconify-json/lucide @iconify-json/logos` to use icons.
+Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit marked playwright mermaid`, Node 24+). Add the `d2` CLI if you use D2 figures, and `@iconify-json/lucide @iconify-json/logos` to use icons.
 `first-reader` needs only the Python 3 standard library.
 
 `first-reader` is bundled from [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
@@ -51,13 +49,13 @@ Install the scripts' dependencies in the repository that holds the documents (`n
 ```
 persona ─→ question ─→ real artifacts (runnable examples, models) ─→ text + figures ─→ verify ─→ HTML
   │                          │                                          │               │
-  questions + public info    paste outputs, never retype               vlmkit-anim     verify-doc.mjs
-                                                                        fact sheets     (checks / figures / quotes / vlmkit)
+  questions + public info    paste outputs, never retype               Mermaid / D2    verify-doc.mjs
+                                                                        + fact sheets   (checks / figures / quotes / vlmkit)
 ```
 
 - **Persona** (`personas/`): what the reader already knows, and where their understanding is shaky. It decides what to leave out.
 - **Skills** (`skills/explainer/`): the procedure, writing style, how to choose a figure, how to verify.
-- **Verification**: every quoted output is re-run from `checks.json` and compared with the text. Figures are checked against fact sheets with [`@mizchi/vlmkit-anim`](https://github.com/mizchi/vlmkit), and pages go through `vlmkit check integrity` / `check a11y contrast`.
+- **Verification**: every quoted output is re-run from `checks.json` and compared with the text. Figures (Mermaid / D2 / SVG / HTML) are checked against fact sheets and for overlap, clipping and arrow readability by `figure-check.mjs`, and pages go through `vlmkit check integrity` / `check a11y contrast`.
 
 [ELI5](https://github.com/dreambigou/eli5) treats the reader as a type (age, job).
 This skill treats one real person as the reader, and checks what it writes with tools.
@@ -76,7 +74,7 @@ The images are rebuilt with `npm run readme:images`. The figures themselves are 
 
 ![Figures from the formal methods crash course](docs/readme/formal-methods.png)
 
-- A: all reachable states of Counter, generated from TLC's state graph by `tlc-to-scene.mjs`. The orange `D D | 1` is the final state where one update was lost.
+- A: all reachable states of Counter, generated from TLC's state graph as Mermaid by `tlc-to-mermaid.mjs`. The thick-bordered states are the ones the correct order and TLC's counterexample walk; `D D | 1` is the final state where one update was lost.
 - B: for CounterAtomic, reachable states ⊂ NoLostUpdate ⊂ all states. The contents of the "reachable" box are checked against the states TLC enumerated. Red is the counterexample to induction (CTI) that Z3 found: an unreachable state that satisfies NoLostUpdate and leaves it in one step.
 - C: which states each check looked at (hand-written SVG).
 - Document: [`docs/formal-methods/README.md`](docs/formal-methods/README.md)
@@ -156,7 +154,7 @@ When one document is not enough, the `explainer-book` skill splits it into chapt
 ## Example: choosing a figure tool (cheat sheet)
 
 - Document: [`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md) "Which figure, with which tool"
-- Mermaid when it is enough; D2 (TALA / ELK / dagre) for structures Mermaid can't handle; SVG / HTML for free-form figures that don't fit D2. vlmkit-anim for figures that copy a tool's output. Includes a comparison that draws the same samples with Mermaid and D2's three engines (`samples/compare.mjs`).
+- Mermaid when it is enough; D2 (TALA / ELK / dagre) for structures Mermaid can't handle; SVG / HTML for free-form figures that don't fit D2. A figure that copies a tool's output is generated from that output together with its fact sheet. Includes a comparison that draws the same samples with Mermaid and D2's three engines (`samples/compare.mjs`).
 - Measured findings: the direction inside a container is ignored by Mermaid once inner nodes link outside, and always silently ignored by ELK and dagre; only TALA kept it. TALA's layout changes completely with the seed, and it slows down sharply as boxes are added.
 
 ## Usage
@@ -225,10 +223,10 @@ Unit tests for the `first-reader` scripts: `python3 tests/first-reader/test_firs
 | `skills/explainer/SKILL.md` | The skill (one crash course) |
 | `skills/explainer-book/SKILL.md` | The book version (chaptered course). `scripts/verify-book.mjs` checks the whole book |
 | `skills/explainer/references/` | Guides for personas, writing and figures |
-| `skills/explainer/scripts/verify-doc.mjs` | Verification (checks / vlmkit-anim / quotes / vlmkit gates) |
+| `skills/explainer/scripts/verify-doc.mjs` | Verification (checks / figures / quotes / vlmkit gates) |
 | `skills/explainer/scripts/build-html.mjs` | Markdown → self-contained HTML |
 | `skills/explainer/scripts/icons.mjs` | Finds icons in the installed Iconify sets (lucide, logos), shows candidates in one image, places the chosen ones next to the figure and records their source and license in ICONS.md |
-| `skills/explainer/scripts/tlc-to-scene.mjs` | TLC state graphs and counterexamples → vlmkit-anim figures and fact sheets |
+| `skills/explainer/scripts/tlc-to-mermaid.mjs` | TLC state graphs and counterexamples → Mermaid figures and fact sheets |
 | `skills/explainer/scripts/figure-check.mjs` | Renders and checks hand-written SVG / HTML / D2 / Mermaid figures, and makes a sheet to look at (light, dark, phone) |
 | `skills/explainer/scripts/figure-arrows.mjs` | Arrow readability checks, and a sheet with each edge highlighted in turn (used by figure-check) |
 | `skills/explainer/scripts/figure-variants.mjs` | Draws D2 / Mermaid layout candidates (TALA seeds, ELK, dagre, directions) and lays them out with scores |
