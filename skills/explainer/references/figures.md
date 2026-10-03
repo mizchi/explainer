@@ -1,8 +1,8 @@
 # 図：問い → 種類 → 事実シート → 検査
 
-図は `@mizchi/vlmkit-anim` のシーン（JSON）で描く。
-座標は書かない。書くのは「種類（kind）」と「意図」。
-書き方の詳細は vlmkit の `docs/anim-ir.md` と `vlmkit-anim schema --kind <kind>` を参照する。
+図は Mermaid か D2 のテキストで描く（足りなければ SVG / HTML。順序は下の「手で描く図」）。
+座標は書かない。書くのは箱と辺（意味）で、配置は道具が決める。
+どの図にも事実シート `figures/<name>.facts.json` を付け、`figure-check.mjs` で照合する。
 
 ## 描くか
 
@@ -16,44 +16,43 @@
 - 1 つの関数の中身
 - 値を 1 つ聞かれている
 
-## 問いから種類を選ぶ
+## 問いから形を選ぶ
 
-| 読み手の問い | kind | 事実の出どころ |
+| 読み手の問い | 形 | 事実の出どころ |
 |---|---|---|
-| どういう状態があり、何で移るか | `state-machine` | TLC `-dump dot,actionlabels` → `scripts/tlc-to-scene.mjs` |
-| 反例はどういう順序で起きたか | `state-machine` の `trace` / `sequence` / `distributed` | TLC・Apalache・Quint の反例トレース |
-| A は B に含まれるか（集合・範囲） | `diagram` の入れ子 `groups` | 道具の出力（到達可能状態の一覧、型の定義） |
-| どう分岐するか | `flowchart` の `walk` | 条件分岐のコード |
-| どういう構造か（モジュール） | `modules` | `vlmkit-anim facts <dir> --depth 1` |
-| この PR で何が変わるか | `vlmkit-anim pr --base origin/main` | git |
+| どういう状態があり、何で移るか | Mermaid flowchart（状態 = 箱、遷移 = 辺） | TLC `-dump dot,actionlabels` → `scripts/tlc-to-mermaid.mjs` |
+| 反例はどういう順序で起きたか | 状態の図で反例の道を太枠（`--trace`）に。やり取りなら Mermaid `sequenceDiagram` | TLC・Apalache・Quint の反例トレース |
+| A は B に含まれるか（集合・範囲） | D2 の入れ子のコンテナ | 道具の出力（到達可能状態の一覧、型の定義） |
+| どう分岐するか | Mermaid flowchart / D2 | 条件分岐のコード |
+| どういう構造か（モジュール） | D2（`d2-diagram` スキル） | import / package.json の依存 |
 
 1 つの問いに図は 1 枚。
 
 ## 手順
 
 ```
-1. 事実シート  <name>.expect.json を道具の出力から作る（手で書くなら、出どころを本文に書く）
-2. シーン     <name>.scene.json。id は ASCII、表示は label に
-3. check      vlmkit-anim check <name>.scene.json --expect <name>.expect.json   ✗ を 0 に
-4. layout     vlmkit-anim layout <name>.scene.json                              重なり・はみ出し 0 に
-5. explain    vlmkit-anim explain <name>.scene.json                             キャプションが「なぜ」を言っているか
-6. still      vlmkit-anim still <name>.scene.json --out <name>.svg              一度は目で見る（.png で Read）
+1. 事実シート  <name>.facts.json を道具の出力から作る（手で書くなら、出どころを本文に書く）
+2. ソース     <name>.mmd か <name>.d2。id は ASCII、表示はラベルに
+3. 検査       figure-check.mjs figures/<name>.mmd --write   ✗ を 0 に（facts の edges はソースの辺とちょうど一致）
+4. 目で見る   シートと辺のシートを Read で開く（下の「ループ」）
 ```
 
-`verify-doc.mjs` は 3・4・6 を毎回やり直す。
-SVG がシーンより古ければ落ちる。
+`verify-doc.mjs` は 3 を毎回やり直す。
+SVG がソースより古ければ落ちる。
 
 ## 事実シートは道具から
 
-- 状態グラフ：`tlc-to-scene.mjs` が TLC の dot から scene と expect を同時に作る。
+- 状態グラフ：`tlc-to-mermaid.mjs` が TLC の dot から `.mmd` と `.facts.json` を同時に作る。`--trace` / `--also` の行動列が TLC の遷移に無ければエラーで止まる。
   - `checks.json` に「作り直して、コミット済みのものと diff」を入れておく。図が TLC とずれたら検証が落ちる。
-- 手で描いた図（例：包含関係の図）：図の一部を道具の出力と照合する小さなスクリプトを `checks.json` に入れる（例：`figures/check-induction.mjs`）。
+- 手で描いた図（例：包含関係の D2）：図の一部を道具の出力と照合する小さなスクリプトを `checks.json` に入れる（例：`figures/check-induction.mjs` が D2 の `reach` コンテナを TLC の状態と照合する）。
 
 ## よくある kickback
 
-- `canvas ... over 2000px`：ラベルが長い。`tlc-to-scene.mjs --bare --abbrev read=R,...` で短くし、凡例を本文に書く。`layout` を `tb` / `lr` で比べる。
-- `state ... drawn but the trace never enters it`：全状態を描き、反例だけを歩く図では想定内の警告。本文で「描いたが歩かない状態」の意味を説明する。
-- GIF は重い（13 状態で 5 MB）。README には SVG を置く。動きは `build-html.mjs` が作る再生ページ（`vlmkit-anim html`）で見せる。
+- スマホで文字が 9px 未満：ラベルが長いか、横に広い。`tlc-to-mermaid.mjs --bare --abbrev read=R,...` で短くし、凡例を本文に書く。`--layout tb` / `lr` を比べる。
+- Mermaid が箱の中でラベルを折り返し、facts の語が見つからない：frontmatter の `flowchart: { wrappingWidth: 480 }` で折り返しを広げる。
+- 描くたびに SVG が変わり「stale」で落ちる：Mermaid のスタジアム形 `([…])` は輪郭を乱数で描く。角丸 `(…)` にする。
+- 二重丸 `(((…)))` はラベルの幅で円が決まり、ほかの箱の倍になる。終端は `[[…]]` にする。
+- 動きは図にしない。状態の図に道を太枠で引き、手順は本文で番号を振って書く。
 
 ## データの図（グラフ）
 
@@ -114,7 +113,7 @@ matplotlib で描くなら、次の 2 つを守る。
 
 ## 手で描く図（Mermaid / D2 / SVG / HTML）と、目で見るループ
 
-vlmkit-anim の kind に当てはまらない概念図（包含関係、使い分けの図、コードと箱が混ざる図）は、直接マークアップで書く。
+道具の出力から作る図（上）でも、手で書く概念図（使い分けの図、コードと箱が混ざる図）でも、形式は同じ順で選ぶ。
 形式は **Mermaid → D2 → SVG / HTML** の順に当て、足りるものを使う（測った結果は `docs/figure-cheatsheet/`）。
 
 1. **Mermaid で済むなら Mermaid**：フロー・シーケンス・状態遷移など。GitHub の Markdown（PR 本文・Issue）がそのまま描くので、PR の説明に置く図はこれが一番安い。

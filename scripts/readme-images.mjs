@@ -60,8 +60,8 @@ async function shrink(name, png, width = 1200) {
 
 // 1. 形式手法の速習資料
 await tile('formal-methods', [
-  [svg('docs/formal-methods/figures/lost-update.svg'), 300],
-  [svg('docs/formal-methods/figures/induction.svg'), 560],
+  [svg('docs/formal-methods/figures/lost-update.svg'), 460],
+  [svg('docs/formal-methods/figures/induction.svg'), 400],
   [svg('docs/formal-methods/figures/coverage.svg'), 380],
 ]);
 

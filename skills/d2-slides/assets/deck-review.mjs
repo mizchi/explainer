@@ -24,7 +24,7 @@
  * Issue kinds: `split` (one sentence broken across two blocks), `out-of-order`
  * (text above what it belongs to), `clipped`, `overlap`, `illegible`, `other`.
  *
- * Scoring, in the vocabulary `vlmkit-anim review` uses for a still figure:
+ * Scoring (the vocabulary of the old `vlmkit-anim review` for a still figure):
  *   read      a sheet line the reader read (matched loosely — see `near`)
  *   missed    a sheet line no read line covers
  *   invented  a read line no sheet line covers

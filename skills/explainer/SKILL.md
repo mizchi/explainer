@@ -1,6 +1,6 @@
 ---
 name: explainer
-description: 特定の読み手に向けて、概念・PR・設計を「冗長にならない水準」の速習資料として説明し、図と主張を道具で検証する。読み手のペルソナ（既に知っていること・知らないこと・読み方）を質問と公開情報から作り、その差分だけを書く。図は vlmkit-anim で事実シートに照らして描き、本文に引用するコード・出力は再実行して照合し、HTML は vlmkit のゲートに通す。Use when the user says "explain this to me / to <person>", "速習資料", "解説ドキュメント", "この PR を理解したい", "わかるように説明して", "I can't keep up with what the agent wrote", "この PR を <人> が理解できるように説明して", or when a reviewer asks what a change does. Use it even for a small diff or a chat-only answer whenever a named reader (a reviewer, an on-call engineer, a teammate, a PM) is given. Also when model or analysis results (diagnostics, metrics, charts) must be explained to someone who decides on them, e.g. "このモデルを本番に出してよいか <人> が判断できるように". Also when the user wrote an explanation themselves and lost confidence in it.
+description: 特定の読み手に向けて、概念・PR・設計を「冗長にならない水準」の速習資料として説明し、図と主張を道具で検証する。読み手のペルソナ（既に知っていること・知らないこと・読み方）を質問と公開情報から作り、その差分だけを書く。図は Mermaid / D2 で描いて事実シートに照らし、本文に引用するコード・出力は再実行して照合し、HTML は vlmkit のゲートに通す。Use when the user says "explain this to me / to <person>", "速習資料", "解説ドキュメント", "この PR を理解したい", "わかるように説明して", "I can't keep up with what the agent wrote", "この PR を <人> が理解できるように説明して", or when a reviewer asks what a change does. Use it even for a small diff or a chat-only answer whenever a named reader (a reviewer, an on-call engineer, a teammate, a PM) is given. Also when model or analysis results (diagnostics, metrics, charts) must be explained to someone who decides on them, e.g. "このモデルを本番に出してよいか <人> が判断できるように". Also when the user wrote an explanation themselves and lost confidence in it.
 ---
 
 # explainer
@@ -22,10 +22,10 @@ ELI5 との違いは 2 つ。
 依存は、資料を置くリポジトリに入れます。Node 24 以上が必要です。
 
 ```sh
-npm i -D @mizchi/vlmkit @mizchi/vlmkit-anim marked playwright
+npm i -D @mizchi/vlmkit marked playwright mermaid
 ```
 
-Mermaid の図（`figures/*.mmd`）を使うときは `mermaid`、データの図（`figures/*.vl.json`）を使うときは `vega` と `vega-lite`、アイコンを使うときは `@iconify-json/lucide` と `@iconify-json/logos` も入れます。
+D2 の図（`figures/*.d2`）を使うときは `d2` の CLI、データの図（`figures/*.vl.json`）を使うときは `vega` と `vega-lite`、アイコンを使うときは `@iconify-json/lucide` と `@iconify-json/logos` も入れます。
 形式手法の例を扱うときは、TLC（Java 11+）や Apalache（Java 17+）、`z3-solver` も入れます。
 `verify-doc.mjs` は `$TLA2TOOLS`（tla2tools.jar）と `$APALACHE`（apalache-mc）を、リポジトリの `.tools/` から探します。
 
@@ -37,7 +37,7 @@ Mermaid の図（`figures/*.mmd`）を使うときは `mermaid`、データの�
 3. 差分を決める ペルソナの「知っている」に載っていることは書かない。「怪しい」を本文の芯にする
 4. 実物を作る   主張ごとに、実行できる例（コード・モデル・コマンド）を先に作って走らせる
 5. 書く        references/writing.md の型で。価値を先に、根拠は後に。出力は貼る、打ち直さない。書き終えたら削除テスト
-6. 図          references/figures.md。事実シート（*.expect.json）を先に、図は後
+6. 図          references/figures.md。事実シート（*.facts.json）を先に、図は後
 7. 検証        node <skill>/scripts/verify-doc.mjs <doc-dir> が VERIFIED になるまで
 8. 読ませる    first-reader スキルで、ペルソナ本人を読み手にして読ませる。途中で離脱した箇所と、翌日残ったものを見る
 9. 渡す        HTML（dist/index.html）と要約。検証できなかったことは「未検証」と明記
@@ -153,7 +153,7 @@ Mermaid の図（`figures/*.mmd`）を使うときは `mermaid`、データの�
 - 時間の順序があるとき
 - 包含関係があるとき
 
-図は vlmkit-anim のシーン（JSON）で描く。当てはまる kind が無い概念図は、Mermaid で済むなら Mermaid、足りない構造なら D2、D2 に乗らない自由な図なら SVG / HTML で直接書く。どれも `scripts/figure-check.mjs` で描画・検査して、出てきたシートと辺のシート（矢印を 1 本ずつ強調したもの）を目で見て直す。D2 と Mermaid は配置を道具が決めるので、不自然なら `scripts/figure-variants.mjs` で候補を並べて選び直す（`references/figures.md` の「手で描く図」）。
+図は、Mermaid で済むなら Mermaid、足りない構造なら D2、D2 に乗らない自由な図なら SVG / HTML で書く。道具の出力を写す図（TLC の状態グラフなど）は、スクリプトで出力から `.mmd` と事実シートを作る（`scripts/tlc-to-mermaid.mjs`）。どれも `scripts/figure-check.mjs` で描画・検査して、出てきたシートと辺のシート（矢印を 1 本ずつ強調したもの）を目で見て直す。D2 と Mermaid は配置を道具が決めるので、不自然なら `scripts/figure-variants.mjs` で候補を並べて選び直す（`references/figures.md` の「手で描く図」）。
 データの図（分布・関係・モデルの診断）は Vega-Lite の spec（`figures/<name>.vl.json`）で書く。SVG を手で書かない、matplotlib の既定の SVG にしない。`figure-check.mjs` が描画・検査する（`references/figures.md` の「データの図」）。
 
 モデルや分析の診断結果を説明するときは、次の 3 つを必ず出す。
@@ -171,11 +171,7 @@ Mermaid の図（`figures/*.mmd`）を使うときは `mermaid`、データの�
 コマンドを実行できない環境でも、図は `.vl.json` の spec として書く。値から座標を手で計算して SVG を描かない（描き損じを検査できない）。本文には spec へのリンクと「未描画：`figure-check.mjs <spec> --write` で SVG になる」を書く。
 アイコン（データベース・サーバ・製品のロゴなど）は `scripts/icons.mjs` で探して図の隣に置き、D2・Mermaid・SVG のどれからでも使う（`references/figures.md` の「アイコン」）。
 
-vlmkit-anim の図の検査は 3 つ。
-
-- `check --expect`：事実シートと照合する。事実シートは道具の出力（TLC の状態グラフ、import グラフ）から作る。
-- `layout`：重なりやはみ出しがないか。
-- `still`：SVG を出して、一度は目で見る。
+事実シート（`figures/<name>.facts.json`）は道具の出力（TLC の状態グラフ、import グラフ）から作る。`figure-check.mjs` が、ラベルが図にあるか、`edges` が `.mmd` / `.d2` の辺とちょうど一致するかを照合する。
 
 ### 7. 検証
 
@@ -189,7 +185,7 @@ node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直
 `verify-doc.mjs` が見るもの：
 
 1. `checks.json` の各コマンドの出力に、期待する行が順に出るか
-2. 図：`vlmkit-anim check --expect` / `layout` / SVG が最新か
+2. 図：`figure-check.mjs`（重なり・はみ出し・矢印・事実シート）と、SVG がソースより新しいか
 3. 本文：`output` / `source` の引用が実物と一致するか。画像が存在するか
 4. HTML：`vlmkit check integrity`（`<details>` を開いた版で厳格に）と `check a11y contrast`
 
@@ -229,7 +225,7 @@ node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直
 差分はファイル順ではなく、説明の順に並べる（literate diff）。
 
 実物は次の 2 つ。
-- `vlmkit-anim pr --base origin/main` の変更地図
+- 変更地図：`git diff --stat` と import から事実シートを作り、触ったモジュールと依存を D2 か Mermaid で描く
 - 変更前後で振る舞いが変わる最小の例（テストの追加・変更から選ぶ）
 
 ## やってはいけないこと
@@ -245,11 +241,11 @@ node <skill>/scripts/verify-doc.mjs <doc-dir> --write  # 図の SVG を描き直
 |---|---|
 | `references/persona.md` | ペルソナのテンプレートと、作り方 |
 | `references/writing.md` | 資料の型、文体、理解度チェックの作り方 |
-| `references/figures.md` | 問い → 図の種類の対応、事実シートの作り方、vlmkit-anim の手順 |
+| `references/figures.md` | 問い → 図の種類の対応、事実シートの作り方、検査と目で見るループ |
 | `scripts/verify-doc.mjs` | 検証（checks / 図 / 引用 / HTML） |
 | `scripts/build-html.mjs` | README.md → 自己完結 HTML（SVG をインラインで埋め込む） |
 | `scripts/figure-check.mjs` | 手で書いた SVG / HTML / D2 / Mermaid の図と Vega-Lite の spec を描画し、重なり・はみ出し・枠線や線と文字の交差・小さすぎる文字・豆腐（字形の無い文字）・輪郭になった文字・事実シートを検査し、目で見るシートを作る |
 | `scripts/figure-arrows.mjs` | 矢印の読みやすさ（2 本が重なって走る・箱を突き抜ける・交差・遠回り・逆向き）と、辺を 1 本ずつ強調したシート。figure-check が使う |
 | `scripts/figure-variants.mjs` | D2 / Mermaid の配置の候補（TALA の seed・ELK・dagre、向き）を描き、点数つきで並べる |
 | `scripts/icons.mjs` | Iconify のアイコンセット（lucide・logos）からアイコンを探し、候補を 1 枚に並べ、図の隣に置いて出典を ICONS.md に残す |
-| `scripts/tlc-to-scene.mjs` | TLC の状態グラフと反例 → vlmkit-anim の state-machine シーンと事実シート |
+| `scripts/tlc-to-mermaid.mjs` | TLC の状態グラフと反例 → Mermaid の flowchart（反例の道を太枠）と事実シート |

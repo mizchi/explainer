@@ -36,11 +36,11 @@ api -> db: SQL
 (`d2 --layout=tala x.d2 x.txt`, verbatim, D2 0.8.1-HEAD.)
 
 This skill is for a diagram whose deliverable is **D2 text**: someone will edit
-it later, TALA lays it out, and it renders wherever D2 does. When the picture has
-to *move* (an algorithm step by step, a walked request) use
-`explanatory-animation` / `explain-with-anim` instead. The two combine: draw the
-modules and dependencies that `vlmkit-anim facts <dir> --depth 1 --out
-f.expect.json` lists, so the D2 is grounded in the code, and keep both files.
+it later, TALA lays it out, and it renders wherever D2 does. A step-by-step
+walk (an algorithm, a request) is not animated: draw the structure once and
+number the steps in the prose. To ground the D2 in the code, list the modules
+and dependencies from the code first (imports, `package.json`), write them into
+the fact sheet, and draw exactly those.
 
 ## Invocation
 
@@ -245,7 +245,7 @@ left"); name ids. Two measured caveats before you reach for seeds:
 | "Draw the deployment / network" | Containers for hosts and zones; `shape: cylinder` for stores, `shape: cloud` for external services, `shape: queue` for brokers |
 | "We already have a `.d2`" | Edit it; `d2 fmt --check`; render before and after; do not switch its engine or theme without saying so |
 | "Put it in the README / a code block / a PR comment" | The `standard` ASCII render inside a fenced block; measure the width as below; keep the `.d2` next to it |
-| "It has to be checked against the code" | `vlmkit-anim facts <dir>` first, draw exactly its modules and deps into the sheet, then `d2-facts --expect` — or hand the task to `explanatory-animation` |
+| "It has to be checked against the code" | List the modules and deps from the code (imports, `package.json`) into the sheet first, draw exactly those, then `d2-facts --expect` |
 
 ## The loop
 

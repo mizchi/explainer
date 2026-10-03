@@ -1,0 +1,30 @@
+# CounterAtomic: 到達可能 ⊂ NoLostUpdate ⊂ 全状態
+# 状態は「count | a の pc  b の pc」。reach の 4 つは TLC の -dump dot と照合する (check-induction.mjs)。
+vars: {
+  d2-config: {
+    layout-engine: elk
+  }
+}
+
+direction: down
+*.style.font-size: 22
+(* -> *)[*].style.font-size: 20
+
+all: "型を満たす全状態" {
+  inv: "NoLostUpdate を満たす" {
+    reach: "到達可能 (TLC が列挙) = CountIsDone" {
+      r0: "0 | incr incr"
+      r1: "1 | done incr"
+      r2: "1 | incr done"
+      r3: "2 | done done"
+    }
+    cti: "-1 | done incr" {style.stroke: "#dc2626"; style.font-color: "#dc2626"}
+  }
+  bad: "0 | done done" {style.stroke: "#dc2626"; style.font-color: "#dc2626"}
+}
+
+all.inv.reach.r0 -> all.inv.reach.r1: "Incr(a)"
+all.inv.reach.r0 -> all.inv.reach.r2: "Incr(b)"
+all.inv.reach.r1 -> all.inv.reach.r3: "Incr(b)"
+all.inv.reach.r2 -> all.inv.reach.r3: "Incr(a)"
+all.inv.cti -> all.bad: "Incr(b)" {style.stroke: "#dc2626"; style.stroke-dash: 4}
