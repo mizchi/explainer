@@ -3,6 +3,12 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.5.1 — 2026-10-03
+
+(Pushed on a branch as 0.4.3; released after 0.5.0.)
+
+- explainer: in a verdict table, measured values come only from the request or executed output (hand-computed intervals and ratios stay out of the table), and pass criteria only from a source; with no source the criterion reads "depends on context" and the verdict is 確認. `references/figures.md` lists common criteria for logistic regression with their basis.
+
 ## 0.5.0 — 2026-10-02
 
 Removed `@mizchi/vlmkit-anim`. Figures are Mermaid or D2 text, held to a fact sheet (`*.facts.json`) and checked by `figure-check.mjs`; nothing is animated.
