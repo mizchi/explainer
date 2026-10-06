@@ -3,6 +3,11 @@
 The plugin's version is in `.claude-plugin/plugin.json` (and the marketplace entry in `.claude-plugin/marketplace.json`).
 Bump both when the skills change, so that installed copies see an update. Never reuse or go below a number that has been pushed anywhere, even on a branch.
 
+## 0.5.2 — 2026-10-06
+
+- d2-diagram, d2-slides: quote descriptions with folded YAML scalars so the skill frontmatter parses correctly and bundle installation succeeds; the descriptions and skill bodies are unchanged (#28).
+- CI: use a YAML block scalar for the d2-slides integrity command; the command itself is unchanged.
+
 ## 0.5.1 — 2026-10-03
 
 (Pushed on a branch as 0.4.3; released after 0.5.0.)
