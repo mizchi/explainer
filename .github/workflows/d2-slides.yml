@@ -134,7 +134,8 @@ jobs:
           echo "built/ matches, $(ls "$BUILT"/slide-*.svg | wc -l) figure(s) byte for byte"
 
       - name: check integrity — the deck view, every viewport
-        run: "$VLMKIT" check integrity "$BUILT/index.html"
+        run: |
+          "$VLMKIT" check integrity "$BUILT/index.html"
 
       - name: check integrity — the print view, where every slide is on the page at once
         run: |
