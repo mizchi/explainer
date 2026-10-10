@@ -41,6 +41,8 @@ The last two came from [mizchi/vlmkit](https://github.com/mizchi/vlmkit). Figure
 Install the scripts' dependencies in the repository that holds the documents (`npm i -D @mizchi/vlmkit marked playwright mermaid`, Node 24+). Add the `d2` CLI if you use D2 figures, and `@iconify-json/lucide @iconify-json/logos` to use icons.
 `first-reader` needs only the Python 3 standard library.
 
+For documents in Japanese, also install [yomiyasu](https://github.com/nanaism/yomiyasu) (MIT): `verify-doc.mjs` then runs its linter over the prose and lists patterns common in AI-written Japanese (too much bold or bulleting, metaphorical verbs) as things to look at. It is not bundled (`npx skills add nanaism/yomiyasu`).
+
 `first-reader` is bundled from [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) (Apache-2.0; see `skills/first-reader/LICENSE` and `NOTICE`).
 `feed.py` counts words differently so that Japanese drafts can also be read one paragraph at a time.
 
