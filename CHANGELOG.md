@@ -10,6 +10,7 @@ Ideas from [yomiyasu](https://github.com/nanaism/yomiyasu) (MIT), rewritten for 
 - explainer: `references/writing.md` gains "読みやすい日本語", a short table of patterns common in AI-written Japanese (too much bold, bulleting, colon-led lists, metaphorical verbs, decorative negation, inflated nouns, preview-only sentences) and how to fix each without changing meaning or adding information. The writing step points to it, for chat replies too.
 - verify-doc: when yomiyasu is installed (`$YOMIYASU_LINT`, `.claude/skills`, `.agents/skills` or the plugin cache), runs `yomiyasu_lint.py` on each page and lists findings as △. Never fails, since human prose also scores below 100.
 - explainer's own SKILL.md, README.ja.md and docs/figure-cheatsheet reworded to the same rules (SKILL.md: lint score 54 → 86).
+- explainer: reply-form lines stay plain (no bold labels, no bullets), and chat replies follow the same rules; bold in PR replies dropped from about 8 per 1,000 characters to under 1.
 
 ## 0.5.2 — 2026-10-06
 
