@@ -9,7 +9,7 @@ AI から人間へ概念を説明するための、スキルと道具です。
 
 ## インストール
 
-Claude Code のプラグインとして入れる場合（このリポジトリがそのままマーケットプレイスで、プラグイン `explainer` に 5 つのスキルが入っています）：
+Claude Code のプラグインとして入れるときは、次のコマンドを使います。このリポジトリがそのままマーケットプレイスで、プラグイン `explainer` に 5 つのスキルが入っています。
 
 ```
 /plugin marketplace add mizchi/explainer
@@ -40,6 +40,8 @@ apm install mizchi/explainer --target claude
 
 スクリプトの依存は、資料を置くリポジトリに入れます（`npm i -D @mizchi/vlmkit marked playwright mermaid`、Node 24+）。D2 の図を使うなら `d2` の CLI、アイコンを使うなら `@iconify-json/lucide @iconify-json/logos` も入れます。
 `first-reader` は Python 3 の標準ライブラリだけで動きます。
+
+日本語の資料では、[yomiyasu](https://github.com/nanaism/yomiyasu)（MIT）も入れておくと、`verify-doc.mjs` がそのリンターで本文を点検し、AI の文章に出やすい型（太字・箇条書きの多さ、比喩の動詞など）を見直す候補として出します。同梱はしていません（`npx skills add nanaism/yomiyasu`）。
 
 `first-reader` は [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps/tree/main/agent_skills/first-reader) からの同梱です（Apache-2.0、`skills/first-reader/LICENSE` と `NOTICE`）。
 日本語の下書きでも 1 段落ずつ読ませられるよう、`feed.py` の語数の数え方を変えています。
@@ -155,7 +157,7 @@ apm install mizchi/explainer --target claude
 
 - 資料：[`docs/figure-cheatsheet/README.md`](docs/figure-cheatsheet/README.md)「どの図を、どの道具で描くか」
 - Mermaid で済むなら Mermaid、足りない構造なら D2（TALA / ELK / dagre）、D2 に乗らない自由な図なら SVG / HTML。道具の出力を写す図は、その出力から図と事実シートを一緒に作る。同じサンプルを Mermaid と D2 の 3 つのエンジンで描いて比べた結果（`samples/compare.mjs`）つき
-- 測って分かったこと：箱の中の向きは、Mermaid だと中の箱が外とつながると無視され、ELK と dagre は常に黙って無視する。守ったのは TALA だけ。TALA は seed で配置がすべて変わり、箱が増えると急に遅くなる
+- 測って分かったこと：箱の中の向きは、Mermaid だと中の箱が外とつながると無視され、ELK と dagre は常にエラーを出さずに無視する。守ったのは TALA だけ。TALA は seed で配置がすべて変わり、箱が増えると急に遅くなる
 
 ## 使い方
 
