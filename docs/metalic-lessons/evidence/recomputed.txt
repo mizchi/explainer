@@ -1,0 +1,38 @@
+Source: mizchi/metalic @ 99eee23e12ee78428d9435b7d4d74f736da96118
+Verification scope: archived data and recorded successful traces; no new GPU timing
+
+| host待機数 | job p50 ms | GPU区間の合計 p50 ms | 完了後のscalar読取 p50 µs |
+|---:|---:|---:|---:|
+| 1 | 1.931 | 1.530 | 0.000 |
+| 2 | 2.227 | 1.600 | 0.167 |
+| 8 | 4.752 | 2.413 | 0.917 |
+| 63 | 12.869 | 0.805 | 1.750 |
+
+| 出力 | slot | native batch p50 ms | API p50 ms | Metal保持容量 MiB |
+|---|---:|---:|---:|---:|
+| full | 1 | 68.523 | 286.365 | 4.03 |
+| summary | 1 | 17.294 | 59.085 | 4.03 |
+| full | 3 | 59.397 | 282.677 | 12.09 |
+| summary | 3 | 10.283 | 51.209 | 12.09 |
+Recorded ownership traces: 480, reuse follows CPU consumption
+
+| CPU実装の段階 | CPU best ms | GPU copy込み ms | CPU / GPU |
+|---|---:|---:|---:|
+| 分岐あり・試行1 | 8.798 | 6.336 | 1.39 |
+| 分岐なし・試行5 | 2.582 | 5.488 | 0.47 |
+
+| ケース | CPU best ms | GPU ms | auto ms | 定常 fit |
+|---|---:|---:|---:|---:|
+| tea-small | 0.033 | 0.250 | 0.050 | 100.0% |
+| tea-large | 2.994 | 1.781 | 1.749 | 100.0% |
+| tea-resident | 2.931 | 1.656 | 1.611 | 100.0% |
+| dependent-walk | 0.051 | 0.795 | 0.063 | 100.0% |
+| compact | 0.233 | 0.452 | 0.255 | 100.0% |
+| histogram-hot | 0.716 | 2.252 | 0.749 | 100.0% |
+| histogram-balanced | 0.952 | 1.519 | 0.993 | 100.0% |
+| merkle | 12.941 | 5.497 | 5.086 | 100.0% |
+Fit: 8 cases, 768 automatic decisions, 766/766 steady competitive choices
+All decisions: 766/768; max estimated regret 4.2%
+
+Failure trial2/merkle: steady fit 0.0%, estimated regret 130.6%
+Failure trial3/compact: steady fit 89.0%, estimated regret 11.0%

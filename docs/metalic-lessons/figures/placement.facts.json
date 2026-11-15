@@ -1,0 +1,16 @@
+{
+  "labels": [
+    "GPU / CPU の API 時間比",
+    "破線の左で GPU が速い",
+    "同じ処理の CPU best = 1",
+    "TEA 小",
+    "TEA 大",
+    "TEA 常駐",
+    "単一鎖",
+    "圧縮",
+    "hot 集計",
+    "常駐集計",
+    "Merkle"
+  ],
+  "forbidden": []
+}

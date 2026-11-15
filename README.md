@@ -143,6 +143,11 @@ Building the persona showed the reader was not a beginner at formal methods.
 They already run about ten verifiers through agents.
 So the document is not a tool tutorial; it is limited to **criteria for judging, yourself, what a checker's result guaranteed**.
 
+## Example: lessons from a Metal language prototype
+
+- Document: [`docs/metalic-lessons/README.md`](docs/metalic-lessons/README.md) (Japanese), covering GPU suitability, CPU coordination, resource ownership, output costs, CPU baselines and adaptive placement failures.
+- Archived samples from a pinned Metalic commit are included. `pnpm verify:metalic` checks the numbers, recorded ownership traces, figures and HTML without requiring an Apple GPU. It does not rerun the hardware benchmarks.
+
 ## Example: a chaptered course (book)
 
 When one document is not enough, the `explainer-book` skill splits it into chapters.

@@ -1,0 +1,6 @@
+    wait(); // No host reads or waits between GPU passes.
+    uint64_t finished=mach_absolute_time();
+    check(command.status==MTLCommandBufferStatusCompleted,
+      command.error ? command.error.localizedDescription.UTF8String : "GPU command did not complete");
+    auto result=consume(finished);
+    consumed=true;
