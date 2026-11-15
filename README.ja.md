@@ -143,12 +143,6 @@ apm install mizchi/explainer --target claude
 約 10 種の検証器をエージェント経由で既に回しています。
 そこで資料は、ツールの入門ではなく、**検査器の結果が何を保証したかを自分で判定する基準**に絞りました。
 
-## 例：Metal で言語を作って分かったこと
-
-- 資料：[`docs/metalic-lessons/README.md`](docs/metalic-lessons/README.md)「Metal で言語を作ると、GPU に何を任せる設計になるか」
-- 純粋な処理の GPU 適性、host 待機と資源所有、AST 回収、CPU 対照、自動配置の失敗を整理。Metalic の固定commitから測定標本を抜粋し、表と図を Apple GPU なしで再検査する。
-- `pnpm verify:metalic` で数値・記録された所有期間・本文の引用・図・HTML を検査する。新しい GPU 性能の測定とは区別する。
-
 ## 例：章立ての学習資料（本）
 
 1 本の資料に収まらないときは、`explainer-book` スキルで章立てにします。

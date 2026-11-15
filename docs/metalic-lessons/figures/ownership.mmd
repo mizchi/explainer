@@ -1,4 +1,0 @@
-flowchart TD
-    prepare["CPU 準備"] -->|commit| gpu["GPU 実行"]
-    gpu -->|完了通知| consume["CPU 消費"]
-    consume -->|消費完了| reuse["再利用可"]
